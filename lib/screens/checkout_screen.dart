@@ -28,7 +28,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _paymentOption = 'upi';
   String _addressType = 'home';
   bool _makeDefaultAddress = false;
-  bool _addressAdded = false;
 
   @override
   void dispose() {
@@ -45,13 +44,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _shippingFor(double subtotal) {
-    if (subtotal <= 0 || subtotal >= 5000) return 0;
+    if (subtotal <= 0 || subtotal >= 5000) {
+      return 0;
+    }
     return _deliveryOption == 'express' ? 199 : 99;
   }
 
   double _taxFor(double subtotal) => subtotal * 0.03;
 
-  double _discountFor(double subtotal) => subtotal >= 25000 ? subtotal * 0.08 : 0;
+  double _discountFor(double subtotal) =>
+      subtotal >= 25000 ? subtotal * 0.08 : 0;
 
   Map<String, String> _areaForPincode(String pincode) {
     final prefix = pincode.substring(0, 2);
@@ -144,7 +146,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textInverse,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text(
                       'SAVE DETAILS',
@@ -161,7 +165,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _detectLocation() {
-    final locationPincodeController = TextEditingController(text: _pincodeController.text);
+    final locationPincodeController = TextEditingController(
+      text: _pincodeController.text,
+    );
 
     showModalBottomSheet<void>(
       context: context,
@@ -208,7 +214,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     const SizedBox(height: 10),
                     const Text(
                       'Enter your current pincode and we will fill city and state automatically.',
-                      style: TextStyle(color: AppColors.textLight, height: 1.35),
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        height: 1.35,
+                      ),
                     ),
                     const SizedBox(height: 18),
                     TextField(
@@ -217,8 +226,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       decoration: InputDecoration(
                         labelText: 'Current Pincode',
                         errorText: errorText.isEmpty ? null : errorText,
-                        prefixIcon: const Icon(Icons.my_location, color: AppColors.textLight),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        prefixIcon: const Icon(
+                          Icons.my_location,
+                          color: AppColors.textLight,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -229,7 +243,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         onPressed: () {
                           final pincode = locationPincodeController.text.trim();
                           if (!RegExp(r'^[1-9][0-9]{5}$').hasMatch(pincode)) {
-                            setSheetState(() => errorText = 'Enter a valid 6-digit Indian pincode');
+                            setSheetState(
+                              () => errorText =
+                                  'Enter a valid 6-digit Indian pincode',
+                            );
                             return;
                           }
 
@@ -244,7 +261,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textInverse,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: const Text(
                           'USE THIS LOCATION',
@@ -264,17 +283,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   void _proceedToPayment(CartProvider cart) {
     if (cart.items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your cart is empty')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Your cart is empty')));
       return;
     }
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const PaymentScreen()),
+      MaterialPageRoute(
+        builder: (_) {
+          final subtotal = cart.totalPrice;
+          final shipping = _shippingFor(subtotal);
+          final tax = _taxFor(subtotal);
+          final discount = _discountFor(subtotal);
+          final grandTotal = subtotal + shipping + tax - discount;
+
+          return PaymentScreen(
+            subtotal: subtotal,
+            shipping: shipping,
+            tax: tax,
+            discount: discount,
+            total: grandTotal,
+            itemCount: cart.totalItems,
+            preferredMethod: _paymentOption,
+          );
+        },
+      ),
     );
   }
 
@@ -335,7 +374,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 onContactTap: _showContactDetailsSheet,
                                 onDetectLocation: _detectLocation,
                                 onDefaultChanged: (value) {
-                                  setState(() => _makeDefaultAddress = value ?? false);
+                                  setState(
+                                    () => _makeDefaultAddress = value ?? false,
+                                  );
                                 },
                                 onAddressTypeChanged: (value) {
                                   setState(() => _addressType = value);
@@ -350,18 +391,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 children: [
                                   _ChoiceTile(
                                     title: 'Standard Delivery',
-                                    subtitle: subtotal >= 5000 ? 'Free delivery in 3-5 days' : 'Rs 99, delivery in 3-5 days',
+                                    subtitle: subtotal >= 5000
+                                        ? 'Free delivery in 3-5 days'
+                                        : 'Rs 99, delivery in 3-5 days',
                                     value: 'standard',
                                     groupValue: _deliveryOption,
-                                    onChanged: (value) => setState(() => _deliveryOption = value),
+                                    onChanged: (value) =>
+                                        setState(() => _deliveryOption = value),
                                   ),
                                   const Divider(height: 1),
                                   _ChoiceTile(
                                     title: 'Express Delivery',
-                                    subtitle: subtotal >= 5000 ? 'Free priority delivery in 1-2 days' : 'Rs 199, delivery in 1-2 days',
+                                    subtitle: subtotal >= 5000
+                                        ? 'Free priority delivery in 1-2 days'
+                                        : 'Rs 199, delivery in 1-2 days',
                                     value: 'express',
                                     groupValue: _deliveryOption,
-                                    onChanged: (value) => setState(() => _deliveryOption = value),
+                                    onChanged: (value) =>
+                                        setState(() => _deliveryOption = value),
                                   ),
                                 ],
                               ),
@@ -377,7 +424,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     subtitle: 'Fast and secure digital payment',
                                     value: 'upi',
                                     groupValue: _paymentOption,
-                                    onChanged: (value) => setState(() => _paymentOption = value),
+                                    onChanged: (value) =>
+                                        setState(() => _paymentOption = value),
                                   ),
                                   const Divider(height: 1),
                                   _ChoiceTile(
@@ -385,7 +433,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     subtitle: 'Pay after the order reaches you',
                                     value: 'cod',
                                     groupValue: _paymentOption,
-                                    onChanged: (value) => setState(() => _paymentOption = value),
+                                    onChanged: (value) =>
+                                        setState(() => _paymentOption = value),
                                   ),
                                 ],
                               ),
@@ -400,20 +449,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   ...cartItems.map(
                                     (item) => _CheckoutItem(
                                       item: item,
-                                      onIncrease: () => cart.increaseQty(item.watch.id),
-                                      onDecrease: () => cart.decreaseQty(item.watch.id),
-                                      onRemove: () => cart.removeFromCart(item.watch.id),
+                                      onIncrease: () =>
+                                          cart.increaseQty(item.watch.id),
+                                      onDecrease: () =>
+                                          cart.decreaseQty(item.watch.id),
+                                      onRemove: () =>
+                                          cart.removeFromCart(item.watch.id),
                                     ),
                                   ),
                                   const Divider(height: 24),
                                   _PriceRow(label: 'Subtotal', value: subtotal),
-                                  _PriceRow(label: 'Shipping', value: shipping, freeText: shipping == 0 ? 'Free' : null),
+                                  _PriceRow(
+                                    label: 'Shipping',
+                                    value: shipping,
+                                    freeText: shipping == 0 ? 'Free' : null,
+                                  ),
                                   _PriceRow(label: 'Taxes & fees', value: tax),
                                   if (discount > 0)
-                                    _PriceRow(label: 'Member discount', value: -discount, isDiscount: true),
+                                    _PriceRow(
+                                      label: 'Member discount',
+                                      value: -discount,
+                                      isDiscount: true,
+                                    ),
                                   const Divider(height: 24),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       const Text(
                                         'Grand Total',
@@ -462,11 +523,19 @@ class _EmptyCheckout extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined, color: AppColors.textLight.withOpacity(0.5), size: 76),
+          Icon(
+            Icons.shopping_bag_outlined,
+            color: AppColors.textLight.withValues(alpha: 0.5),
+            size: 76,
+          ),
           const SizedBox(height: 14),
           const Text(
             'No items to checkout',
-            style: TextStyle(color: AppColors.textDark, fontSize: 18, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -559,7 +628,9 @@ class _CheckoutStepper extends StatelessWidget {
         children: const [
           Expanded(child: _StepLabel(text: '01 Cart', isDone: true)),
           _StepLine(),
-          Expanded(child: _StepLabel(text: '02 Delivery Information', isActive: true)),
+          Expanded(
+            child: _StepLabel(text: '02 Delivery Information', isActive: true),
+          ),
           _StepLine(),
           Expanded(child: _StepLabel(text: '03 Payment')),
         ],
@@ -587,7 +658,11 @@ class _StepLabel extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.center,
       style: TextStyle(
-        color: isActive ? AppColors.accent : isDone ? AppColors.textDark : AppColors.textLight.withOpacity(0.55),
+        color: isActive
+            ? AppColors.accent
+            : isDone
+            ? AppColors.textDark
+            : AppColors.textLight.withValues(alpha: 0.55),
         fontSize: 12,
         fontWeight: FontWeight.w900,
       ),
@@ -600,11 +675,7 @@ class _StepLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 1,
-      color: AppColors.border,
-    );
+    return Container(width: 28, height: 1, color: AppColors.border);
   }
 }
 
@@ -652,11 +723,7 @@ class _AddressForm extends StatelessWidget {
         Widget rowOrColumn(Widget first, Widget second) {
           if (!isWide) {
             return Column(
-              children: [
-                first,
-                const SizedBox(height: 14),
-                second,
-              ],
+              children: [first, const SizedBox(height: 14), second],
             );
           }
 
@@ -709,7 +776,9 @@ class _AddressForm extends StatelessWidget {
                               contactEmail,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: AppColors.textLight),
+                              style: const TextStyle(
+                                color: AppColors.textLight,
+                              ),
                             ),
                           ],
                         ],
@@ -735,7 +804,9 @@ class _AddressForm extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textInverse,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -801,7 +872,9 @@ class _AddressForm extends StatelessWidget {
                 label: 'City *',
                 icon: Icons.location_city_outlined,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) return 'Enter city';
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Enter city';
+                  }
                   return null;
                 },
               ),
@@ -813,7 +886,9 @@ class _AddressForm extends StatelessWidget {
                 label: 'State *',
                 icon: Icons.map_outlined,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) return 'Enter state';
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Enter state';
+                  }
                   return null;
                 },
               ),
@@ -839,7 +914,10 @@ class _AddressForm extends StatelessWidget {
               controlAffinity: ListTileControlAffinity.leading,
               title: const Text(
                 'Make this my default address',
-                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             Wrap(
@@ -896,12 +974,18 @@ class _AddressTypeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.card,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: selected ? AppColors.primary : AppColors.border),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: selected ? AppColors.textInverse : AppColors.textDark),
+            Icon(
+              icon,
+              size: 18,
+              color: selected ? AppColors.textInverse : AppColors.textDark,
+            ),
             const SizedBox(width: 8),
             Text(
               label,
@@ -1011,7 +1095,10 @@ class _ChoiceTile extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: AppColors.textLight, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -1080,7 +1167,10 @@ class _CheckoutItem extends StatelessWidget {
                   '${watch.brand} | ${watch.category}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.textLight, fontSize: 12),
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -1101,7 +1191,11 @@ class _CheckoutItem extends StatelessWidget {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       onPressed: onRemove,
-                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: AppColors.error,
+                        size: 20,
+                      ),
                     ),
                   ],
                 ),
@@ -1167,11 +1261,20 @@ class _PriceRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600)),
           Text(
-            freeText ?? '${isDiscount ? '-' : ''}Rs ${value.abs().toStringAsFixed(2)}',
+            label,
+            style: const TextStyle(
+              color: AppColors.textLight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            freeText ??
+                '${isDiscount ? '-' : ''}Rs ${value.abs().toStringAsFixed(2)}',
             style: TextStyle(
-              color: isDiscount || freeText != null ? AppColors.success : AppColors.textDark,
+              color: isDiscount || freeText != null
+                  ? AppColors.success
+                  : AppColors.textDark,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1218,7 +1321,9 @@ class _CheckoutBottomBar extends StatelessWidget {
                   foregroundColor: AppColors.textDark,
                   side: const BorderSide(color: AppColors.primary),
                   padding: const EdgeInsets.symmetric(vertical: 17),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: const Text(
                   'CANCEL',
@@ -1234,7 +1339,9 @@ class _CheckoutBottomBar extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textInverse,
                   padding: const EdgeInsets.symmetric(vertical: 17),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: Text(
                   'ADD ADDRESS - Rs ${total.toStringAsFixed(0)}',
