@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../theme/app_colors.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -22,9 +23,6 @@ class _SignupScreenState extends State<SignupScreen> {
   bool hidePassword = true;
   bool isLoading = false;
 
-  final Color primaryGold = const Color(0xFFC9BB9D);
-  final Color darkBg = const Color(0xFF1E1702);
-
   // 🔥 NEW FUNCTION (Firebase Signup)
   Future<void> createAccount() async {
     try {
@@ -34,7 +32,6 @@ class _SignupScreenState extends State<SignupScreen> {
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
 
-      // 🔐 Firebase Auth
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -43,7 +40,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
       String uid = userCredential.user!.uid;
 
-      // ☁️ Firestore save
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         "name": name,
         "email": email,
@@ -86,7 +82,7 @@ if (!mounted) return;
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: primaryGold,
+      backgroundColor: AppColors.scaffoldBg,
 
       body: SingleChildScrollView(
         child: Column(
@@ -99,9 +95,9 @@ if (!mounted) return;
                   child: Container(
                     height: 320,
                     width: double.infinity,
-                    color: darkBg,
+                    color: AppColors.primary,
                     child: Opacity(
-                      opacity: 0.6,
+                      opacity: 0.4,
                       child: Image.network(
                         "https://images.unsplash.com/photo-1547996160-81dfa63595aa",
                         fit: BoxFit.cover,
@@ -152,6 +148,7 @@ if (!mounted) return;
                     TextFormField(
                       controller: nameController,
                       validator: (v) => v!.isEmpty ? "Enter name" : null,
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("User Name", Icons.person),
                     ),
 
@@ -160,6 +157,7 @@ if (!mounted) return;
                     TextFormField(
                       controller: emailController,
                       validator: (v) => v!.isEmpty ? "Enter email" : null,
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("Email Address", Icons.email),
                     ),
 
@@ -173,13 +171,14 @@ if (!mounted) return;
                         if (v.length < 6) return "Min 6 characters";
                         return null;
                       },
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("Password", Icons.lock).copyWith(
                         suffixIcon: IconButton(
                           icon: Icon(
                             hidePassword
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: darkBg,
+                            color: AppColors.textDark,
                           ),
                           onPressed: () {
                             setState(() {
@@ -201,6 +200,7 @@ if (!mounted) return;
                         }
                         return null;
                       },
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration:
                           inputDecoration("Confirm Password", Icons.lock_outline),
                     ),
@@ -212,7 +212,7 @@ if (!mounted) return;
                       height: 55,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: darkBg,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -245,16 +245,16 @@ if (!mounted) return;
                       children: [
                         const Text(
                           "Already have account?",
-                          style: TextStyle(color: Colors.black54),
+                          style: TextStyle(color: AppColors.textLight),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: Text(
+                          child: const Text(
                             "Login",
                             style: TextStyle(
-                              color: darkBg,
+                              color: AppColors.accent,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -276,9 +276,10 @@ if (!mounted) return;
   InputDecoration inputDecoration(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: darkBg),
+      hintStyle: const TextStyle(color: AppColors.textLight),
+      prefixIcon: Icon(icon, color: AppColors.textDark),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.5),
+      fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
         borderSide: BorderSide.none,
@@ -302,3 +303,4 @@ class WaveClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
+

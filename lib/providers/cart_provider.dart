@@ -3,12 +3,10 @@ import '../models/watch_model.dart';
 
 class CartProvider extends ChangeNotifier {
 
-  // 🔥 id → (Watch + quantity)
   final Map<String, CartItem> _items = {};
 
   Map<String, CartItem> get items => _items;
 
-  // ✅ Add to Cart
   void addToCart(Watch watch) {
     if (_items.containsKey(watch.id)) {
       _items[watch.id]!.quantity++;
@@ -18,7 +16,6 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ➕ Increase Quantity
   void increaseQty(String id) {
     if (_items.containsKey(id)) {
       _items[id]!.quantity++;
@@ -26,7 +23,6 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // ➖ Decrease Quantity
   void decreaseQty(String id) {
     if (_items.containsKey(id)) {
       if (_items[id]!.quantity > 1) {
@@ -38,13 +34,11 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // ❌ Remove Item
   void removeFromCart(String id) {
     _items.remove(id);
     notifyListeners();
   }
 
-  // 🧮 Total Items Count
   int get totalItems {
     int total = 0;
     _items.forEach((key, value) {
@@ -53,7 +47,6 @@ class CartProvider extends ChangeNotifier {
     return total;
   }
 
-  // 💰 Total Price
   double get totalPrice {
     double total = 0;
     _items.forEach((key, value) {
@@ -62,14 +55,12 @@ class CartProvider extends ChangeNotifier {
     return total;
   }
 
-  // 🧹 Clear Cart
   void clearCart() {
     _items.clear();
     notifyListeners();
   }
 }
 
-// 🔥 Cart Item Model
 class CartItem {
   final Watch watch;
   int quantity;

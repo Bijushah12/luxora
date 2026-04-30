@@ -14,94 +14,121 @@ class CartScreen extends StatelessWidget {
     final cartItems = cartProvider.items.values.toList();
 
     return Scaffold(
-      backgroundColor: AppColors.primaryGold.withOpacity(0.05),
-      extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        toolbarHeight: 92,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textDark),
         title: Text(
           "My Cart (${cartProvider.totalItems})",
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
-            shadows: [
-              Shadow(offset: Offset(0, 2), blurRadius: 8, color: Color(0x80000000)),
-              Shadow(offset: Offset(0, -2), blurRadius: 8, color: AppColors.primaryGold),
-            ],
+            color: AppColors.textDark,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.darkBg, AppColors.primaryGold.withOpacity(0.3)],
-            ),
-          ),
-        ),
       ),
 
       body: cartItems.isEmpty
-          ? const Center(child: Text("Cart is Empty"))
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shopping_cart_outlined, size: 80, color: AppColors.textLight.withOpacity(0.5)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Your cart is empty",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            )
           : Column(
               children: [
 
-                // 🛒 LIST
+                // LIST
                 Expanded(
                   child: ListView.builder(
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
 
-                      final item = cartItems[index]; // 🔥 CartItem
+                      final item = cartItems[index];
                       final watch = item.watch;
 
                       return Card(
-                        margin: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: AppColors.border),
+                        ),
                         child: ListTile(
-                          leading: Image.network(
-                            watch.image,
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
+                          contentPadding: const EdgeInsets.all(12),
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              watch.image,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
                           ),
 
-                          title: Text(watch.name),
+                          title: Text(
+                            watch.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
 
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("₹${watch.price}"),
+                              Text(
+                                "₹${watch.price}",
+                                style: const TextStyle(
+                                  color: AppColors.goldAccent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               Text("Qty: ${item.quantity}"),
                             ],
                           ),
 
-                          // ➕➖ Quantity controls
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
 
                               IconButton(
-                                icon: const Icon(Icons.remove),
+                                icon: const Icon(Icons.remove, color: AppColors.textDark),
                                 onPressed: () {
                                   cartProvider.decreaseQty(watch.id);
                                 },
                               ),
 
-                              Text(item.quantity.toString()),
+                              Text(
+                                item.quantity.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
 
                               IconButton(
-                                icon: const Icon(Icons.add),
+                                icon: const Icon(Icons.add, color: AppColors.textDark),
                                 onPressed: () {
                                   cartProvider.increaseQty(watch.id);
                                 },
                               ),
 
                               IconButton(
-                                icon: const Icon(Icons.delete),
+                                icon: const Icon(Icons.delete_outline, color: AppColors.error),
                                 onPressed: () {
                                   cartProvider.removeFromCart(watch.id);
                                 },
@@ -114,45 +141,63 @@ class CartScreen extends StatelessWidget {
                   ),
                 ),
 
-                // 💰 TOTAL + BUTTON
+                // TOTAL + BUTTON
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.card,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                     boxShadow: [
                       BoxShadow(
-                        blurRadius: 5,
-                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.05),
                       )
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Total: ₹${cartProvider.totalPrice.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CheckoutScreen(),
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Total:",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textDark,
                               ),
-                            );
-                          },
-                          child: const Text("Checkout"),
+                            ),
+                            Text(
+                              "₹${cartProvider.totalPrice.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.goldAccent,
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    ],
+
+                        const SizedBox(height: 16),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const CheckoutScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text("Checkout"),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 )
               ],
@@ -160,3 +205,4 @@ class CartScreen extends StatelessWidget {
     );
   }
 }
+

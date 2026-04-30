@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../models/watch_model.dart';
 import '../theme/app_colors.dart';
+import 'product_screen.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
@@ -15,61 +16,89 @@ class WishlistScreen extends StatelessWidget {
     List<Watch> wishlistItems = wishlistProvider.wishlistItems;
 
     return Scaffold(
-      backgroundColor: AppColors.primaryGold.withOpacity(0.05),
-      extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        toolbarHeight: 92,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textDark),
         title: const Text(
           "My Wishlist",
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
-            shadows: [
-              Shadow(offset: Offset(0, 2), blurRadius: 8, color: Color(0x80000000)),
-              Shadow(offset: Offset(0, -2), blurRadius: 8, color: AppColors.primaryGold),
-            ],
+            color: AppColors.textDark,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
           ),
         ),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.darkBg, AppColors.primaryGold.withOpacity(0.3)],
-            ),
-          ),
-        ),
       ),
 
       body: wishlistItems.isEmpty
-          ? const Center(
-              child: Text("No items in wishlist"),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.favorite_border, size: 80, color: AppColors.textLight.withOpacity(0.5)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "No items in wishlist",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             )
           : ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: wishlistItems.length,
               itemBuilder: (context, index) {
 
                 final watch = wishlistItems[index];
 
-                return ListTile(
-                  leading: Image.network(
-                    watch.image,
-                    width: 60,
-                    fit: BoxFit.cover,
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppColors.border),
                   ),
-
-                  title: Text(watch.name),
-
-                  subtitle: Text("₹${watch.price}"),
-
-                  trailing: IconButton(
-                    icon: const Icon(Icons.favorite, color: Colors.red),
-                    onPressed: () => wishlistProvider.toggleWishlist(watch),
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => ProductScreen(watch)),
+                      );
+                    },
+                    contentPadding: const EdgeInsets.all(12),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        watch.image,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    title: Text(
+                      watch.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    subtitle: Text(
+                      "₹${watch.price}",
+                      style: const TextStyle(
+                        color: AppColors.goldAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.favorite, color: AppColors.error),
+                      onPressed: () => wishlistProvider.toggleWishlist(watch),
+                    ),
                   ),
                 );
               },

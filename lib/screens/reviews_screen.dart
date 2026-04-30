@@ -55,7 +55,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please add a rating and review text'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -76,7 +76,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Review submitted successfully!'),
-        backgroundColor: AppColors.primaryGold,
+        backgroundColor: AppColors.accent,
       ),
     );
   }
@@ -92,19 +92,17 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.darkBg,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textDark),
         title: const Text(
           'Reviews & Feedback',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textDark,
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -116,8 +114,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.darkBg,
-                  Color(0xFF2C2410),
+                  AppColors.surface,
+                  AppColors.background,
                 ],
               ),
               borderRadius: BorderRadius.only(
@@ -135,7 +133,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.textDark,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -146,7 +144,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                           children: List.generate(5, (index) {
                             return Icon(
                               index < 4 ? Icons.star : Icons.star_half,
-                              color: AppColors.primaryGold,
+                              color: AppColors.accent,
                               size: 22,
                             );
                           }),
@@ -154,8 +152,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         const SizedBox(height: 4),
                         Text(
                           '${_reviews.length} reviews',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                          style: const TextStyle(
+                            color: AppColors.textLight,
                             fontSize: 14,
                           ),
                         ),
@@ -175,20 +173,20 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         Text(
                           '$star',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.textDark,
                             fontSize: 12,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.star, color: AppColors.primaryGold, size: 12),
+                        const Icon(Icons.star, color: AppColors.accent, size: 12),
                         const SizedBox(width: 8),
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: percentage,
-                              backgroundColor: Colors.white.withOpacity(0.1),
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                              backgroundColor: AppColors.divider,
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
                               minHeight: 6,
                             ),
                           ),
@@ -196,8 +194,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '$count',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                          style: const TextStyle(
+                            color: AppColors.textLight,
                             fontSize: 12,
                           ),
                         ),
@@ -225,7 +223,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
@@ -247,7 +245,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.darkBg,
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -262,7 +260,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         },
                         child: Icon(
                           index < _rating ? Icons.star : Icons.star_border,
-                          color: AppColors.primaryGold,
+                          color: AppColors.accent,
                           size: 32,
                         ),
                       );
@@ -272,11 +270,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                   TextField(
                     controller: _reviewController,
                     maxLines: 2,
+                    style: const TextStyle(color: AppColors.textDark),
                     decoration: InputDecoration(
                       hintText: 'Share your experience...',
-                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      hintStyle: const TextStyle(color: AppColors.textLight),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: AppColors.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -284,7 +283,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
-                          color: AppColors.primaryGold,
+                          color: AppColors.accent,
                           width: 1.5,
                         ),
                       ),
@@ -300,14 +299,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: _submitReview,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGold,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
                       child: const Text(
                         'Submit Review',
                         style: TextStyle(
@@ -331,9 +322,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,9 +336,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 backgroundImage: review['avatar'] != null
                     ? NetworkImage(review['avatar'])
                     : null,
-                backgroundColor: AppColors.primaryGold.withOpacity(0.2),
+                backgroundColor: AppColors.accent.withOpacity(0.2),
                 child: review['avatar'] == null
-                    ? const Icon(Icons.person, color: AppColors.primaryGold)
+                    ? const Icon(Icons.person, color: AppColors.accent)
                     : null,
               ),
               const SizedBox(width: 12),
@@ -360,15 +351,15 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
-                        color: AppColors.darkBg,
+                        color: AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       review['date'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: AppColors.textLight,
                       ),
                     ),
                   ],
@@ -378,7 +369,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 children: List.generate(5, (index) {
                   return Icon(
                     index < review['rating'] ? Icons.star : Icons.star_border,
-                    color: AppColors.primaryGold,
+                    color: AppColors.accent,
                     size: 16,
                   );
                 }),
@@ -388,9 +379,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           const SizedBox(height: 12),
           Text(
             review['review'],
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade700,
+              color: AppColors.textLight,
               height: 1.5,
             ),
           ),
@@ -399,4 +390,3 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 }
-

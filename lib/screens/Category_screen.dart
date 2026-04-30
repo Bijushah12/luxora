@@ -5,6 +5,7 @@ import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../widgets/watch_card.dart';
+import 'cart_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
   final String category;
@@ -28,7 +29,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Future<void> loadCategoryWatches() async {
     try {
       final allWatches = await ApiService.getWatches();
-      categoryWatches = allWatches.where((w) => w.category == widget.category).toList();
+      if (widget.category == 'All' ||
+          widget.category == 'Special Member Deals' ||
+          widget.category == 'New Arrivals') {
+        categoryWatches = allWatches;
+      } else {
+        categoryWatches = allWatches.where((w) => w.category == widget.category).toList();
+      }
       setState(() => isLoading = false);
     } catch (e) {
       print('Error loading $widget.category watches: $e');
@@ -49,7 +56,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CartScreen()),
+                  );
+                },
               ),
               if (cart.totalItems > 0)
                 Positioned(

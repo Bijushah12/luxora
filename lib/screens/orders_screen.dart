@@ -18,35 +18,21 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryGold.withOpacity(0.05),
-      extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        toolbarHeight: 92,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textDark),
         title: const Text(
           'My Orders',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
-            shadows: [
-              Shadow(offset: Offset(0, 2), blurRadius: 8, color: Color(0x80000000)),
-              Shadow(offset: Offset(0, -2), blurRadius: 8, color: AppColors.primaryGold),
-            ],
+            color: AppColors.textDark,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
           ),
         ),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.darkBg, AppColors.primaryGold.withOpacity(0.3)],
-            ),
-          ),
-        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -61,15 +47,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       Icon(
                         Icons.shopping_bag_outlined,
                         size: 80,
-                        color: Colors.grey[400],
+                        color: AppColors.textLight.withOpacity(0.5),
                       ),
                       const SizedBox(height: 16),
-                      Text(
+                      const Text(
                         'No orders yet',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
+                          color: AppColors.textLight,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -77,7 +63,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         'Your orders will appear here',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[500],
+                          color: AppColors.textLight.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -94,22 +80,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     final order = orderProvider.orders[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
-                      elevation: 4,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(color: AppColors.border),
                       ),
                       child: ExpansionTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.green[100],
-                          child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                          backgroundColor: AppColors.success.withOpacity(0.1),
+                          child: const Icon(Icons.check_circle, color: AppColors.success, size: 24),
                         ),
                         title: Text(
-                          '#${order.id.substring(order.id.length - 8)}', // Short ID
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          '#${order.id.substring(order.id.length - 8)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
                         ),
                         subtitle: Text(
                           'Total: \$${order.total.toStringAsFixed(2)} • Delivered',
-                          style: TextStyle(color: Colors.green[700]),
+                          style: TextStyle(color: AppColors.success),
                         ),
                         children: [
                           Padding(
@@ -119,9 +106,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               children: [
                                 ...order.items.map((watch) => Padding(
                                   padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: WatchCard(watch: watch), // Reuse existing widget
+                                  child: WatchCard(watch: watch),
                                 )),
-                                Divider(color: Colors.grey[300]),
+                                const Divider(color: AppColors.divider),
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: Text(
@@ -129,6 +116,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: AppColors.textDark,
                                     ),
                                   ),
                                 ),

@@ -1,160 +1,262 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Ensure this file exists in your project
+import '../../theme/app_colors.dart';
+import 'login_screen.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _shineController;
+  late AnimationController _rotateController;
+
+  late Animation<double> _shineAnimation;
+  late Animation<double> _rotateAnimation;
+
+  double _dragPosition = 0.0;
+
+  final String watchImage =
+      "https://images.unsplash.com/photo-1547996160-81dfa63595aa"; // NEW PREMIUM WATCH
+
+  @override
+  void initState() {
+    super.initState();
+
+    _shineController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+
+    _shineAnimation =
+        Tween<double>(begin: 0, end: 1).animate(_shineController);
+
+    _rotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat(reverse: true);
+
+    _rotateAnimation = Tween<double>(begin: -0.15, end: 0.15).animate(
+      CurvedAnimation(parent: _rotateController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shineController.dispose();
+    _rotateController.dispose();
+    super.dispose();
+  }
+
+  void _navigate() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Online Transparent Luxury Watch URL
-    const String watchImageUrl = 'https://pngimg.com/uploads/watch/watch_PNG9894.png';
+    final maxDrag = MediaQuery.of(context).size.width - 120;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFC9BB9D),
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            /// 1. TOP HEADER
-            Positioned(
-              top: 30,
-              left: 20,
-              right: 20,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.stars_rounded, color: Colors.black.withOpacity(0.7), size: 28),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "LUXORA",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Icon(Icons.menu_rounded, color: Colors.black87, size: 30),
-                ],
+            const SizedBox(height: 30),
+
+            // 🔥 TOP ICON
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.diamond_outlined,
+                color: AppColors.accent,
+                size: 30,
               ),
             ),
 
-            /// 2. CENTER WATCH IMAGE (Using Image.network)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 80, bottom: 180),
-                child: Stack(
+            const SizedBox(height: 20),
+
+            // 🔥 TITLE
+            Text(
+              "LUXORA",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 28,
+                    letterSpacing: 6,
+                  ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // 🔥 3D WATCH + SHINE
+            AnimatedBuilder(
+              animation: Listenable.merge([_shineAnimation, _rotateAnimation]),
+              builder: (_, __) {
+                return Transform(
                   alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 250,
-                      height: 250,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.15),
-                      ),
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001)
+                    ..rotateY(_rotateAnimation.value)
+                    ..rotateX(_rotateAnimation.value / 2),
+                  child: Container(
+                    width: 260,
+                    height: 260,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.card,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 20,
+                        ),
+                      ],
                     ),
-                    Image.network(
-                      watchImageUrl,
-                      height: 380,
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const CircularProgressIndicator(color: Colors.white);
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.watch, size: 120, color: Colors.white54),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            /// 3. TEXT CONTENT
-            Positioned(
-              bottom: 140,
-              left: 20,
-              right: 20,
-              child: Column(
-                children: [
-                  const Text(
-                    "THE ART OF TIMEKEEPING",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    "Luxury watches crafted for distinction.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// 4. BOTTOM SWIPE SLIDER (Left to Right to Login)
-            Positioned(
-              bottom: 30,
-              left: 20,
-              right: 20,
-              child: GestureDetector(
-                // SWIPE LOGIC: Left to Right
-                onHorizontalDragEnd: (details) {
-                  // If swipe velocity is positive and fast enough
-                  if (details.primaryVelocity! > 300) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  }
-                },
-                child: Container(
-                  height: 65,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff998C74).withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Starting Point (Watch Icon)
-                      const CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.watch_outlined, color: Colors.black, size: 24),
-                      ),
-                      
-                      // Visual Swipe Indicator
-                      const Row(
+                    child: ClipOval(
+                      child: Stack(
                         children: [
-                          Text("Swipe to Start  ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white54),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white70),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
+                          Image.network(
+                            watchImage,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+
+                          // ✨ CLEAN SHINE
+                          Align(
+                            alignment:
+                                Alignment(-1 + _shineAnimation.value * 2, 0),
+                            child: Container(
+                              width: 70,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.white.withOpacity(0.4),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-
-                      // Target Point Icon
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.black.withOpacity(0.4),
-                        child: const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 28),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 30),
+
+            // 🔥 HEADLINE
+Text(
+  "THE ART OF TIMEKEEPING",
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.w900,
+    letterSpacing: 3,
+    color: AppColors.textDark,
+  ),
+),       
+
+     const SizedBox(height: 20),
+
+            // 🔥 SUBTEXT
+Text(
+  "Luxury Watches crafted for distinction",
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 16,
+    color: AppColors.textLight,
+    letterSpacing: 0.8,
+  ),
+),
+            const Spacer(),
+
+            // 🔥 SWIPE BUTTON
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Stack(
+                children: [
+                  Container(
+                    height: 65,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      "SWIPE TO ENTER",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+
+                  // DRAG WATCH
+                  GestureDetector(
+                    onHorizontalDragUpdate: (details) {
+                      setState(() {
+                        _dragPosition += details.delta.dx;
+                        if (_dragPosition < 0) _dragPosition = 0;
+                        if (_dragPosition > maxDrag) {
+                          _dragPosition = maxDrag;
+                        }
+                      });
+                    },
+                    onHorizontalDragEnd: (_) {
+                      if (_dragPosition > maxDrag * 0.7) {
+                        _navigate();
+                      } else {
+                        setState(() {
+                          _dragPosition = 0;
+                        });
+                      }
+                    },
+                    child: Transform.translate(
+                      offset: Offset(_dragPosition, 0),
+                      child: Container(
+                        width: 65,
+                        height: 65,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.accent,
+                        ),
+                        child: const Icon(
+                          Icons.watch,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ARROW
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    bottom: 8,
+                    child: Container(
+                      width: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

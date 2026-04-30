@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:math';
 
-
 class UnsplashService {
   static const String apiKey = "nbmj_CZmjUJy19i0JHrLL76GyhQRdAzruPUBAoekK0Q";
 
@@ -25,12 +24,14 @@ class UnsplashService {
       case "smart":
         query = "smartwatch apple watch";
         break;
+      case "banner":
+        query = "luxury watch banner";
+        break;
     }
 
+    final random = Random();
 
-final random = Random();
-
-final url =
+    final url =
 "https://api.unsplash.com/search/photos?query=$query&per_page=20&page=${random.nextInt(5)+1}&client_id=$apiKey";
     final response = await http.get(Uri.parse(url));
 

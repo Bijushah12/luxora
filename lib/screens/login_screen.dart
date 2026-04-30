@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../theme/app_colors.dart';
 import 'signup_screen.dart';
 import 'main_navigation.dart';
 
@@ -18,9 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool hidePassword = true;
   bool isLoading = false;
-
-  final Color primaryGold = const Color(0xFFC9BB9D);
-  final Color darkBg = const Color(0xFF1E1702);
 
   @override
   void dispose() {
@@ -69,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text(message), backgroundColor: AppColors.error),
       );
 
     } catch (_) {
@@ -84,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryGold,
+      backgroundColor: AppColors.scaffoldBg,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -95,9 +93,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Container(
                     height: 320,
                     width: double.infinity,
-                    color: darkBg,
+                    color: AppColors.primary,
                     child: Opacity(
-                      opacity: 0.6,
+                      opacity: 0.4,
                       child: Image.network(
                         "https://images.unsplash.com/photo-1523170335258-f5ed11844a49",
                         fit: BoxFit.cover,
@@ -147,11 +145,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: emailController,
                       validator: validateEmail,
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: InputDecoration(
                         hintText: "Email Address",
-                        prefixIcon: Icon(Icons.email_outlined, color: darkBg),
+                        hintStyle: const TextStyle(color: AppColors.textLight),
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textDark),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.5),
+                        fillColor: AppColors.surface,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
@@ -165,21 +165,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: passwordController,
                       validator: validatePassword,
                       obscureText: hidePassword,
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: InputDecoration(
                         hintText: "Password",
-                        prefixIcon: Icon(Icons.lock_outline, color: darkBg),
+                        hintStyle: const TextStyle(color: AppColors.textLight),
+                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textDark),
                         suffixIcon: IconButton(
                           icon: Icon(
                             hidePassword
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: darkBg,
+                            color: AppColors.textDark,
                           ),
                           onPressed: () =>
                               setState(() => hidePassword = !hidePassword),
                         ),
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.5),
+                        fillColor: AppColors.surface,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
@@ -194,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 55,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: darkBg,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -219,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text("New to Luxora?",
-                            style: TextStyle(color: Colors.black54)),
+                            style: TextStyle(color: AppColors.textLight)),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -228,10 +230,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   builder: (_) => const SignupScreen()),
                             );
                           },
-                          child: Text(
+                          child: const Text(
                             "Create Account",
                             style: TextStyle(
-                              color: darkBg,
+                              color: AppColors.accent,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

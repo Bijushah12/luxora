@@ -17,7 +17,6 @@ class Watch {
     required this.category,
   });
 
-  // 🔥 JSON → Model
   factory Watch.fromJson(Map<String, dynamic> json) {
     return Watch(
       id: json['id'].toString(),
@@ -32,7 +31,6 @@ class Watch {
     );
   }
 
-  // 🔥 Model → JSON (useful for cart / storage)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -45,7 +43,6 @@ class Watch {
     };
   }
 
-  // 🔥 Copy (very useful in cart updates)
   Watch copyWith({
     String? id,
     String? name,

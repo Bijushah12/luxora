@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// Forces light theme (Titan-inspired) across the app.
 class ThemeProvider extends ChangeNotifier {
-
   bool _isDark = false;
 
   bool get isDark => _isDark;
 
-  ThemeMode get currentTheme =>
-      _isDark ? ThemeMode.dark : ThemeMode.light;
+  ThemeMode get currentTheme => ThemeMode.light;
 
   void toggleTheme() {
-    _isDark = !_isDark;
+    // Light theme is enforced; toggle is disabled.
+    _isDark = false;
     notifyListeners();
   }
 }
