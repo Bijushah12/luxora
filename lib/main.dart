@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'providers/cart_provider.dart';
+import 'providers/address_provider.dart';
+import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/order_provider.dart';
@@ -13,9 +15,7 @@ import 'screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const LuxoraApp());
 }
@@ -31,6 +31,12 @@ class LuxoraApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AddressProvider()..loadAddresses(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider()..loadNotifications(),
+        ),
       ],
 
       child: Consumer<ThemeProvider>(

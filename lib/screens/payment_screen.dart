@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_notification.dart';
 import '../providers/cart_provider.dart';
+import '../providers/notification_provider.dart';
 import '../providers/order_provider.dart';
 import '../theme/app_colors.dart';
 
@@ -38,15 +39,10 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _upiController = TextEditingController();
-  final _cardNumberController = TextEditingController();
-  final _cardNameController = TextEditingController();
-  final _expiryController = TextEditingController();
-  final _cvvController = TextEditingController();
 
   late _PaymentMethod _method;
   String _bank = 'HDFC Bank';
   String _wallet = 'Google Pay';
-  bool _saveMethod = true;
   bool _isProcessing = false;
 
   @override
@@ -60,10 +56,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   void dispose() {
     _upiController.dispose();
-    _cardNumberController.dispose();
-    _cardNameController.dispose();
-    _expiryController.dispose();
-    _cvvController.dispose();
     super.dispose();
   }
 
@@ -89,8 +81,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return cart.totalPrice;
   }
 
-  bool _hasCheckoutAmount(CartProvider cart) => _payableAmount(cart) > 0;
-
   Future<void> _payNow(CartProvider cart, OrderProvider orders) async {
     final amount = _payableAmount(cart);
     if (amount <= 0) {
@@ -110,6 +100,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     final watches = cart.items.values.map((item) => item.watch).toList();
     orders.placeOrder(watches, amount);
+    await context.read<NotificationProvider>().addNotification(
+      AppNotification(
+        id: 'order-${DateTime.now().microsecondsSinceEpoch}',
+        type: 'order',
+        title: 'Order placed successfully',
+        subtitle:
+            '${watches.length} ${watches.length == 1 ? 'item' : 'items'} confirmed for Rs ${amount.toStringAsFixed(0)}.',
+        createdAt: DateTime.now(),
+        isRead: false,
+      ),
+    );
     cart.clearCart();
 
     setState(() => _isProcessing = false);
@@ -208,7 +209,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Consumer2<CartProvider, OrderProvider>(
       builder: (context, cart, orders, child) {
         final amount = _payableAmount(cart);
-        final hasCheckout = _hasCheckoutAmount(cart);
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -216,9 +216,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             backgroundColor: AppColors.scaffoldBg,
             elevation: 0,
             iconTheme: const IconThemeData(color: AppColors.textDark),
-            title: Text(
-              hasCheckout ? 'Secure Payment' : 'Payment Methods',
-              style: const TextStyle(
+            title: const Text(
+              'Secure Payment',
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
@@ -238,8 +238,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       : widget.itemCount,
                 ),
                 const SizedBox(height: 16),
-                _SecurityBanner(methodName: _methodName),
-                const SizedBox(height: 16),
                 _SectionCard(
                   title: 'Choose Payment Method',
                   icon: Icons.payments_outlined,
@@ -248,7 +246,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       _MethodTile(
                         icon: Icons.qr_code_2,
                         title: 'UPI',
-                        subtitle: 'Pay with any UPI app',
+                        subtitle: 'Fast demo payment',
                         selected: _method == _PaymentMethod.upi,
                         onTap: () =>
                             setState(() => _method = _PaymentMethod.upi),
@@ -256,7 +254,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       _MethodTile(
                         icon: Icons.credit_card,
                         title: 'Credit / Debit Card',
-                        subtitle: 'Visa, Mastercard, RuPay',
+                        subtitle: 'Demo card payment',
                         selected: _method == _PaymentMethod.card,
                         onTap: () =>
                             setState(() => _method = _PaymentMethod.card),
@@ -264,7 +262,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       _MethodTile(
                         icon: Icons.account_balance,
                         title: 'Net Banking',
-                        subtitle: 'Pay from your bank account',
+                        subtitle: 'Select your bank',
                         selected: _method == _PaymentMethod.netBanking,
                         onTap: () =>
                             setState(() => _method = _PaymentMethod.netBanking),
@@ -364,20 +362,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget _detailsForMethod() {
     switch (_method) {
       case _PaymentMethod.upi:
-        return _UpiForm(key: const ValueKey('upi'), controller: _upiController);
+        return _UpiDetails(
+          key: const ValueKey('upi'),
+          controller: _upiController,
+        );
       case _PaymentMethod.card:
-        return _CardForm(
-          key: const ValueKey('card'),
-          numberController: _cardNumberController,
-          nameController: _cardNameController,
-          expiryController: _expiryController,
-          cvvController: _cvvController,
-          saveMethod: _saveMethod,
-          onSaveChanged: (value) => setState(() => _saveMethod = value ?? true),
+        return const _StaticDetails(
+          key: ValueKey('card'),
+          label: 'Demo Card',
+          value: 'Card payment will be simulated for this order.',
         );
       case _PaymentMethod.netBanking:
-        return _DropdownForm(
+        return _DropdownDetails(
           key: const ValueKey('bank'),
+          label: 'Select Bank',
           value: _bank,
           values: const [
             'HDFC Bank',
@@ -386,13 +384,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
             'Axis Bank',
             'Kotak Mahindra Bank',
           ],
-          label: 'Select Bank',
-          icon: Icons.account_balance,
           onChanged: (value) => setState(() => _bank = value ?? _bank),
         );
       case _PaymentMethod.wallet:
-        return _DropdownForm(
+        return _DropdownDetails(
           key: const ValueKey('wallet'),
+          label: 'Select Wallet',
           value: _wallet,
           values: const [
             'Google Pay',
@@ -401,12 +398,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
             'Amazon Pay',
             'Mobikwik',
           ],
-          label: 'Select Wallet',
-          icon: Icons.account_balance_wallet_outlined,
           onChanged: (value) => setState(() => _wallet = value ?? _wallet),
         );
       case _PaymentMethod.cod:
-        return const _CodDetails(key: ValueKey('cod'));
+        return const _StaticDetails(
+          key: ValueKey('cod'),
+          label: 'COD',
+          value: 'Keep exact cash or UPI ready when your order arrives.',
+        );
     }
   }
 }
@@ -471,40 +470,6 @@ class _PaymentHeader extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SecurityBanner extends StatelessWidget {
-  final String methodName;
-
-  const _SecurityBanner({required this.methodName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.verified_user_outlined, color: AppColors.success),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Secured $methodName payment with order confirmation after successful verification.',
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w700,
-                height: 1.35,
-              ),
             ),
           ),
         ],
@@ -646,174 +611,57 @@ class _MethodTile extends StatelessWidget {
   }
 }
 
-class _UpiForm extends StatelessWidget {
+class _UpiDetails extends StatelessWidget {
   final TextEditingController controller;
 
-  const _UpiForm({super.key, required this.controller});
+  const _UpiDetails({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _PaymentTextField(
-          controller: controller,
-          label: 'UPI ID',
-          hint: 'name@bank',
-          icon: Icons.alternate_email,
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) {
-            final upi = value?.trim() ?? '';
-            if (!RegExp(r'^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z]{2,}$').hasMatch(upi)) {
-              return 'Enter a valid UPI ID';
-            }
-            return null;
-          },
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.emailAddress,
+      decoration: InputDecoration(
+        labelText: 'UPI ID',
+        hintText: 'name@bank',
+        prefixIcon: const Icon(
+          Icons.alternate_email,
+          color: AppColors.textLight,
         ),
-        const SizedBox(height: 12),
-        const _InfoStrip(
-          label: 'Verification',
-          value: 'A collect request will be sent to your UPI app.',
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
-      ],
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+        ),
+      ),
+      validator: (value) {
+        final upi = value?.trim() ?? '';
+        if (!RegExp(r'^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z]{2,}$').hasMatch(upi)) {
+          return 'Enter a valid UPI ID';
+        }
+        return null;
+      },
     );
   }
 }
 
-class _CardForm extends StatelessWidget {
-  final TextEditingController numberController;
-  final TextEditingController nameController;
-  final TextEditingController expiryController;
-  final TextEditingController cvvController;
-  final bool saveMethod;
-  final ValueChanged<bool?> onSaveChanged;
-
-  const _CardForm({
-    super.key,
-    required this.numberController,
-    required this.nameController,
-    required this.expiryController,
-    required this.cvvController,
-    required this.saveMethod,
-    required this.onSaveChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _PaymentTextField(
-          controller: numberController,
-          label: 'Card Number',
-          hint: '1234 5678 9012 3456',
-          icon: Icons.credit_card,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(16),
-            _CardNumberFormatter(),
-          ],
-          validator: (value) {
-            final digits = (value ?? '').replaceAll(' ', '');
-            if (digits.length < 13) {
-              return 'Enter a valid card number';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 12),
-        _PaymentTextField(
-          controller: nameController,
-          label: 'Name on Card',
-          hint: 'Full name',
-          icon: Icons.person_outline,
-          textCapitalization: TextCapitalization.words,
-          validator: (value) {
-            if ((value ?? '').trim().length < 3) {
-              return 'Enter card holder name';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _PaymentTextField(
-                controller: expiryController,
-                label: 'Expiry',
-                hint: 'MM/YY',
-                icon: Icons.calendar_month_outlined,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
-                  _ExpiryFormatter(),
-                ],
-                validator: (value) {
-                  if (!RegExp(
-                    r'^(0[1-9]|1[0-2])\/[0-9]{2}$',
-                  ).hasMatch(value ?? '')) {
-                    return 'Invalid expiry';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _PaymentTextField(
-                controller: cvvController,
-                label: 'CVV',
-                hint: '123',
-                icon: Icons.password,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
-                ],
-                validator: (value) {
-                  final cvv = value ?? '';
-                  if (cvv.length < 3) {
-                    return 'Invalid CVV';
-                  }
-                  return null;
-                },
-              ),
-            ),
-          ],
-        ),
-        CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          value: saveMethod,
-          onChanged: onSaveChanged,
-          controlAffinity: ListTileControlAffinity.leading,
-          title: const Text(
-            'Save this card securely',
-            style: TextStyle(
-              color: AppColors.textDark,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DropdownForm extends StatelessWidget {
+class _DropdownDetails extends StatelessWidget {
+  final String label;
   final String value;
   final List<String> values;
-  final String label;
-  final IconData icon;
   final ValueChanged<String?> onChanged;
 
-  const _DropdownForm({
+  const _DropdownDetails({
     super.key,
+    required this.label,
     required this.value,
     required this.values,
-    required this.label,
-    required this.icon,
     required this.onChanged,
   });
 
@@ -827,7 +675,10 @@ class _DropdownForm extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.textLight),
+        prefixIcon: const Icon(
+          Icons.account_balance,
+          color: AppColors.textLight,
+        ),
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -840,76 +691,15 @@ class _DropdownForm extends StatelessWidget {
   }
 }
 
-class _CodDetails extends StatelessWidget {
-  const _CodDetails({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _InfoStrip(
-          label: 'COD Limit',
-          value: 'Available for orders after delivery confirmation.',
-        ),
-        SizedBox(height: 10),
-        _InfoStrip(
-          label: 'Reminder',
-          value: 'Keep exact cash or a UPI app ready at delivery.',
-        ),
-      ],
-    );
-  }
-}
-
-class _PaymentTextField extends StatelessWidget {
-  final TextEditingController controller;
+class _StaticDetails extends StatelessWidget {
   final String label;
-  final String hint;
-  final IconData icon;
-  final TextInputType? keyboardType;
-  final bool obscureText;
-  final TextCapitalization textCapitalization;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?) validator;
+  final String value;
 
-  const _PaymentTextField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    required this.validator,
-    this.keyboardType,
-    this.obscureText = false,
-    this.textCapitalization = TextCapitalization.none,
-    this.inputFormatters,
-  });
+  const _StaticDetails({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      textCapitalization: textCapitalization,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.textLight),
-        filled: true,
-        fillColor: AppColors.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
-        ),
-      ),
-    );
+    return _InfoStrip(label: label, value: value);
   }
 }
 
@@ -1059,44 +849,6 @@ class _PaymentBottomBar extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _CardNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(' ', '');
-    final buffer = StringBuffer();
-    for (var i = 0; i < digits.length; i++) {
-      if (i > 0 && i % 4 == 0) buffer.write(' ');
-      buffer.write(digits[i]);
-    }
-    return TextEditingValue(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(offset: buffer.length),
-    );
-  }
-}
-
-class _ExpiryFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll('/', '');
-    final buffer = StringBuffer();
-    for (var i = 0; i < digits.length; i++) {
-      if (i == 2) buffer.write('/');
-      buffer.write(digits[i]);
-    }
-    return TextEditingValue(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(offset: buffer.length),
     );
   }
 }
