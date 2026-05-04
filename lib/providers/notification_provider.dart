@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,8 +11,20 @@ import '../models/app_notification.dart';
 class NotificationProvider extends ChangeNotifier {
   static const String _storageKey = 'luxora_notifications';
 
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+  StreamSubscription<User?>? _authSubscription;
+
   final List<AppNotification> _notifications = [];
   bool _isLoaded = false;
+  bool _disposed = false;
+
+  NotificationProvider({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance {
+    _authSubscription = _auth.authStateChanges().listen(_loadForUser);
+    _loadForUser(_auth.currentUser);
+  }
 
   bool get isLoaded => _isLoaded;
 
@@ -23,9 +38,53 @@ class NotificationProvider extends ChangeNotifier {
     return _notifications.where((notification) => !notification.isRead).length;
   }
 
+  CollectionReference<Map<String, dynamic>> get _notificationsRef =>
+      _firestore.collection('notifications');
+
   Future<void> loadNotifications() async {
     if (_isLoaded) return;
+    await _loadForUser(_auth.currentUser);
+  }
 
+  Future<void> _loadForUser(User? user) async {
+    _isLoaded = false;
+    _safeNotify();
+    _notifications.clear();
+
+    if (user == null) {
+      await _loadLocalNotifications();
+      _isLoaded = true;
+      _safeNotify();
+      return;
+    }
+
+    try {
+      final doc = await _notificationsRef.doc(user.uid).get();
+      final rawNotifications = doc.data()?['items'];
+
+      if (rawNotifications is Iterable) {
+        _notifications.addAll(
+          rawNotifications
+              .whereType<Map>()
+              .map((item) => AppNotification.fromMap(_stringMap(item)))
+              .where((notification) => notification.id.trim().isNotEmpty),
+        );
+      }
+
+      if (_notifications.isEmpty) {
+        _notifications.addAll(_initialNotifications());
+        await _saveNotifications();
+      }
+    } catch (error) {
+      debugPrint('Error loading cloud notifications: $error');
+      await _loadLocalNotifications();
+    }
+
+    _isLoaded = true;
+    _safeNotify();
+  }
+
+  Future<void> _loadLocalNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_storageKey);
@@ -36,7 +95,7 @@ class NotificationProvider extends ChangeNotifier {
           ..clear()
           ..addAll(
             decoded.map(
-              (item) => AppNotification.fromMap(item as Map<String, dynamic>),
+              (item) => AppNotification.fromMap(_stringMap(item as Map)),
             ),
           );
       } else {
@@ -46,9 +105,6 @@ class NotificationProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading notifications: $e');
     }
-
-    _isLoaded = true;
-    notifyListeners();
   }
 
   Future<void> addNotification(AppNotification notification) async {
@@ -59,7 +115,7 @@ class NotificationProvider extends ChangeNotifier {
     }
 
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> markAsRead(String id) async {
@@ -68,7 +124,7 @@ class NotificationProvider extends ChangeNotifier {
 
     _notifications[index] = _notifications[index].copyWith(isRead: true);
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> markAllRead() async {
@@ -77,25 +133,25 @@ class NotificationProvider extends ChangeNotifier {
     }
 
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> deleteNotification(String id) async {
     _notifications.removeWhere((notification) => notification.id == id);
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> clearRead() async {
     _notifications.removeWhere((notification) => notification.isRead);
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> clearAll() async {
     _notifications.clear();
     await _saveNotifications();
-    notifyListeners();
+    _safeNotify();
   }
 
   List<AppNotification> _initialNotifications() {
@@ -126,5 +182,41 @@ class NotificationProvider extends ChangeNotifier {
       _notifications.map((notification) => notification.toMap()).toList(),
     );
     await prefs.setString(_storageKey, encoded);
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    try {
+      await _notificationsRef.doc(user.uid).set({
+        'userId': user.uid,
+        'items': _notifications
+            .map((notification) => notification.toMap())
+            .toList(),
+        'totalNotifications': _notifications.length,
+        'unreadCount': unreadCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (error) {
+      debugPrint('Error saving cloud notifications: $error');
+    }
+  }
+
+  Map<String, dynamic> _stringMap(Map<dynamic, dynamic> value) {
+    return value.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  void _safeNotify() {
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }

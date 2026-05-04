@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class AppNotification {
   final String id;
   final String type;
@@ -46,14 +48,25 @@ class AppNotification {
 
   factory AppNotification.fromMap(Map<String, dynamic> map) {
     return AppNotification(
-      id: map['id'] as String? ?? '',
-      type: map['type'] as String? ?? 'account',
-      title: map['title'] as String? ?? '',
-      subtitle: map['subtitle'] as String? ?? '',
-      createdAt:
-          DateTime.tryParse(map['createdAt'] as String? ?? '') ??
-          DateTime.now(),
+      id: map['id']?.toString() ?? '',
+      type: map['type']?.toString() ?? 'account',
+      title: map['title']?.toString() ?? '',
+      subtitle: map['subtitle']?.toString() ?? '',
+      createdAt: _toDateTime(map['createdAt']) ?? DateTime.now(),
       isRead: map['isRead'] as bool? ?? false,
     );
+  }
+
+  static DateTime? _toDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    if (value is DateTime) {
+      return value;
+    }
+    if (value is String) {
+      return DateTime.tryParse(value);
+    }
+    return null;
   }
 }

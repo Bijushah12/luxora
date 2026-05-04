@@ -9,6 +9,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
 class WatchCard extends StatefulWidget {
+  static const double cardHeight = 300;
+
   final Watch watch;
   final VoidCallback? onTap;
   final bool isSkeleton;
@@ -51,7 +53,7 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     if (widget.isSkeleton) {
       return Container(
-        height: 300,
+        height: WatchCard.cardHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           color: AppColors.card,
@@ -109,7 +111,7 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
           return Transform.translate(
             offset: Offset(0, _liftAnimation.value),
             child: Container(
-              height: 300,
+              height: WatchCard.cardHeight,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
                 color: AppColors.card,

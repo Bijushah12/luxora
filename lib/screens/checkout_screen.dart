@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_address.dart';
+import '../providers/address_provider.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_colors.dart';
 import 'payment_screen.dart';
@@ -281,7 +283,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     ).whenComplete(locationPincodeController.dispose);
   }
 
-  void _proceedToPayment(CartProvider cart) {
+  Future<void> _proceedToPayment(CartProvider cart) async {
     if (cart.items.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -293,28 +295,83 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final subtotal = cart.totalPrice;
+    final shipping = _shippingFor(subtotal);
+    final tax = _taxFor(subtotal);
+    final discount = _discountFor(subtotal);
+    final grandTotal = subtotal + shipping + tax - discount;
+    final flat = _flatController.text.trim();
+    final addressLine = _addressController.text.trim();
+    final line1 = [
+      if (flat.isNotEmpty) flat,
+      addressLine,
+    ].where((part) => part.trim().isNotEmpty).join(', ');
+    final deliveryAddress = {
+      'fullName': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'line1': line1,
+      'address': addressLine,
+      'flat': flat,
+      'line2': _landmarkController.text.trim(),
+      'landmark': _landmarkController.text.trim(),
+      'city': _cityController.text.trim(),
+      'state': _stateController.text.trim(),
+      'pincode': _pincodeController.text.trim(),
+      'addressType': _addressType,
+      'makeDefault': _makeDefaultAddress,
+    };
+
+    if (_makeDefaultAddress) {
+      await context.read<AddressProvider>().addAddress(
+        AppAddress(
+          id: 'checkout-${DateTime.now().microsecondsSinceEpoch}',
+          label: _labelForAddressType(_addressType),
+          fullName: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
+          addressLine: [
+            line1,
+            _landmarkController.text.trim(),
+            _cityController.text.trim(),
+            _stateController.text.trim(),
+            _pincodeController.text.trim(),
+          ].where((part) => part.trim().isNotEmpty).join(', '),
+          isDefault: true,
+        ),
+      );
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) {
-          final subtotal = cart.totalPrice;
-          final shipping = _shippingFor(subtotal);
-          final tax = _taxFor(subtotal);
-          final discount = _discountFor(subtotal);
-          final grandTotal = subtotal + shipping + tax - discount;
-
-          return PaymentScreen(
-            subtotal: subtotal,
-            shipping: shipping,
-            tax: tax,
-            discount: discount,
-            total: grandTotal,
-            itemCount: cart.totalItems,
-            preferredMethod: _paymentOption,
-          );
-        },
+        builder: (_) => PaymentScreen(
+          subtotal: subtotal,
+          shipping: shipping,
+          tax: tax,
+          discount: discount,
+          total: grandTotal,
+          itemCount: cart.totalItems,
+          preferredMethod: _paymentOption,
+          deliveryOption: _deliveryOption,
+          address: deliveryAddress,
+        ),
       ),
     );
+  }
+
+  String _labelForAddressType(String value) {
+    switch (value) {
+      case 'office':
+        return 'Office';
+      case 'other':
+        return 'Other';
+      default:
+        return 'Home';
+    }
   }
 
   @override

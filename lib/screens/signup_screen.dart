@@ -12,7 +12,6 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -23,71 +22,161 @@ class _SignupScreenState extends State<SignupScreen> {
   bool hidePassword = true;
   bool isLoading = false;
 
-  // 🔥 NEW FUNCTION (Firebase Signup)
-  Future<void> createAccount() async {
-    try {
-      setState(() => isLoading = true);
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmController.dispose();
+    super.dispose();
+  }
 
+  // Firebase signup
+  Future<void> createAccount() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
       final name = nameController.text.trim();
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-      String uid = userCredential.user!.uid;
+      final user = userCredential.user;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'missing-user',
+          message: 'No Firebase user was returned after signup.',
+        );
+      }
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      await user.updateDisplayName(name);
+
+      final firestore = FirebaseFirestore.instance;
+      final batch = firestore.batch();
+      final now = FieldValue.serverTimestamp();
+
+      batch.set(firestore.collection('users').doc(user.uid), {
         "name": name,
         "email": email,
-        "uid": uid,
-        "createdAt": Timestamp.now(),
+        "uid": user.uid,
+        "role": "customer",
+        "isAdmin": false,
+        "createdAt": now,
+        "updatedAt": now,
       });
+      batch.set(firestore.collection('carts').doc(user.uid), {
+        'userId': user.uid,
+        'items': const [],
+        'totalItems': 0,
+        'totalPrice': 0,
+        'updatedAt': now,
+      });
+      batch.set(firestore.collection('wishlists').doc(user.uid), {
+        'userId': user.uid,
+        'items': const [],
+        'totalItems': 0,
+        'updatedAt': now,
+      });
+      batch.set(firestore.collection('addresses').doc(user.uid), {
+        'userId': user.uid,
+        'addresses': const [],
+        'totalAddresses': 0,
+        'updatedAt': now,
+      });
+      batch.set(firestore.collection('notifications').doc(user.uid), {
+        'userId': user.uid,
+        'items': const [],
+        'totalNotifications': 0,
+        'unreadCount': 0,
+        'updatedAt': now,
+      });
+      await batch.commit();
 
+      await _safeSignOut();
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Account Created Successfully")),
       );
 
-if (!mounted) return; 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
-
     } on FirebaseAuthException catch (e) {
-      String message = "Error";
-
-      if (e.code == 'email-already-in-use') {
-        message = "Email already exists";
-      } else if (e.code == 'weak-password') {
-        message = "Password too weak";
+      if (mounted) {
+        setState(() => isLoading = false);
+        _showError(_messageForAuthError(e));
       }
-if (!mounted) return;
+    } on FirebaseException catch (e) {
+      await _safeSignOut();
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
+      if (mounted) {
+        setState(() => isLoading = false);
+        _showError(_messageForFirebaseError(e));
+      }
+    } catch (_) {
+      await _safeSignOut();
 
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+        _showError("Something went wrong. Please try again.");
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+    );
+  }
+
+  Future<void> _safeSignOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (_) {
+      // Keep the signup error path from failing while already handling a failure.
+    }
+  }
+
+  String _messageForAuthError(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'email-already-in-use':
+        return "Email already exists";
+      case 'weak-password':
+        return "Password too weak";
+      case 'invalid-email':
+        return "Enter valid email";
+      case 'network-request-failed':
+        return "Check your internet connection";
+      default:
+        return error.message ?? "Account creation failed";
+    }
+  }
+
+  String _messageForFirebaseError(FirebaseException error) {
+    switch (error.code) {
+      case 'permission-denied':
+        return "Account created, but profile access is blocked. Deploy Firestore rules.";
+      case 'unavailable':
+        return "Firebase is unavailable. Try again shortly.";
+      default:
+        return error.message ?? "Account profile could not be saved";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
 
       body: SingleChildScrollView(
         child: Column(
           children: [
-
             Stack(
               children: [
                 ClipPath(
@@ -142,7 +231,6 @@ if (!mounted) return;
                 key: _formKey,
                 child: Column(
                   children: [
-
                     const SizedBox(height: 25),
 
                     TextFormField(
@@ -172,21 +260,22 @@ if (!mounted) return;
                         return null;
                       },
                       style: const TextStyle(color: AppColors.textDark),
-                      decoration: inputDecoration("Password", Icons.lock).copyWith(
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            hidePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: AppColors.textDark,
+                      decoration: inputDecoration("Password", Icons.lock)
+                          .copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                hidePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: AppColors.textDark,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  hidePassword = !hidePassword;
+                                });
+                              },
+                            ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              hidePassword = !hidePassword;
-                            });
-                          },
-                        ),
-                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -201,8 +290,10 @@ if (!mounted) return;
                         return null;
                       },
                       style: const TextStyle(color: AppColors.textDark),
-                      decoration:
-                          inputDecoration("Confirm Password", Icons.lock_outline),
+                      decoration: inputDecoration(
+                        "Confirm Password",
+                        Icons.lock_outline,
+                      ),
                     ),
 
                     const SizedBox(height: 40),
@@ -218,16 +309,11 @@ if (!mounted) return;
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                if (_formKey.currentState!.validate()) {
-                                  createAccount();
-                                }
-                              },
+                        onPressed: isLoading ? null : createAccount,
                         child: isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white)
+                                color: Colors.white,
+                              )
                             : const Text(
                                 "SIGN UP",
                                 style: TextStyle(
@@ -294,7 +380,11 @@ class WaveClipper extends CustomClipper<Path> {
     Path path = Path();
     path.lineTo(0, size.height - 80);
     path.quadraticBezierTo(
-        size.width / 2, size.height, size.width, size.height - 80);
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height - 80,
+    );
     path.lineTo(size.width, 0);
     path.close();
     return path;
@@ -303,4 +393,3 @@ class WaveClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-

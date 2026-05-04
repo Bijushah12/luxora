@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function adminProfileExists() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && (
+          request.auth.token.admin == true
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          || (
+            adminProfileExists()
+            && (
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+              || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+            )
+          )
+        );
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow create: if signedIn();
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /carts/{userId} {
+      allow read, write: if isAdmin()
+        || (signedIn() && request.auth.uid == userId);
+    }
+
+    match /wishlists/{userId} {
+      allow read, write: if isAdmin()
+        || (signedIn() && request.auth.uid == userId);
+    }
+
+    match /addresses/{userId} {
+      allow read, write: if isAdmin()
+        || (signedIn() && request.auth.uid == userId);
+    }
+
+    match /notifications/{userId} {
+      allow read, write: if isAdmin()
+        || (signedIn() && request.auth.uid == userId);
+    }
+
+    match /users/{userId} {
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == userId
+          && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['role', 'isAdmin'])
+        );
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if signedIn()
+        && (request.auth.uid == adminId || isAdmin());
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}

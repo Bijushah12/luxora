@@ -94,7 +94,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.75,
+                mainAxisExtent: WatchCard.cardHeight,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),

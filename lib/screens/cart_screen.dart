@@ -35,7 +35,11 @@ class CartScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: AppColors.textLight.withOpacity(0.5)),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 80,
+                    color: AppColors.textLight.withValues(alpha: 0.5),
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     "Your cart is empty",
@@ -50,18 +54,19 @@ class CartScreen extends StatelessWidget {
             )
           : Column(
               children: [
-
                 // LIST
                 Expanded(
                   child: ListView.builder(
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
-
                       final item = cartItems[index];
                       final watch = item.watch;
 
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -104,9 +109,11 @@ class CartScreen extends StatelessWidget {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-
                               IconButton(
-                                icon: const Icon(Icons.remove, color: AppColors.textDark),
+                                icon: const Icon(
+                                  Icons.remove,
+                                  color: AppColors.textDark,
+                                ),
                                 onPressed: () {
                                   cartProvider.decreaseQty(watch.id);
                                 },
@@ -121,14 +128,20 @@ class CartScreen extends StatelessWidget {
                               ),
 
                               IconButton(
-                                icon: const Icon(Icons.add, color: AppColors.textDark),
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: AppColors.textDark,
+                                ),
                                 onPressed: () {
                                   cartProvider.increaseQty(watch.id);
                                 },
                               ),
 
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: AppColors.error,
+                                ),
                                 onPressed: () {
                                   cartProvider.removeFromCart(watch.id);
                                 },
@@ -146,12 +159,14 @@ class CartScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: AppColors.card,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 10,
-                        color: Colors.black.withOpacity(0.05),
-                      )
+                        color: Colors.black.withValues(alpha: 0.05),
+                      ),
                     ],
                   ),
                   child: SafeArea(
@@ -195,14 +210,13 @@ class CartScreen extends StatelessWidget {
                             },
                             child: const Text("Checkout"),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
     );
   }
 }
-

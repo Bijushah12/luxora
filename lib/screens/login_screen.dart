@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/admin_auth_service.dart';
 import '../theme/app_colors.dart';
 import 'signup_screen.dart';
 import 'main_navigation.dart';
@@ -16,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final AdminAuthService _adminAuthService = AdminAuthService();
 
   bool hidePassword = true;
   bool isLoading = false;
@@ -45,18 +48,39 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
+      final user = credential.user;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'missing-user',
+          message: 'No Firebase user was returned after login.',
+        );
+      }
+
+      final isAdmin = await _adminAuthService.isAdmin(user);
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        if (user.email != null) 'email': user.email,
+        if (user.displayName != null && user.displayName!.trim().isNotEmpty)
+          'name': user.displayName,
+        'lastLoginAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-      );
-
+      if (isAdmin) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/admin', (_) => false);
+      } else {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+          (_) => false,
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String message = "Login failed";
 
@@ -69,14 +93,15 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: AppColors.error),
       );
-
-    } catch (_) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Something went wrong")),
+        SnackBar(content: Text("Unable to verify account role. $e")),
       );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-
-    setState(() => isLoading = false);
   }
 
   @override
@@ -109,7 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   right: 0,
                   child: Column(
                     children: [
-                      const Icon(Icons.stars_rounded, color: Colors.white, size: 40),
+                      const Icon(
+                        Icons.stars_rounded,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                       const SizedBox(height: 10),
                       const Text(
                         "LUXORA",
@@ -123,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         "PREMIUM WATCHES",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
                           letterSpacing: 4,
                         ),
@@ -149,7 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         hintText: "Email Address",
                         hintStyle: const TextStyle(color: AppColors.textLight),
-                        prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textDark),
+                        prefixIcon: const Icon(
+                          Icons.email_outlined,
+                          color: AppColors.textDark,
+                        ),
                         filled: true,
                         fillColor: AppColors.surface,
                         border: OutlineInputBorder(
@@ -169,7 +201,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: const TextStyle(color: AppColors.textLight),
-                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textDark),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          color: AppColors.textDark,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             hidePassword
@@ -204,7 +239,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         onPressed: isLoading ? null : loginUser,
                         child: isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                             : const Text(
                                 "LOGIN",
                                 style: TextStyle(
@@ -220,14 +257,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("New to Luxora?",
-                            style: TextStyle(color: AppColors.textLight)),
+                        const Text(
+                          "New to Luxora?",
+                          style: TextStyle(color: AppColors.textLight),
+                        ),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const SignupScreen()),
+                                builder: (_) => const SignupScreen(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -237,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
 
@@ -259,7 +299,11 @@ class WaveClipper extends CustomClipper<Path> {
     Path path = Path();
     path.lineTo(0, size.height - 80);
     path.quadraticBezierTo(
-        size.width / 2, size.height, size.width, size.height - 80);
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height - 80,
+    );
     path.lineTo(size.width, 0);
     path.close();
     return path;

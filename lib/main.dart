@@ -9,7 +9,13 @@ import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/order_provider.dart';
+import 'providers/admin_auth_provider.dart';
+import 'providers/admin_dashboard_provider.dart';
+import 'providers/admin_orders_provider.dart';
+import 'providers/admin_products_provider.dart';
+import 'providers/admin_users_provider.dart';
 import 'theme/app_theme.dart';
+import 'screens/admin/admin_gate.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
@@ -31,6 +37,11 @@ class LuxoraApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => AdminAuthProvider()),
+        ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProductsProvider()),
+        ChangeNotifierProvider(create: (_) => AdminOrdersProvider()),
+        ChangeNotifierProvider(create: (_) => AdminUsersProvider()),
         ChangeNotifierProvider(
           create: (_) => AddressProvider()..loadAddresses(),
         ),
@@ -63,6 +74,7 @@ class LuxoraApp extends StatelessWidget {
             },
 
             home: const SplashScreen(),
+            routes: {'/admin': (_) => const AdminGate()},
           );
         },
       ),

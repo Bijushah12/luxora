@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/watch_card.dart';
+import 'cart_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -130,7 +131,13 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CartScreen(),
+                    ),
+                  );
+                },
               ),
               if (cart.totalItems > 0)
                 Positioned(
@@ -276,7 +283,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.75,
+                        mainAxisExtent: WatchCard.cardHeight,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                       ),

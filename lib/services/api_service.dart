@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import '../models/watch_model.dart';
 import 'unsplash_service.dart';
@@ -12,7 +13,7 @@ class ApiService {
     "Women",
     "Luxury",
     "Sports",
-    "Smart"
+    "Smart",
   ];
 
   static final List<String> brands = [
@@ -20,10 +21,15 @@ class ApiService {
     "Omega",
     "Tag Heuer",
     "Casio",
-    "Fossil"
+    "Fossil",
   ];
 
   static Future<List<Watch>> getWatches() async {
+    final firestoreWatches = await _getFirestoreWatches();
+    if (firestoreWatches.isNotEmpty) {
+      return firestoreWatches;
+    }
+
     try {
       final response = await http.get(Uri.parse(baseUrl));
 
@@ -47,7 +53,7 @@ class ApiService {
           final images = categoryImages[category] ?? [];
           final image = (images.isNotEmpty)
               ? images[random.nextInt(images.length)]
-              : "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400";      
+              : "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400";
           final brand = brands[random.nextInt(brands.length)];
           final price = (random.nextDouble() * 15000 + 5000);
 
@@ -68,10 +74,52 @@ class ApiService {
       } else {
         throw Exception("Server error");
       }
-    } catch (e) {
-      print("API Error: $e");
-
+    } catch (_) {
       return [];
     }
+  }
+
+  static Future<List<Watch>> _getFirestoreWatches() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .get();
+
+      return snapshot.docs
+          .where((doc) => doc.data()['isActive'] != false)
+          .map((doc) {
+            final data = doc.data();
+            return Watch(
+              id: doc.id,
+              name: data['name'] as String? ?? data['title'] as String? ?? '',
+              brand: data['brand'] as String? ?? 'Luxora',
+              price: _toDouble(data['price']),
+              image:
+                  data['imageUrl'] as String? ?? data['image'] as String? ?? '',
+              description: data['description'] as String? ?? '',
+              category: data['category'] as String? ?? 'Men',
+            );
+          })
+          .where((watch) => watch.name.trim().isNotEmpty)
+          .toList(growable: false);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is int) {
+      return value.toDouble();
+    }
+    if (value is double) {
+      return value;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value) ?? 0;
+    }
+    return 0;
   }
 }

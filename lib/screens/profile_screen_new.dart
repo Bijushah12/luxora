@@ -12,6 +12,7 @@ import '../../providers/theme_provider.dart';
 import '../../theme/app_colors.dart';
 import '../widgets/profile_stat_card.dart';
 import '../widgets/watch_card.dart';
+import 'cart_screen.dart';
 import 'orders_screen.dart';
 import 'login_screen.dart';
 
@@ -184,6 +185,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                             count: cart.items.length.toString(),
                             title: 'Cart',
                             icon: Icons.shopping_bag,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const CartScreen(),
+                                ),
+                              );
+                            },
                           ),
 
                           ProfileStatCard(

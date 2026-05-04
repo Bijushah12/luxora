@@ -46,11 +46,15 @@ class AppAddress {
 
   factory AppAddress.fromMap(Map<String, dynamic> map) {
     return AppAddress(
-      id: map['id'] as String? ?? '',
-      label: map['label'] as String? ?? 'Home',
-      fullName: map['fullName'] as String? ?? '',
-      phone: map['phone'] as String? ?? '',
-      addressLine: map['addressLine'] as String? ?? '',
+      id: map['id']?.toString() ?? '',
+      label: map['label']?.toString() ?? 'Home',
+      fullName: map['fullName']?.toString() ?? '',
+      phone: map['phone']?.toString() ?? '',
+      addressLine:
+          map['addressLine']?.toString() ??
+          map['line1']?.toString() ??
+          map['address']?.toString() ??
+          '',
       isDefault: map['isDefault'] as bool? ?? false,
     );
   }

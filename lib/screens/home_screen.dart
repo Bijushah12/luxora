@@ -704,7 +704,7 @@ SliverToBoxAdapter(
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 0.72,
+                          mainAxisExtent: WatchCard.cardHeight,
                         ),
                         itemCount: newArrivals.length > 4 ? 4 : newArrivals.length,
                         itemBuilder: (context, index) => WatchCard(
@@ -732,7 +732,7 @@ SliverToBoxAdapter(
                         ),
                       ),
                       SizedBox(
-                        height: 300,
+                        height: WatchCard.cardHeight,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),

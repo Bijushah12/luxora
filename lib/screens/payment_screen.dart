@@ -20,6 +20,8 @@ class PaymentScreen extends StatefulWidget {
   final double total;
   final int itemCount;
   final String preferredMethod;
+  final String deliveryOption;
+  final Map<String, dynamic> address;
 
   const PaymentScreen({
     super.key,
@@ -30,6 +32,8 @@ class PaymentScreen extends StatefulWidget {
     this.total = 0,
     this.itemCount = 0,
     this.preferredMethod = 'upi',
+    this.deliveryOption = 'standard',
+    this.address = const {},
   });
 
   @override
@@ -81,6 +85,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return cart.totalPrice;
   }
 
+  String _transactionId() {
+    return 'LUX${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(90) + 10}';
+  }
+
   Future<void> _payNow(CartProvider cart, OrderProvider orders) async {
     final amount = _payableAmount(cart);
     if (amount <= 0) {
@@ -92,35 +100,59 @@ class _PaymentScreenState extends State<PaymentScreen> {
       return;
     }
 
+    final notificationProvider = context.read<NotificationProvider>();
+
     setState(() => _isProcessing = true);
-    await Future<void>.delayed(const Duration(seconds: 2));
-    if (!mounted) {
-      return;
+    final transactionId = _transactionId();
+
+    try {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      if (!mounted) {
+        return;
+      }
+
+      final order = await orders.placeOrder(
+        cartItems: cart.items.values,
+        subtotal: widget.subtotal > 0 ? widget.subtotal : cart.totalPrice,
+        shipping: widget.shipping,
+        tax: widget.tax,
+        discount: widget.discount,
+        total: amount,
+        paymentMethod: _methodName,
+        paymentStatus: _method == _PaymentMethod.cod ? 'Pending' : 'Paid',
+        transactionId: transactionId,
+        deliveryOption: widget.deliveryOption,
+        address: widget.address,
+      );
+
+      await notificationProvider.addNotification(
+        AppNotification(
+          id: 'order-${DateTime.now().microsecondsSinceEpoch}',
+          type: 'order',
+          title: 'Order placed successfully',
+          subtitle:
+              '${order.itemCount} ${order.itemCount == 1 ? 'item' : 'items'} confirmed for Rs ${amount.toStringAsFixed(0)}.',
+          createdAt: DateTime.now(),
+          isRead: false,
+        ),
+      );
+      cart.clearCart();
+
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isProcessing = false);
+      await _showSuccessSheet(amount, transactionId);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isProcessing = false);
+      _showSnack('Order could not be saved. Please try again.');
     }
-
-    final watches = cart.items.values.map((item) => item.watch).toList();
-    orders.placeOrder(watches, amount);
-    await context.read<NotificationProvider>().addNotification(
-      AppNotification(
-        id: 'order-${DateTime.now().microsecondsSinceEpoch}',
-        type: 'order',
-        title: 'Order placed successfully',
-        subtitle:
-            '${watches.length} ${watches.length == 1 ? 'item' : 'items'} confirmed for Rs ${amount.toStringAsFixed(0)}.',
-        createdAt: DateTime.now(),
-        isRead: false,
-      ),
-    );
-    cart.clearCart();
-
-    setState(() => _isProcessing = false);
-    await _showSuccessSheet(amount);
   }
 
-  Future<void> _showSuccessSheet(double amount) {
-    final paymentId =
-        'LUX${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(90) + 10}';
-
+  Future<void> _showSuccessSheet(double amount, String paymentId) {
     return showModalBottomSheet<void>(
       context: context,
       isDismissible: false,

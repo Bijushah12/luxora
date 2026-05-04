@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,15 +11,66 @@ import '../models/app_address.dart';
 class AddressProvider extends ChangeNotifier {
   static const String _storageKey = 'luxora_addresses';
 
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+  StreamSubscription<User?>? _authSubscription;
+
   final List<AppAddress> _addresses = [];
   bool _isLoaded = false;
+  bool _disposed = false;
+
+  AddressProvider({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance {
+    _authSubscription = _auth.authStateChanges().listen(_loadAddressesForUser);
+    _loadAddressesForUser(_auth.currentUser);
+  }
 
   bool get isLoaded => _isLoaded;
   List<AppAddress> get addresses => List.unmodifiable(_addresses);
 
+  CollectionReference<Map<String, dynamic>> get _addressesRef =>
+      _firestore.collection('addresses');
+
   Future<void> loadAddresses() async {
     if (_isLoaded) return;
+    await _loadAddressesForUser(_auth.currentUser);
+  }
 
+  Future<void> _loadAddressesForUser(User? user) async {
+    _isLoaded = false;
+    _safeNotify();
+    _addresses.clear();
+
+    if (user == null) {
+      await _loadLocalAddresses();
+      _isLoaded = true;
+      _safeNotify();
+      return;
+    }
+
+    try {
+      final doc = await _addressesRef.doc(user.uid).get();
+      final rawAddresses = doc.data()?['addresses'];
+
+      if (rawAddresses is Iterable) {
+        _addresses.addAll(
+          rawAddresses
+              .whereType<Map>()
+              .map((item) => AppAddress.fromMap(_stringMap(item)))
+              .where((address) => address.id.trim().isNotEmpty),
+        );
+      }
+    } catch (error) {
+      debugPrint('Error loading cloud addresses: $error');
+      await _loadLocalAddresses();
+    }
+
+    _isLoaded = true;
+    _safeNotify();
+  }
+
+  Future<void> _loadLocalAddresses() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_storageKey);
@@ -26,17 +80,12 @@ class AddressProvider extends ChangeNotifier {
         _addresses
           ..clear()
           ..addAll(
-            decoded.map(
-              (item) => AppAddress.fromMap(item as Map<String, dynamic>),
-            ),
+            decoded.map((item) => AppAddress.fromMap(_stringMap(item as Map))),
           );
       }
     } catch (e) {
       debugPrint('Error loading addresses: $e');
     }
-
-    _isLoaded = true;
-    notifyListeners();
   }
 
   Future<void> addAddress(AppAddress address) async {
@@ -49,7 +98,7 @@ class AddressProvider extends ChangeNotifier {
 
     _addresses.insert(0, next);
     await _saveAddresses();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> updateAddress(AppAddress address) async {
@@ -63,14 +112,14 @@ class AddressProvider extends ChangeNotifier {
     _addresses[index] = address;
     _ensureDefaultAddress();
     await _saveAddresses();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> removeAddress(String id) async {
     _addresses.removeWhere((address) => address.id == id);
     _ensureDefaultAddress();
     await _saveAddresses();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> setDefaultAddress(String id) async {
@@ -79,7 +128,7 @@ class AddressProvider extends ChangeNotifier {
     }
 
     await _saveAddresses();
-    notifyListeners();
+    _safeNotify();
   }
 
   void _clearDefaultAddress() {
@@ -103,5 +152,52 @@ class AddressProvider extends ChangeNotifier {
       _addresses.map((address) => address.toMap()).toList(),
     );
     await prefs.setString(_storageKey, encoded);
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    try {
+      final defaultAddress = _defaultAddressMap();
+      final data = {
+        'userId': user.uid,
+        'addresses': _addresses.map((address) => address.toMap()).toList(),
+        'totalAddresses': _addresses.length,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      if (defaultAddress != null) {
+        data['defaultAddress'] = defaultAddress;
+      }
+      await _addressesRef.doc(user.uid).set(data, SetOptions(merge: true));
+    } catch (error) {
+      debugPrint('Error saving cloud addresses: $error');
+    }
+  }
+
+  Map<String, dynamic>? _defaultAddressMap() {
+    for (final address in _addresses) {
+      if (address.isDefault) {
+        return address.toMap();
+      }
+    }
+    return null;
+  }
+
+  Map<String, dynamic> _stringMap(Map<dynamic, dynamic> value) {
+    return value.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  void _safeNotify() {
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }
