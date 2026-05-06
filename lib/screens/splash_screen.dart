@@ -31,8 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 3),
     )..repeat();
 
-    _shineAnimation =
-        Tween<double>(begin: 0, end: 1).animate(_shineController);
+    _shineAnimation = Tween<double>(begin: 0, end: 1).animate(_shineController);
 
     _rotateController = AnimationController(
       vsync: this,
@@ -54,7 +53,10 @@ class _SplashScreenState extends State<SplashScreen>
   void _navigate() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/login'),
+        builder: (_) => const LoginScreen(),
+      ),
     );
   }
 
@@ -73,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.1),
+                color: AppColors.accent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -88,10 +90,9 @@ class _SplashScreenState extends State<SplashScreen>
             // 🔥 TITLE
             Text(
               "LUXORA",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontSize: 28,
-                    letterSpacing: 6,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontSize: 28, letterSpacing: 6),
             ),
 
             const SizedBox(height: 40),
@@ -99,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
             // 🔥 3D WATCH + SHINE
             AnimatedBuilder(
               animation: Listenable.merge([_shineAnimation, _rotateAnimation]),
-              builder: (_, __) {
+              builder: (context, child) {
                 return Transform(
                   alignment: Alignment.center,
                   transform: Matrix4.identity()
@@ -113,10 +114,7 @@ class _SplashScreenState extends State<SplashScreen>
                       shape: BoxShape.circle,
                       color: AppColors.card,
                       boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadow,
-                          blurRadius: 20,
-                        ),
+                        BoxShadow(color: AppColors.shadow, blurRadius: 20),
                       ],
                     ),
                     child: ClipOval(
@@ -131,15 +129,17 @@ class _SplashScreenState extends State<SplashScreen>
 
                           // ✨ CLEAN SHINE
                           Align(
-                            alignment:
-                                Alignment(-1 + _shineAnimation.value * 2, 0),
+                            alignment: Alignment(
+                              -1 + _shineAnimation.value * 2,
+                              0,
+                            ),
                             child: Container(
                               width: 70,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
                                     Colors.transparent,
-                                    Colors.white.withOpacity(0.4),
+                                    Colors.white.withValues(alpha: 0.4),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -157,29 +157,29 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(height: 30),
 
             // 🔥 HEADLINE
-Text(
-  "THE ART OF TIMEKEEPING",
-  textAlign: TextAlign.center,
-  style: TextStyle(
-    fontSize: 30,
-    fontWeight: FontWeight.w900,
-    letterSpacing: 3,
-    color: AppColors.textDark,
-  ),
-),       
+            Text(
+              "THE ART OF TIMEKEEPING",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3,
+                color: AppColors.textDark,
+              ),
+            ),
 
-     const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // 🔥 SUBTEXT
-Text(
-  "Luxury Watches crafted for distinction",
-  textAlign: TextAlign.center,
-  style: TextStyle(
-    fontSize: 16,
-    color: AppColors.textLight,
-    letterSpacing: 0.8,
-  ),
-),
+            Text(
+              "Luxury Watches crafted for distinction",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textLight,
+                letterSpacing: 0.8,
+              ),
+            ),
             const Spacer(),
 
             // 🔥 SWIPE BUTTON
@@ -197,8 +197,8 @@ Text(
                     child: Text(
                       "SWIPE TO ENTER",
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
 
@@ -231,10 +231,7 @@ Text(
                           shape: BoxShape.circle,
                           color: AppColors.accent,
                         ),
-                        child: const Icon(
-                          Icons.watch,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.watch, color: Colors.white),
                       ),
                     ),
                   ),

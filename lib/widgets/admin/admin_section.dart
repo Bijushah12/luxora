@@ -27,6 +27,13 @@ class AdminSection extends StatelessWidget {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.glassShadow,
+            blurRadius: 16,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -38,10 +45,13 @@ class AdminSection extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.accent.withValues(alpha: 0.22),
+                  ),
                 ),
-                child: Icon(icon, color: AppColors.accent, size: 21),
+                child: Icon(icon, color: AppColors.textDark, size: 21),
               ),
               const SizedBox(width: 12),
               Expanded(

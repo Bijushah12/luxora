@@ -9,6 +9,7 @@ class AdminAppUser {
   final String phoneNumber;
   final String role;
   final bool isAdmin;
+  final bool isBlocked;
   final DateTime? createdAt;
   final DateTime? lastLoginAt;
 
@@ -19,6 +20,7 @@ class AdminAppUser {
     required this.phoneNumber,
     required this.role,
     required this.isAdmin,
+    required this.isBlocked,
     this.createdAt,
     this.lastLoginAt,
   });
@@ -37,6 +39,7 @@ class AdminAppUser {
           data['phoneNumber'] as String? ?? data['phone'] as String? ?? '',
       role: role,
       isAdmin: data['isAdmin'] as bool? ?? role.toLowerCase() == 'admin',
+      isBlocked: data['isBlocked'] as bool? ?? data['blocked'] == true,
       createdAt: _toDateTime(data['createdAt']),
       lastLoginAt: _toDateTime(data['lastLoginAt']),
     );

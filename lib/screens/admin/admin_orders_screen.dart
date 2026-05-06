@@ -79,6 +79,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   ),
                   child: Column(
                     children: [
+                      _OrderSummaryStrip(orders: orders),
+                      const SizedBox(height: 16),
                       if (snapshot.connectionState == ConnectionState.waiting)
                         const LinearProgressIndicator(minHeight: 3)
                       else if (snapshot.hasError)
@@ -123,6 +125,173 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
           },
         );
       },
+    );
+  }
+}
+
+class _OrderSummaryStrip extends StatelessWidget {
+  final List<AdminOrder> orders;
+
+  const _OrderSummaryStrip({required this.orders});
+
+  @override
+  Widget build(BuildContext context) {
+    int countFor(String status) {
+      return orders
+          .where((order) => AdminOrderStatus.normalize(order.status) == status)
+          .length;
+    }
+
+    return _AdminSummaryGrid(
+      items: [
+        _AdminSummaryItem(
+          label: 'Total',
+          value: orders.length.toString(),
+          icon: Icons.receipt_long_outlined,
+          color: AppColors.primary,
+        ),
+        _AdminSummaryItem(
+          label: 'Pending',
+          value: countFor(AdminOrderStatus.pending).toString(),
+          icon: Icons.pending_actions_outlined,
+          color: const Color(0xFF2563EB),
+        ),
+        _AdminSummaryItem(
+          label: 'Packed',
+          value: countFor(AdminOrderStatus.packed).toString(),
+          icon: Icons.inventory_outlined,
+          color: const Color(0xFF7C3AED),
+        ),
+        _AdminSummaryItem(
+          label: 'Shipped',
+          value: countFor(AdminOrderStatus.shipped).toString(),
+          icon: Icons.local_shipping_outlined,
+          color: AppColors.warning,
+        ),
+        _AdminSummaryItem(
+          label: 'Delivered',
+          value: countFor(AdminOrderStatus.delivered).toString(),
+          icon: Icons.check_circle_outline,
+          color: AppColors.success,
+        ),
+      ],
+    );
+  }
+}
+
+class _AdminSummaryGrid extends StatelessWidget {
+  final List<_AdminSummaryItem> items;
+
+  const _AdminSummaryGrid({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= 860) {
+          return Row(
+            children: items
+                .map(
+                  (item) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: item == items.last ? 0 : 10,
+                      ),
+                      child: _AdminSummaryTile(item: item),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          );
+        }
+
+        return SizedBox(
+          height: 96,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            itemBuilder: (context, index) => SizedBox(
+              width: 176,
+              child: _AdminSummaryTile(item: items[index]),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AdminSummaryItem {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _AdminSummaryItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+}
+
+class _AdminSummaryTile extends StatelessWidget {
+  final _AdminSummaryItem item;
+
+  const _AdminSummaryTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: item.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(item.icon, color: item.color, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -212,6 +381,8 @@ class _OrderPanel extends StatelessWidget {
                 ),
         ),
         children: [
+          _OrderTimeline(status: order.status),
+          const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth >= 760;
@@ -236,6 +407,101 @@ class _OrderPanel extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OrderTimeline extends StatelessWidget {
+  final String status;
+
+  const _OrderTimeline({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final currentIndex = AdminOrderStatus.values.indexOf(
+      AdminOrderStatus.normalize(status),
+    );
+
+    return _DetailBox(
+      title: 'Delivery Timeline',
+      icon: Icons.timeline_outlined,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 620;
+            Widget stepFor(MapEntry<int, String> entry) {
+              final index = entry.key;
+              final label = entry.value;
+              final complete = index <= currentIndex;
+              final color = complete ? _statusColor(label) : AppColors.border;
+
+              final marker = Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: complete ? 0.14 : 1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: color),
+                ),
+                child: Icon(
+                  complete ? Icons.check : Icons.radio_button_unchecked,
+                  color: complete ? color : AppColors.textLight,
+                  size: 16,
+                ),
+              );
+              final text = Text(
+                label,
+                style: TextStyle(
+                  color: complete ? AppColors.textDark : AppColors.textLight,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              );
+
+              if (!isWide) {
+                return Row(children: [marker, const SizedBox(width: 10), text]);
+              }
+
+              return Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        marker,
+                        if (index != AdminOrderStatus.values.length - 1)
+                          Expanded(
+                            child: Container(
+                              height: 2,
+                              color: complete ? color : AppColors.border,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Align(alignment: Alignment.centerLeft, child: text),
+                  ],
+                ),
+              );
+            }
+
+            final steps = AdminOrderStatus.values.asMap().entries.map(stepFor);
+
+            if (isWide) {
+              return Row(children: steps.toList(growable: false));
+            }
+            return Column(
+              children: steps
+                  .map(
+                    (step) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: step,
+                    ),
+                  )
+                  .toList(growable: false),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -335,7 +601,7 @@ class _OrderItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'Qty ${item.quantity} | Rs ${item.price.toStringAsFixed(2)}',
+                  '${_itemMeta(item)} | Qty ${item.quantity} | Rs ${item.price.toStringAsFixed(2)}',
                   style: const TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
@@ -476,6 +742,8 @@ class _InlineError extends StatelessWidget {
 
 Color _statusColor(String status) {
   switch (AdminOrderStatus.normalize(status)) {
+    case AdminOrderStatus.packed:
+      return const Color(0xFF7C3AED);
     case AdminOrderStatus.shipped:
       return AppColors.warning;
     case AdminOrderStatus.delivered:
@@ -492,4 +760,12 @@ String _formatDate(DateTime? date) {
   final month = date.month.toString().padLeft(2, '0');
   final day = date.day.toString().padLeft(2, '0');
   return '${date.year}-$month-$day';
+}
+
+String _itemMeta(AdminOrderItem item) {
+  final parts = [
+    item.brand,
+    item.category,
+  ].where((part) => part.trim().isNotEmpty).toList(growable: false);
+  return parts.isEmpty ? 'Watch' : parts.join(' | ');
 }

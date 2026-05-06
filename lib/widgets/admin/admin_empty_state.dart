@@ -30,11 +30,13 @@ class AdminEmptyState extends StatelessWidget {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                    color: AppColors.accent.withValues(alpha: 0.24),
+                  ),
                 ),
-                child: Icon(icon, color: AppColors.textLight, size: 34),
+                child: Icon(icon, color: AppColors.accent, size: 34),
               ),
               const SizedBox(height: 18),
               Text(

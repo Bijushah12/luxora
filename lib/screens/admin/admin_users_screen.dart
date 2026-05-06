@@ -6,6 +6,7 @@ import '../../models/admin_user.dart';
 import '../../providers/admin_users_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/admin/admin_empty_state.dart';
+import '../../widgets/admin/admin_feedback.dart';
 import '../../widgets/admin/admin_section.dart';
 
 class AdminUsersScreen extends StatefulWidget {
@@ -53,6 +54,11 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
             return ListView(
               padding: const EdgeInsets.all(24),
               children: [
+                AdminFeedbackBanner(
+                  error: provider.errorMessage,
+                  success: provider.successMessage,
+                  onClose: provider.clearMessages,
+                ),
                 AdminSection(
                   title: 'Users',
                   subtitle:
@@ -60,6 +66,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   icon: Icons.people_outline,
                   child: Column(
                     children: [
+                      _UserSummaryStrip(users: users),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _searchController,
                         onChanged: (_) => setState(() {}),
@@ -114,6 +122,165 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           },
         );
       },
+    );
+  }
+}
+
+class _UserSummaryStrip extends StatelessWidget {
+  final List<AdminAppUser> users;
+
+  const _UserSummaryStrip({required this.users});
+
+  @override
+  Widget build(BuildContext context) {
+    final admins = users.where((user) => user.isAdmin).length;
+    final blocked = users.where((user) => user.isBlocked).length;
+    final customers = users.where((user) => !user.isAdmin).length;
+
+    return _AdminSummaryGrid(
+      items: [
+        _AdminSummaryItem(
+          label: 'Total Users',
+          value: users.length.toString(),
+          icon: Icons.people_outline,
+          color: AppColors.primary,
+        ),
+        _AdminSummaryItem(
+          label: 'Customers',
+          value: customers.toString(),
+          icon: Icons.person_outline,
+          color: const Color(0xFF2563EB),
+        ),
+        _AdminSummaryItem(
+          label: 'Admins',
+          value: admins.toString(),
+          icon: Icons.admin_panel_settings_outlined,
+          color: AppColors.accent,
+        ),
+        _AdminSummaryItem(
+          label: 'Blocked',
+          value: blocked.toString(),
+          icon: Icons.block_outlined,
+          color: AppColors.error,
+        ),
+      ],
+    );
+  }
+}
+
+class _AdminSummaryGrid extends StatelessWidget {
+  final List<_AdminSummaryItem> items;
+
+  const _AdminSummaryGrid({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= 760) {
+          return Row(
+            children: items
+                .map(
+                  (item) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: item == items.last ? 0 : 10,
+                      ),
+                      child: _AdminSummaryTile(item: item),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          );
+        }
+
+        return SizedBox(
+          height: 96,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            itemBuilder: (context, index) => SizedBox(
+              width: 176,
+              child: _AdminSummaryTile(item: items[index]),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AdminSummaryItem {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _AdminSummaryItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+}
+
+class _AdminSummaryTile extends StatelessWidget {
+  final _AdminSummaryItem item;
+
+  const _AdminSummaryTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: item.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(item.icon, color: item.color, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -187,6 +354,10 @@ class _UserActivityPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 _RoleBadge(user: user),
+                if (user.isBlocked) ...[
+                  const SizedBox(width: 8),
+                  const _BlockedBadge(),
+                ],
               ],
             ),
             subtitle: Padding(
@@ -220,7 +391,11 @@ class _UserActivityPanel extends StatelessWidget {
               if (snapshot.hasError)
                 _InlineError(message: snapshot.error.toString())
               else
-                _ActivityDetails(user: user, activity: activity),
+                _ActivityDetails(
+                  user: user,
+                  activity: activity,
+                  provider: provider,
+                ),
             ],
           ),
         );
@@ -260,6 +435,12 @@ class _ActivityChips extends StatelessWidget {
           label: 'Addresses',
           value: activity.addressCount.toString(),
         ),
+        if (activity.totalSpent >= 100000)
+          _MetricChip(
+            icon: Icons.workspace_premium_outlined,
+            label: 'VIP',
+            value: 'Rs ${activity.totalSpent.toStringAsFixed(0)}',
+          ),
       ],
     );
   }
@@ -307,8 +488,13 @@ class _MetricChip extends StatelessWidget {
 class _ActivityDetails extends StatelessWidget {
   final AdminAppUser user;
   final AdminUserActivity activity;
+  final AdminUsersProvider provider;
 
-  const _ActivityDetails({required this.user, required this.activity});
+  const _ActivityDetails({
+    required this.user,
+    required this.activity,
+    required this.provider,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -321,6 +507,12 @@ class _ActivityDetails extends StatelessWidget {
           _DetailRow(label: 'Phone', value: _fallback(user.phoneNumber)),
           _DetailRow(label: 'Joined', value: _formatDate(user.createdAt)),
           _DetailRow(label: 'Last login', value: _formatDate(user.lastLoginAt)),
+          _DetailRow(
+            label: 'Access',
+            value: user.isBlocked ? 'Blocked' : 'Active',
+          ),
+          const Divider(height: 20),
+          _UserAccessAction(user: user, provider: provider),
         ],
       ),
       _DetailBlock(
@@ -785,6 +977,61 @@ class _RoleBadge extends StatelessWidget {
   }
 }
 
+class _BlockedBadge extends StatelessWidget {
+  const _BlockedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Text(
+        'Blocked',
+        style: TextStyle(
+          color: AppColors.error,
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _UserAccessAction extends StatelessWidget {
+  final AdminAppUser user;
+  final AdminUsersProvider provider;
+
+  const _UserAccessAction({required this.user, required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final isUpdating = provider.isUpdating(user.id);
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: isUpdating
+            ? null
+            : () => provider.updateBlocked(user, !user.isBlocked),
+        icon: isUpdating
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(
+                user.isBlocked
+                    ? Icons.lock_open_outlined
+                    : Icons.block_outlined,
+              ),
+        label: Text(user.isBlocked ? 'Unblock user' : 'Block user'),
+      ),
+    );
+  }
+}
+
 class _InlineError extends StatelessWidget {
   final String message;
 
@@ -820,6 +1067,8 @@ class _InlineError extends StatelessWidget {
 
 Color _statusColor(String status) {
   switch (AdminOrderStatus.normalize(status)) {
+    case AdminOrderStatus.packed:
+      return const Color(0xFF7C3AED);
     case AdminOrderStatus.shipped:
       return AppColors.warning;
     case AdminOrderStatus.delivered:

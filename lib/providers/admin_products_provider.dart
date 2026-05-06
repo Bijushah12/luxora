@@ -29,21 +29,45 @@ class AdminProductsProvider extends ChangeNotifier {
 
   bool isDeleting(String productId) => _deletingProductIds.contains(productId);
 
-  Future<bool> saveProduct(AdminProduct product, {XFile? image}) async {
+  Future<bool> saveProduct(
+    AdminProduct product, {
+    XFile? image,
+    List<XFile> images = const [],
+  }) async {
     _isSaving = true;
     _errorMessage = null;
     _successMessage = null;
     notifyListeners();
 
-    AdminImageUpload? uploadedImage;
+    final uploadedImages = <AdminImageUpload>[];
 
     try {
       var productToSave = product;
-      if (image != null) {
-        uploadedImage = await _storageService.uploadProductImage(image);
+      final imagesToUpload = [
+        ...?(image == null ? null : [image]),
+        ...images,
+      ];
+
+      if (imagesToUpload.isNotEmpty) {
+        uploadedImages.addAll(
+          await _storageService.uploadProductImages(imagesToUpload),
+        );
+        final galleryUrls = _mergeStrings([
+          ...product.imageUrls,
+          product.imageUrl,
+          ...uploadedImages.map((upload) => upload.downloadUrl),
+        ]);
+        final galleryPaths = _mergeStrings([
+          ...product.imagePaths,
+          product.imagePath,
+          ...uploadedImages.map((upload) => upload.storagePath),
+        ]);
+
         productToSave = product.copyWith(
-          imageUrl: uploadedImage.downloadUrl,
-          imagePath: uploadedImage.storagePath,
+          imageUrl: galleryUrls.first,
+          imagePath: galleryPaths.isEmpty ? '' : galleryPaths.first,
+          imageUrls: galleryUrls,
+          imagePaths: galleryPaths,
         );
       }
 
@@ -55,21 +79,13 @@ class AdminProductsProvider extends ChangeNotifier {
         _successMessage = 'Product updated successfully.';
       }
 
-      if (uploadedImage != null &&
-          product.imagePath.isNotEmpty &&
-          product.imagePath != uploadedImage.storagePath) {
-        try {
-          await _storageService.deleteProductImage(product.imagePath);
-        } catch (error) {
-          debugPrint('Unable to clean old product image: $error');
-        }
-      }
-
       return true;
     } catch (error) {
-      if (uploadedImage != null) {
+      if (uploadedImages.isNotEmpty) {
         try {
-          await _storageService.deleteProductImage(uploadedImage.storagePath);
+          for (final upload in uploadedImages) {
+            await _storageService.deleteProductImage(upload.storagePath);
+          }
         } catch (cleanupError) {
           debugPrint('Unable to clean uploaded product image: $cleanupError');
         }
@@ -90,8 +106,9 @@ class AdminProductsProvider extends ChangeNotifier {
 
     try {
       await _firestoreService.deleteProduct(product.id);
-      if (product.imagePath.isNotEmpty) {
-        await _storageService.deleteProductImage(product.imagePath);
+      final paths = _mergeStrings([product.imagePath, ...product.imagePaths]);
+      for (final path in paths) {
+        await _storageService.deleteProductImage(path);
       }
       _successMessage = 'Product deleted successfully.';
       return true;
@@ -108,5 +125,19 @@ class AdminProductsProvider extends ChangeNotifier {
     _errorMessage = null;
     _successMessage = null;
     notifyListeners();
+  }
+
+  List<String> _mergeStrings(List<String> values) {
+    final seen = <String>{};
+    final merged = <String>[];
+    for (final value in values) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty || seen.contains(trimmed)) {
+        continue;
+      }
+      seen.add(trimmed);
+      merged.add(trimmed);
+    }
+    return merged;
   }
 }

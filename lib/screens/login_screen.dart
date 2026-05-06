@@ -77,7 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pushNamedAndRemoveUntil('/admin', (_) => false);
       } else {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
+          MaterialPageRoute(
+            settings: const RouteSettings(name: '/main'),
+            builder: (_) => const MainNavigation(),
+          ),
           (_) => false,
         );
       }

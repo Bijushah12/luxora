@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminOrderStatus {
   static const pending = 'Pending';
+  static const packed = 'Packed';
   static const shipped = 'Shipped';
   static const delivered = 'Delivered';
 
-  static const values = [pending, shipped, delivered];
+  static const values = [pending, packed, shipped, delivered];
 
   static String normalize(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -100,6 +101,8 @@ class AdminOrder {
 class AdminOrderItem {
   final String productId;
   final String name;
+  final String brand;
+  final String category;
   final String imageUrl;
   final double price;
   final int quantity;
@@ -107,6 +110,8 @@ class AdminOrderItem {
   const AdminOrderItem({
     required this.productId,
     required this.name,
+    required this.brand,
+    required this.category,
     required this.imageUrl,
     required this.price,
     required this.quantity,
@@ -129,8 +134,13 @@ class AdminOrderItem {
       name: _string(
         data['name'] ?? nestedProduct['name'] ?? nestedProduct['title'],
       ),
+      brand: _string(data['brand'] ?? nestedProduct['brand']),
+      category: _string(data['category'] ?? nestedProduct['category']),
       imageUrl: _string(
-        data['imageUrl'] ?? data['image'] ?? nestedProduct['image'],
+        data['imageUrl'] ??
+            data['image'] ??
+            nestedProduct['imageUrl'] ??
+            nestedProduct['image'],
       ),
       price: price,
       quantity: quantity <= 0 ? 1 : quantity,

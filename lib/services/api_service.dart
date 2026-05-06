@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import '../models/watch_model.dart';
 import 'unsplash_service.dart';
+import 'watch_content_service.dart';
 
 class ApiService {
   static const String baseUrl = "https://fakestoreapi.com/products";
@@ -56,14 +57,23 @@ class ApiService {
               : "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400";
           final brand = brands[random.nextInt(brands.length)];
           final price = (random.nextDouble() * 15000 + 5000);
+          final name = WatchContentService.generatedName(
+            brand: brand,
+            category: category,
+            index: i,
+          );
 
           watches.add(
             Watch(
               id: item['id'].toString(),
-              name: item['title'] ?? "Luxury Watch",
+              name: name,
               brand: brand,
               price: price,
-              description: item['description'] ?? "",
+              description: WatchContentService.generatedDescription(
+                name: name,
+                brand: brand,
+                category: category,
+              ),
               category: category,
               image: image,
             ),
@@ -89,15 +99,24 @@ class ApiService {
           .where((doc) => doc.data()['isActive'] != false)
           .map((doc) {
             final data = doc.data();
+            final name =
+                data['name'] as String? ?? data['title'] as String? ?? '';
+            final brand = data['brand'] as String? ?? 'Luxora';
+            final category = data['category'] as String? ?? 'Men';
             return Watch(
               id: doc.id,
-              name: data['name'] as String? ?? data['title'] as String? ?? '',
-              brand: data['brand'] as String? ?? 'Luxora',
+              name: name,
+              brand: brand,
               price: _toDouble(data['price']),
               image:
                   data['imageUrl'] as String? ?? data['image'] as String? ?? '',
-              description: data['description'] as String? ?? '',
-              category: data['category'] as String? ?? 'Men',
+              description: WatchContentService.descriptionFromRaw(
+                rawDescription: data['description'] as String? ?? '',
+                name: name,
+                brand: brand,
+                category: category,
+              ),
+              category: category,
             );
           })
           .where((watch) => watch.name.trim().isNotEmpty)

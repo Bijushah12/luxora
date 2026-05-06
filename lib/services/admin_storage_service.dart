@@ -38,6 +38,14 @@ class AdminStorageService {
     );
   }
 
+  Future<List<AdminImageUpload>> uploadProductImages(List<XFile> images) async {
+    final uploads = <AdminImageUpload>[];
+    for (final image in images) {
+      uploads.add(await uploadProductImage(image));
+    }
+    return uploads;
+  }
+
   Future<void> deleteProductImage(String storagePath) async {
     final path = storagePath.trim();
     if (path.isEmpty) {

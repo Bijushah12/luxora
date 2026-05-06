@@ -26,7 +26,8 @@ class WatchCard extends StatefulWidget {
   State<WatchCard> createState() => _WatchCardState();
 }
 
-class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMixin {
+class _WatchCardState extends State<WatchCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _liftController;
   late Animation<double> _liftAnimation;
 
@@ -121,7 +122,7 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
                     color: AppColors.shadow,
                     blurRadius: 12,
                     spreadRadius: 2,
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -150,7 +151,10 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
                           errorWidget: (context, url, error) => Container(
                             height: 140,
                             color: Colors.grey[300],
-                            child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
 
@@ -158,29 +162,41 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
                           right: 10,
                           top: 10,
                           child: Consumer<WishlistProvider>(
-                            builder: (context, wishlistProvider, child) => GestureDetector(
-                              onTap: () => wishlistProvider.toggleWishlist(widget.watch),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.card,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
+                            builder: (context, wishlistProvider, child) =>
+                                GestureDetector(
+                                  onTap: () => wishlistProvider.toggleWishlist(
+                                    widget.watch,
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.card,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                    padding: const EdgeInsets.all(6),
+                                    child: Icon(
+                                      wishlistProvider.isFavorite(widget.watch)
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      size: 18,
+                                      color:
+                                          wishlistProvider.isFavorite(
+                                            widget.watch,
+                                          )
+                                          ? AppColors.error
+                                          : AppColors.textLight,
+                                    ),
+                                  ),
                                 ),
-                                padding: const EdgeInsets.all(6),
-                                child: Icon(
-                                  wishlistProvider.isFavorite(widget.watch) ? Icons.favorite : Icons.favorite_border,
-                                  size: 18,
-                                  color: wishlistProvider.isFavorite(widget.watch) ? AppColors.error : AppColors.textLight,
-                                ),
-                              ),
-                            ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -235,10 +251,15 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
                                       fontSize: 14,
                                     ),
                                   ),
-                                  if (widget.watch.category.toLowerCase().contains('luxury')) ...[
+                                  if (widget.watch.category
+                                      .toLowerCase()
+                                      .contains('luxury')) ...[
                                     const SizedBox(height: 6),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.accent,
                                         borderRadius: BorderRadius.circular(10),
@@ -261,7 +282,10 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
 
                             GestureDetector(
                               onTap: () {
-                                Provider.of<CartProvider>(context, listen: false).addToCart(widget.watch);
+                                Provider.of<CartProvider>(
+                                  context,
+                                  listen: false,
+                                ).addToCart(widget.watch);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Added to cart!'),
@@ -288,12 +312,12 @@ class _WatchCardState extends State<WatchCard> with SingleTickerProviderStateMix
                                   ),
                                 ),
                               ),
-                            )
+                            ),
                           ],
-                        )
+                        ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

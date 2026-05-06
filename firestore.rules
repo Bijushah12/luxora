@@ -58,6 +58,72 @@ service cloud.firestore {
         || (signedIn() && request.auth.uid == userId);
     }
 
+    match /contact_messages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'name',
+          'email',
+          'phone',
+          'topic',
+          'subject',
+          'message',
+          'status',
+          'source',
+          'userId',
+          'userEmail',
+          'userDisplayName',
+          'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 1
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 120
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 8
+        && request.resource.data.phone.size() <= 24
+        && request.resource.data.topic is string
+        && request.resource.data.topic.size() > 1
+        && request.resource.data.topic.size() <= 40
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() > 1
+        && request.resource.data.subject.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 12
+        && request.resource.data.message.size() <= 1200
+        && request.resource.data.status == 'new'
+        && request.resource.data.source == 'about_us'
+        && request.resource.data.createdAt is timestamp;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /chatbot_queries/{queryId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'question',
+          'answer',
+          'intent',
+          'status',
+          'source',
+          'userId',
+          'userEmail',
+          'userDisplayName',
+          'createdAt'
+        ])
+        && request.resource.data.question is string
+        && request.resource.data.question.size() > 1
+        && request.resource.data.question.size() <= 500
+        && request.resource.data.answer is string
+        && request.resource.data.answer.size() > 1
+        && request.resource.data.answer.size() <= 1200
+        && request.resource.data.intent is string
+        && request.resource.data.intent.size() > 1
+        && request.resource.data.intent.size() <= 60
+        && request.resource.data.status == 'resolved'
+        && request.resource.data.source == 'about_us_assistant'
+        && request.resource.data.createdAt is timestamp;
+      allow read, update, delete: if isAdmin();
+    }
+
     match /users/{userId} {
       allow create: if signedIn() && request.auth.uid == userId;
       allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
@@ -75,6 +141,10 @@ service cloud.firestore {
       allow read: if signedIn()
         && (request.auth.uid == adminId || isAdmin());
       allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /admin_settings/{settingId} {
+      allow read, write: if isAdmin();
     }
   }
 }

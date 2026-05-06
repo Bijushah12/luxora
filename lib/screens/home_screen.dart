@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../services/api_service.dart';
 import '../services/unsplash_service.dart';
 import '../models/watch_model.dart';
-import '../providers/cart_provider.dart';
-import '../providers/wishlist_provider.dart';
 import '../widgets/watch_card.dart';
 import '../screens/search_screen.dart';
 import '../screens/men_screen.dart';
@@ -19,7 +16,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui' as ui;
 import '../screens/product_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -29,10 +25,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
   final TextEditingController _searchController = TextEditingController();
 
   List<Watch> apiWatches = [];
+  List<Watch> _newArrivals = [];
+  List<Watch> _trendingWatches = [];
   List<String> bannerImages = [];
   bool isLoading = true;
 
@@ -43,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack);
     _controller.forward();
     _loadData();
   }
@@ -56,10 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadData() async {
-    await Future.wait([
-      loadWatches(),
-      loadBanners(),
-    ]);
+    await Future.wait([loadWatches(), loadBanners()]);
   }
 
   Future<void> loadWatches() async {
@@ -68,10 +61,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (mounted) {
         setState(() {
           apiWatches = data;
+          _prepareHomeSections(data);
         });
       }
     } catch (e) {
-      print("API Error: $e");
+      debugPrint("API Error: $e");
     }
   }
 
@@ -87,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ]);
       }
     } catch (e) {
-      print("Banner load error: $e");
+      debugPrint("Banner load error: $e");
       bannerImages = [
         'https://images.unsplash.com/photo-1524592094714-0f0654e20314',
         'https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e',
@@ -102,49 +96,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  final List<String> bannerTitles = [
+    'Luxury Watches',
+    'Modern Style',
+    'Premium Collection',
+    'Elegant Design',
+  ];
 
-  final List<String> bannerTitles = ['Luxury Watches', 'Modern Style', 'Premium Collection', 'Elegant Design'];
+  void _prepareHomeSections(List<Watch> watches) {
+    if (watches.isEmpty) {
+      _newArrivals = [];
+      _trendingWatches = [];
+      return;
+    }
 
+    final len = watches.length;
+    final splitIndex = len <= 1 ? len : len ~/ 2;
+    _newArrivals = List<Watch>.from(watches.take(splitIndex));
+    _trendingWatches = List<Watch>.from(watches.skip(splitIndex));
+
+    if (_trendingWatches.isEmpty) {
+      _trendingWatches = List<Watch>.from(watches);
+    }
+  }
 
   List<Watch> get newArrivals {
     final len = apiWatches.length;
-    final firstHalf = List<Watch>.from(apiWatches.sublist(0, len ~/ 2));
-    firstHalf.shuffle();
-    return firstHalf;
+    if (_newArrivals.isEmpty && len > 0) {
+      _prepareHomeSections(apiWatches);
+    }
+    return _newArrivals;
   }
 
   List<Watch> get trendingWatches {
     final len = apiWatches.length;
-    final secondHalf = List<Watch>.from(apiWatches.sublist(len ~/ 2));
-    secondHalf.shuffle();
-    return secondHalf;
+    if (_trendingWatches.isEmpty && len > 0) {
+      _prepareHomeSections(apiWatches);
+    }
+    return _trendingWatches;
   }
 
   Widget _buildCategorySection() {
     final categoryItems = [
       {
         'title': 'All',
-        'image': 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=300&q=80',
       },
       {
         'title': 'Men',
-        'image': 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80',
       },
       {
         'title': 'Women',
-        'image': 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=300&q=80',
       },
       {
         'title': 'Luxury',
-        'image': 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=300&q=80',
       },
       {
         'title': 'Sports',
-        'image': 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=300&q=80',
       },
       {
         'title': 'Smart',
-        'image': 'https://images.unsplash.com/photo-1544117519-31a4b719223d?auto=format&fit=crop&w=300&q=80',
+        'image':
+            'https://images.unsplash.com/photo-1544117519-31a4b719223d?auto=format&fit=crop&w=300&q=80',
       },
     ];
 
@@ -200,11 +222,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: AppColors.surface,
-                              child: const Icon(Icons.watch, color: AppColors.textLight),
+                              child: const Icon(
+                                Icons.watch,
+                                color: AppColors.textLight,
+                              ),
                             ),
                             errorWidget: (context, url, error) => Container(
                               color: AppColors.surface,
-                              child: const Icon(Icons.watch_outlined, color: AppColors.textLight),
+                              child: const Icon(
+                                Icons.watch_outlined,
+                                color: AppColors.textLight,
+                              ),
                             ),
                           ),
                         ),
@@ -235,22 +263,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _openCategory(String category) {
     switch (category) {
       case 'Men':
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MenScreen()));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const MenScreen()));
         break;
       case 'Women':
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WomenScreen()));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const WomenScreen()));
         break;
       case 'Luxury':
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LuxuryScreen()));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const LuxuryScreen()));
         break;
       case 'Sports':
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SportsScreen()));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const SportsScreen()));
         break;
       case 'Smart':
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SmartScreen()));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const SmartScreen()));
         break;
       default:
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => CategoryScreen(category)));
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => CategoryScreen(category)));
     }
   }
 
@@ -295,7 +335,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               child: Column(
                 children: [
-                  Icon(item['icon'] as IconData, color: AppColors.accent, size: 24),
+                  Icon(
+                    item['icon'] as IconData,
+                    color: AppColors.accent,
+                    size: 24,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     item['title'] as String,
@@ -334,17 +378,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       {
         'name': 'Aarav Mehta',
         'initials': 'AM',
-        'review': 'Premium feel, neat packaging, and the watch looked even better in person.',
+        'review':
+            'Premium feel, neat packaging, and the watch looked even better in person.',
       },
       {
         'name': 'Nisha Kapoor',
         'initials': 'NK',
-        'review': 'Loved the collection. The product details made choosing the right watch easy.',
+        'review':
+            'Loved the collection. The product details made choosing the right watch easy.',
       },
       {
         'name': 'Rohan Shah',
         'initials': 'RS',
-        'review': 'Smooth experience from browsing to cart. Great designs for gifting.',
+        'review':
+            'Smooth experience from browsing to cart. Great designs for gifting.',
       },
     ];
 
@@ -425,7 +472,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Icon(Icons.star, color: AppColors.goldAccent, size: 16),
                         Icon(Icons.star, color: AppColors.goldAccent, size: 16),
                         Icon(Icons.star, color: AppColors.goldAccent, size: 16),
-                        Icon(Icons.star_half, color: AppColors.goldAccent, size: 16),
+                        Icon(
+                          Icons.star_half,
+                          color: AppColors.goldAccent,
+                          size: 16,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -477,7 +528,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.18),
+                    color: AppColors.accent.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
@@ -558,213 +609,314 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
       ),
       body: isLoading
-        ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
-        : RefreshIndicator(
-            onRefresh: _loadData,
-            child: CustomScrollView(
-              slivers: [
-                // Banner carousel
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: SizedBox(
-                        height: 200,
-                        child: CarouselSlider(
-                          options: CarouselOptions(
-                            height: 200,
-                            autoPlay: true,
-                            viewportFraction: 1,
-                            autoPlayInterval: const Duration(seconds: 3),
-                            enlargeCenterPage: false,
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: CustomScrollView(
+                slivers: [
+                  // Banner carousel
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: SizedBox(
+                          height: 200,
+                          child: CarouselSlider(
+                            options: CarouselOptions(
+                              height: 200,
+                              autoPlay: true,
+                              viewportFraction: 1,
+                              autoPlayInterval: const Duration(seconds: 3),
+                              enlargeCenterPage: false,
+                            ),
+                            items: List.generate(
+                              (bannerImages.length < 4
+                                  ? 4
+                                  : bannerImages.length),
+                              (index) => Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl:
+                                        bannerImages[index %
+                                            bannerImages.length],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    placeholder: (context, url) => Container(
+                                      color: Colors.grey[300],
+                                      child: const Icon(
+                                        Icons.watch,
+                                        color: Colors.grey,
+                                        size: 50,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          color: Colors.grey[300],
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                            color: Colors.grey,
+                                            size: 50,
+                                          ),
+                                        ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          Colors.black.withValues(alpha: 0.6),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 20,
+                                    left: 20,
+                                    child: Text(
+                                      bannerTitles[index % bannerTitles.length],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          items: List.generate(
-                            (bannerImages.length < 4 ? 4 : bannerImages.length),
-                            (index) => Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                CachedNetworkImage(
-                                  imageUrl: bannerImages[index % bannerImages.length],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  placeholder: (context, url) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.watch, color: Colors.grey, size: 50),
-                                  ),
-                                  errorWidget: (context, url, error) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 50),
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                      colors: [
-                                        Colors.black.withOpacity(0.6),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 20,
-                                  left: 20,
-                                  child: Text(
-                                    bannerTitles[index % bannerTitles.length],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Search bar
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+
+                        child: BackdropFilter(
+                          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.glassBg,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: AppColors.glassBorder),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.glassShadow,
+                                  blurRadius: 20,
+                                  offset: Offset(0, 8),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Search bar
-SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-
-                      child: BackdropFilter(
-                        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.glassBg,
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: AppColors.glassBorder),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.glassShadow,
-                                blurRadius: 20,
-                                offset: Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            readOnly: true,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const SearchScreen()),
-                              );
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Search luxury watches...',
-                              hintStyle: const TextStyle(color: AppColors.textLight),
-                              prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Categories
-                SliverToBoxAdapter(child: _buildCategorySection()),
-
-                // New Arrivals
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('New Arrivals', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textDark)),
-                            GestureDetector(
-                              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CategoryScreen('New Arrivals'))),
-                              child: const Text('View All', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 14)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          mainAxisExtent: WatchCard.cardHeight,
-                        ),
-                        itemCount: newArrivals.length > 4 ? 4 : newArrivals.length,
-                        itemBuilder: (context, index) => WatchCard(
-                          watch: newArrivals[index],
-                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProductScreen(newArrivals[index]))),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Trending Now
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Trending Now', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textDark)),
-                            Text('View All', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 14)),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: WatchCard.cardHeight,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: trendingWatches.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 16),
-                              child: SizedBox(
-                                width: 170,
-                                child: WatchCard(
-                                  watch: trendingWatches[index],
-                                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProductScreen(trendingWatches[index]))),
+                            child: TextField(
+                              controller: _searchController,
+                              readOnly: true,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const SearchScreen(),
+                                  ),
+                                );
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search luxury watches...',
+                                hintStyle: const TextStyle(
+                                  color: AppColors.textLight,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: AppColors.textLight,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 18,
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                          ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
 
-                SliverToBoxAdapter(child: _buildTrustSection()),
+                  // Categories
+                  SliverToBoxAdapter(child: _buildCategorySection()),
 
-                SliverToBoxAdapter(child: _buildReviewsSection()),
+                  // New Arrivals
+                  SliverToBoxAdapter(
+                    child: Builder(
+                      builder: (context) {
+                        final arrivals = newArrivals;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                24,
+                                20,
+                                12,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'New Arrivals',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const CategoryScreen(
+                                              'New Arrivals',
+                                            ),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'View All',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    mainAxisExtent: WatchCard.cardHeight,
+                                  ),
+                              itemCount: arrivals.length > 4
+                                  ? 4
+                                  : arrivals.length,
+                              itemBuilder: (context, index) {
+                                final watch = arrivals[index];
+                                return WatchCard(
+                                  watch: watch,
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => ProductScreen(watch),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
 
-                SliverToBoxAdapter(child: _buildOfferSection()),
+                  // Trending Now
+                  SliverToBoxAdapter(
+                    child: Builder(
+                      builder: (context) {
+                        final trending = trendingWatches;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Trending Now',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                  Text(
+                                    'View All',
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: WatchCard.cardHeight,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                itemCount: trending.length,
+                                itemBuilder: (context, index) {
+                                  final watch = trending[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 16),
+                                    child: SizedBox(
+                                      width: 170,
+                                      child: WatchCard(
+                                        watch: watch,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                ProductScreen(watch),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 80)),
-              ],
+                  SliverToBoxAdapter(child: _buildTrustSection()),
+
+                  SliverToBoxAdapter(child: _buildReviewsSection()),
+
+                  SliverToBoxAdapter(child: _buildOfferSection()),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                ],
+              ),
             ),
-          ),
     );
   }
 }

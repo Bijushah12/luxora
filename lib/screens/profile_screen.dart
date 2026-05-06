@@ -12,6 +12,7 @@ import '../providers/order_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../theme/app_colors.dart';
 import 'about_us_screen.dart';
+import 'contact_us_screen.dart';
 import 'address_screen.dart';
 import 'cart_screen.dart';
 import 'login_screen.dart';
@@ -340,10 +341,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                             _MenuItem(
                               icon: Icons.info_outline,
                               title: "About Luxora",
-                              subtitle: "Brand details and contact",
+                              subtitle: "Our story and standards",
                               color: const Color(0xFFEFF6FF),
                               iconColor: const Color(0xFF0284C7),
                               screen: const AboutUsScreen(),
+                            ),
+                            _MenuItem(
+                              icon: Icons.support_agent_outlined,
+                              title: "Contact Us",
+                              subtitle: "Questions, orders, and warranty help",
+                              color: const Color(0xFFFFF7E6),
+                              iconColor: AppColors.accent,
+                              screen: const ContactUsScreen(),
                             ),
                           ]),
                           const SizedBox(height: 24),

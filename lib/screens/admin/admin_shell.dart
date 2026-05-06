@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_products_screen.dart';
+import 'admin_settings_screen.dart';
 import 'admin_users_screen.dart';
 
 class AdminShell extends StatefulWidget {
@@ -21,23 +22,33 @@ class _AdminShellState extends State<AdminShell> {
   static const _destinations = [
     _AdminDestination(
       label: 'Dashboard',
+      subtitle: 'Live store pulse and smart sales insights',
       icon: Icons.dashboard_outlined,
       selectedIcon: Icons.dashboard,
     ),
     _AdminDestination(
       label: 'Products',
+      subtitle: 'Manage watch catalog, stock, images and tags',
       icon: Icons.watch_outlined,
       selectedIcon: Icons.watch,
     ),
     _AdminDestination(
       label: 'Orders',
+      subtitle: 'Track fulfillment, delivery flow and order details',
       icon: Icons.inventory_2_outlined,
       selectedIcon: Icons.inventory_2,
     ),
     _AdminDestination(
       label: 'Users',
+      subtitle: 'Customer activity, VIP value and access control',
       icon: Icons.people_outline,
       selectedIcon: Icons.people,
+    ),
+    _AdminDestination(
+      label: 'Settings',
+      subtitle: 'Storefront categories, brands, banners and discounts',
+      icon: Icons.settings_outlined,
+      selectedIcon: Icons.settings,
     ),
   ];
 
@@ -46,6 +57,7 @@ class _AdminShellState extends State<AdminShell> {
     AdminProductsScreen(),
     AdminOrdersScreen(),
     AdminUsersScreen(),
+    AdminSettingsScreen(),
   ];
 
   void _selectDestination(int index, {bool closeDrawer = false}) {
@@ -75,7 +87,7 @@ class _AdminShellState extends State<AdminShell> {
                 ),
                 Expanded(
                   child: _AdminPageFrame(
-                    title: _destinations[_selectedIndex].label,
+                    destination: _destinations[_selectedIndex],
                     child: _pages[_selectedIndex],
                   ),
                 ),
@@ -105,7 +117,7 @@ class _AdminShellState extends State<AdminShell> {
             ),
           ),
           body: _AdminPageFrame(
-            title: _destinations[_selectedIndex].label,
+            destination: _destinations[_selectedIndex],
             showTitle: false,
             child: _pages[_selectedIndex],
           ),
@@ -116,12 +128,12 @@ class _AdminShellState extends State<AdminShell> {
 }
 
 class _AdminPageFrame extends StatelessWidget {
-  final String title;
+  final _AdminDestination destination;
   final Widget child;
   final bool showTitle;
 
   const _AdminPageFrame({
-    required this.title,
+    required this.destination,
     required this.child,
     this.showTitle = true,
   });
@@ -134,7 +146,7 @@ class _AdminPageFrame extends StatelessWidget {
         children: [
           if (showTitle)
             Container(
-              height: 74,
+              height: 86,
               padding: const EdgeInsets.symmetric(horizontal: 28),
               decoration: const BoxDecoration(
                 color: AppColors.scaffoldBg,
@@ -144,7 +156,9 @@ class _AdminPageFrame extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      title,
+                      destination.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.textDark,
                         fontSize: 25,
@@ -152,13 +166,34 @@ class _AdminPageFrame extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Logout',
+                  const SizedBox(width: 18),
+                  _HeaderChip(
+                    icon: Icons.cloud_done_outlined,
+                    label: 'Live Firestore',
+                  ),
+                  const SizedBox(width: 10),
+                  _HeaderChip(icon: Icons.calendar_today, label: _todayLabel()),
+                  const SizedBox(width: 10),
+                  OutlinedButton.icon(
                     onPressed: () =>
                         context.read<AdminAuthProvider>().signOut(),
-                    icon: const Icon(Icons.logout),
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text('Logout'),
                   ),
                 ],
+              ),
+            ),
+          if (showTitle)
+            Container(
+              width: double.infinity,
+              color: AppColors.scaffoldBg,
+              padding: const EdgeInsets.fromLTRB(28, 0, 28, 12),
+              child: Text(
+                destination.subtitle,
+                style: const TextStyle(
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           Expanded(child: child),
@@ -166,6 +201,59 @@ class _AdminPageFrame extends StatelessWidget {
       ),
     );
   }
+}
+
+class _HeaderChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _HeaderChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.accent, size: 17),
+          const SizedBox(width: 7),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textDark,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _todayLabel() {
+  final now = DateTime.now();
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return '${months[now.month - 1]} ${now.day}, ${now.year}';
 }
 
 class _AdminSidebar extends StatelessWidget {
@@ -316,11 +404,13 @@ class _AdminSidebar extends StatelessWidget {
 
 class _AdminDestination {
   final String label;
+  final String subtitle;
   final IconData icon;
   final IconData selectedIcon;
 
   const _AdminDestination({
     required this.label,
+    required this.subtitle,
     required this.icon,
     required this.selectedIcon,
   });
