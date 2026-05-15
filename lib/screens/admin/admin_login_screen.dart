@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin_auth_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/luxora_logo.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -119,37 +120,15 @@ class _BrandPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            color: AppColors.accent.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.watch_outlined,
-            color: AppColors.accent,
-            size: 30,
-          ),
-        ),
-        const SizedBox(height: 28),
-        const Text(
-          'LUXORA',
-          style: TextStyle(
-            color: AppColors.textInverse,
-            fontSize: 34,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 4,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Admin Console',
-          style: TextStyle(
-            color: AppColors.accent,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
+        const LuxoraLogo(
+          markSize: 58,
+          titleSize: 30,
+          subtitle: 'Admin Console',
+          subtitleSize: 15,
+          markColor: AppColors.accent,
+          textColor: AppColors.textInverse,
+          subtitleColor: AppColors.accent,
+          crossAxisAlignment: CrossAxisAlignment.start,
         ),
         const SizedBox(height: 18),
         const Text(

@@ -124,6 +124,42 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'userName',
+          'userEmail',
+          'userPhotoUrl',
+          'rating',
+          'message',
+          'status',
+          'source',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() >= 1
+        && request.resource.data.userName.size() <= 80
+        && request.resource.data.userEmail is string
+        && request.resource.data.userEmail.size() <= 120
+        && request.resource.data.userPhotoUrl is string
+        && request.resource.data.userPhotoUrl.size() <= 500
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 3
+        && request.resource.data.message.size() <= 800
+        && request.resource.data.status == 'published'
+        && request.resource.data.source == 'reviews_screen'
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      allow update, delete: if isAdmin();
+    }
+
     match /users/{userId} {
       allow create: if signedIn() && request.auth.uid == userId;
       allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);

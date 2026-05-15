@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/admin_auth_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/luxora_logo.dart';
 import 'signup_screen.dart';
 import 'main_navigation.dart';
 
@@ -132,35 +133,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 80,
+                  top: 54,
                   left: 0,
                   right: 0,
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.stars_rounded,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "LUXORA",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
-                        ),
-                      ),
-                      Text(
-                        "PREMIUM WATCHES",
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          letterSpacing: 4,
-                        ),
-                      ),
-                    ],
+                  child: const LuxoraLogo(
+                    markSize: 54,
+                    titleSize: 28,
+                    subtitle: 'PREMIUM WATCHES',
+                    subtitleSize: 10,
+                    markColor: AppColors.accent,
+                    textColor: Colors.white,
+                    subtitleColor: Colors.white70,
                   ),
                 ),
               ],

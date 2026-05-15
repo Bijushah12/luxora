@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
+import '../models/review_model.dart';
 import '../services/api_service.dart';
 import '../services/unsplash_service.dart';
 import '../models/watch_model.dart';
+import '../providers/reviews_provider.dart';
 import '../widgets/watch_card.dart';
+import '../widgets/luxora_logo.dart';
 import '../screens/search_screen.dart';
 import '../screens/men_screen.dart';
 import '../screens/women_screen.dart';
@@ -374,26 +378,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildReviewsSection() {
-    final reviews = [
-      {
-        'name': 'Aarav Mehta',
-        'initials': 'AM',
-        'review':
-            'Premium feel, neat packaging, and the watch looked even better in person.',
-      },
-      {
-        'name': 'Nisha Kapoor',
-        'initials': 'NK',
-        'review':
-            'Loved the collection. The product details made choosing the right watch easy.',
-      },
-      {
-        'name': 'Rohan Shah',
-        'initials': 'RS',
-        'review':
-            'Smooth experience from browsing to cart. Great designs for gifting.',
-      },
-    ];
+    final reviewsProvider = context.watch<ReviewsProvider>();
+    final reviews = reviewsProvider.reviews.take(5).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,94 +395,132 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        SizedBox(
-          height: 178,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: reviews.length,
-            itemBuilder: (context, index) {
-              final review = reviews[index];
-              return Container(
-                width: 280,
-                margin: const EdgeInsets.only(right: 14),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppColors.shadow,
-                      blurRadius: 12,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: AppColors.primary,
-                          child: Text(
-                            review['initials'] as String,
-                            style: const TextStyle(
-                              color: AppColors.textInverse,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            review['name'] as String,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.textDark,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Row(
-                      children: [
-                        Icon(Icons.star, color: AppColors.goldAccent, size: 16),
-                        Icon(Icons.star, color: AppColors.goldAccent, size: 16),
-                        Icon(Icons.star, color: AppColors.goldAccent, size: 16),
-                        Icon(Icons.star, color: AppColors.goldAccent, size: 16),
-                        Icon(
-                          Icons.star_half,
-                          color: AppColors.goldAccent,
-                          size: 16,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      review['review'] as String,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textLight,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+        if (reviewsProvider.isLoading && reviews.isEmpty)
+          const SizedBox(
+            height: 128,
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            ),
+          )
+        else if (reviews.isEmpty)
+          _buildHomeReviewsEmptyState()
+        else
+          SizedBox(
+            height: 178,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                return _buildHomeReviewCard(reviews[index]);
+              },
+            ),
           ),
-        ),
       ],
+    );
+  }
+
+  Widget _buildHomeReviewCard(AppReview review) {
+    final imageUrl = review.userPhotoUrl.trim();
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primary,
+                backgroundImage: imageUrl.isEmpty
+                    ? null
+                    : NetworkImage(imageUrl),
+                child: imageUrl.isEmpty
+                    ? Text(
+                        review.initials,
+                        style: const TextStyle(
+                          color: AppColors.textInverse,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  review.userName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(5, (index) {
+              return Icon(
+                index < review.rating
+                    ? Icons.star_rounded
+                    : Icons.star_border_rounded,
+                color: AppColors.goldAccent,
+                size: 16,
+              );
+            }),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            review.message,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textLight,
+              fontSize: 13,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHomeReviewsEmptyState() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: const Text(
+        'Customer feedback will appear here after the first review.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: AppColors.textLight,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 
@@ -588,22 +612,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         toolbarHeight: 70,
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.emoji_events, color: AppColors.accent, size: 24),
-
-            const SizedBox(width: 8),
-            const Text(
-              'LUXORA',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-                color: AppColors.textDark,
-              ),
-            ),
-          ],
+        title: const LuxoraLogo(
+          direction: Axis.horizontal,
+          markSize: 28,
+          titleSize: 22,
+          markColor: AppColors.accent,
+          textColor: AppColors.textDark,
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,

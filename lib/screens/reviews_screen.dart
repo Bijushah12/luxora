@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/review_model.dart';
+import '../providers/reviews_provider.dart';
 import '../theme/app_colors.dart';
 
 class ReviewsScreen extends StatefulWidget {
@@ -10,86 +14,65 @@ class ReviewsScreen extends StatefulWidget {
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
   final TextEditingController _reviewController = TextEditingController();
-  double _rating = 0;
+  final FocusNode _reviewFocusNode = FocusNode();
+  int _rating = 0;
 
-  final List<Map<String, dynamic>> _reviews = [
-    {
-      'name': 'Rahul Sharma',
-      'rating': 5,
-      'date': '2 days ago',
-      'review': 'Absolutely stunning timepiece! The craftsmanship is exceptional and the gold finish looks even better in person. Highly recommend Luxora for luxury watches.',
-      'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    },
-    {
-      'name': 'Priya Patel',
-      'rating': 4,
-      'date': '1 week ago',
-      'review': 'Beautiful watch with premium build quality. Delivery was fast and packaging was luxurious. Would love to see more strap options in the future.',
-      'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-    },
-    {
-      'name': 'Amit Kumar',
-      'rating': 5,
-      'date': '2 weeks ago',
-      'review': 'Best investment I have made this year. The automatic movement is smooth and the watch keeps perfect time. The customer service team was very helpful too.',
-      'avatar': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-    },
-    {
-      'name': 'Sneha Gupta',
-      'rating': 5,
-      'date': '3 weeks ago',
-      'review': 'Got this as a gift for my husband and he absolutely loves it! The unboxing experience was premium and the watch exceeded our expectations.',
-      'avatar': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
-    },
-    {
-      'name': 'Vikram Rao',
-      'rating': 4,
-      'date': '1 month ago',
-      'review': 'Great collection of luxury watches. The smart watch category has some amazing options. Will definitely be purchasing again.',
-      'avatar': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-    },
-  ];
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    _reviewFocusNode.dispose();
+    super.dispose();
+  }
 
-  void _submitReview() {
-    if (_reviewController.text.trim().isEmpty || _rating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add a rating and review text'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+  Future<void> _submitReview() async {
+    final message = _reviewController.text.trim();
+    if (_rating == 0 || message.isEmpty) {
+      _showSnackBar('Please add a rating and review text.', isError: true);
+      return;
+    }
+    if (message.length < 3) {
+      _showSnackBar('Please add a little more detail.', isError: true);
       return;
     }
 
-    setState(() {
-      _reviews.insert(0, {
-        'name': 'You',
-        'rating': _rating.toInt(),
-        'date': 'Just now',
-        'review': _reviewController.text.trim(),
-        'avatar': null,
-      });
-      _reviewController.clear();
-      _rating = 0;
-    });
+    final success = await context.read<ReviewsProvider>().submitReview(
+      rating: _rating,
+      message: message,
+    );
 
+    if (!mounted) {
+      return;
+    }
+
+    if (success) {
+      _reviewController.clear();
+      _reviewFocusNode.unfocus();
+      setState(() => _rating = 0);
+      _showSnackBar('Review submitted successfully.');
+    } else {
+      final error = context.read<ReviewsProvider>().errorMessage;
+      _showSnackBar(error ?? 'Unable to submit review.', isError: true);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Review submitted successfully!'),
-        backgroundColor: AppColors.accent,
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: isError ? AppColors.error : AppColors.success,
       ),
     );
   }
 
   @override
-  void dispose() {
-    _reviewController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final reviewsProvider = context.watch<ReviewsProvider>();
+    final reviews = reviewsProvider.reviews;
+    final summary = reviewsProvider.summary;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
@@ -104,211 +87,227 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // Rating Summary Header
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.surface,
-                  AppColors.background,
-                ],
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+      body: SafeArea(
+        child: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildSummaryCard(
+                summary: summary,
+                isLoading: reviewsProvider.isLoading,
               ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            if (reviewsProvider.errorMessage != null ||
+                reviewsProvider.successMessage != null)
+              SliverToBoxAdapter(
+                child: _buildFeedbackBanner(
+                  error: reviewsProvider.errorMessage,
+                  success: reviewsProvider.successMessage,
+                  onClose: reviewsProvider.clearMessages,
+                ),
+              ),
+            SliverToBoxAdapter(
+              child: _buildReviewComposer(reviewsProvider.isSubmitting),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+                child: Row(
                   children: [
-                    const Text(
-                      '4.8',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                    const Expanded(
+                      child: Text(
+                        'Latest Reviews',
+                        style: TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: List.generate(5, (index) {
-                            return Icon(
-                              index < 4 ? Icons.star : Icons.star_half,
-                              color: AppColors.accent,
-                              size: 22,
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_reviews.length} reviews',
-                          style: const TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '${summary.totalReviews}',
+                      style: const TextStyle(
+                        color: AppColors.accent,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Rating bars
-                ...[5, 4, 3, 2, 1].map((star) {
-                  final count = _reviews.where((r) => r['rating'] == star).length;
-                  final percentage = _reviews.isEmpty ? 0.0 : count / _reviews.length;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      children: [
-                        Text(
-                          '$star',
-                          style: const TextStyle(
-                            color: AppColors.textDark,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.star, color: AppColors.accent, size: 12),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: percentage,
-                              backgroundColor: AppColors.divider,
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
-                              minHeight: 6,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
-
-          // Reviews List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _reviews.length,
-              itemBuilder: (context, index) {
-                final review = _reviews[index];
-                return _buildReviewCard(review);
-              },
-            ),
-          ),
-
-          // Write Review Section
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
             ),
-            child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            if (reviewsProvider.isLoading && reviews.isEmpty)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                ),
+              )
+            else if (reviews.isEmpty)
+              SliverToBoxAdapter(child: _buildEmptyState())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildReviewCard(reviews[index]),
+                    );
+                  }, childCount: reviews.length),
+                ),
+              ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.viewInsetsOf(context).bottom + 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard({
+    required ReviewSummary summary,
+    required bool isLoading,
+  }) {
+    final reviewLabel = summary.totalReviews == 1 ? 'review' : 'reviews';
+    final averageText = summary.totalReviews == 0
+        ? '0.0'
+        : summary.averageRating.toStringAsFixed(1);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.card, AppColors.surface],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 16,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxWidth < 340;
+              final scoreBlock = Column(
+                crossAxisAlignment: isCompact
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Write a Review',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Text(
+                    averageText,
+                    style: const TextStyle(
+                      fontSize: 46,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
                       color: AppColors.textDark,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _rating = index + 1;
-                          });
-                        },
-                        child: Icon(
-                          index < _rating ? Icons.star : Icons.star_border,
-                          color: AppColors.accent,
-                          size: 32,
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _reviewController,
-                    maxLines: 2,
-                    style: const TextStyle(color: AppColors.textDark),
-                    decoration: InputDecoration(
-                      hintText: 'Share your experience...',
-                      hintStyle: const TextStyle(color: AppColors.textLight),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: AppColors.accent,
-                          width: 1.5,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _submitReview,
-                      child: const Text(
-                        'Submit Review',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  const SizedBox(height: 6),
+                  _buildStars(rating: summary.averageRating, size: 19),
+                  const SizedBox(height: 5),
+                  Text(
+                    isLoading && summary.totalReviews == 0
+                        ? 'Loading reviews'
+                        : '${summary.totalReviews} $reviewLabel',
+                    style: const TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
+              );
+
+              final bars = Column(
+                children: [5, 4, 3, 2, 1]
+                    .map((star) => _buildRatingBar(star, summary))
+                    .toList(growable: false),
+              );
+
+              if (isCompact) {
+                return Column(
+                  children: [scoreBlock, const SizedBox(height: 18), bars],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  scoreBlock,
+                  const SizedBox(width: 24),
+                  Expanded(child: bars),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingBar(int star, ReviewSummary summary) {
+    final count = summary.ratingCounts[star] ?? 0;
+    final percentage = summary.totalReviews == 0
+        ? 0.0
+        : count / summary.totalReviews;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Row(
+              children: [
+                Text(
+                  '$star',
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: 3),
+                const Icon(Icons.star, color: AppColors.accent, size: 12),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: percentage,
+                backgroundColor: AppColors.divider,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.accent,
+                ),
+                minHeight: 7,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 24,
+            child: Text(
+              '$count',
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: AppColors.textLight,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -317,13 +316,190 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  Widget _buildReviewCard(Map<String, dynamic> review) {
+  Widget _buildFeedbackBanner({
+    required String? error,
+    required String? success,
+    required VoidCallback onClose,
+  }) {
+    final message = error ?? success;
+    if (message == null || message.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final isError = error != null;
+    final color = isError ? AppColors.error : AppColors.success;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: color,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: color, fontWeight: FontWeight.w800),
+            ),
+          ),
+          IconButton(
+            onPressed: onClose,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(Icons.close, color: color, size: 18),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewComposer(bool isSubmitting) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 14,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.rate_review_outlined, color: AppColors.accent),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Share your feedback',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Center(child: _buildInteractiveStars(isSubmitting)),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _reviewController,
+            focusNode: _reviewFocusNode,
+            enabled: !isSubmitting,
+            minLines: 2,
+            maxLines: 4,
+            maxLength: 800,
+            style: const TextStyle(color: AppColors.textDark),
+            decoration: InputDecoration(
+              hintText: 'Share your experience with Luxora...',
+              hintStyle: const TextStyle(color: AppColors.textLight),
+              counterStyle: const TextStyle(
+                color: AppColors.textLight,
+                fontSize: 11,
+              ),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(
+                  color: AppColors.accent,
+                  width: 1.5,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: isSubmitting ? null : _submitReview,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textInverse,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.textInverse,
+                      ),
+                    )
+                  : const Icon(Icons.send_outlined),
+              label: Text(
+                isSubmitting ? 'Submitting...' : 'Submit Review',
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractiveStars(bool isSubmitting) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        final selected = index < _rating;
+        return IconButton(
+          tooltip: '${index + 1} star',
+          onPressed: isSubmitting
+              ? null
+              : () {
+                  setState(() => _rating = index + 1);
+                },
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            selected ? Icons.star_rounded : Icons.star_border_rounded,
+            color: AppColors.accent,
+            size: 34,
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildReviewCard(AppReview review) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -331,62 +507,151 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundImage: review['avatar'] != null
-                    ? NetworkImage(review['avatar'])
-                    : null,
-                backgroundColor: AppColors.accent.withOpacity(0.2),
-                child: review['avatar'] == null
-                    ? const Icon(Icons.person, color: AppColors.accent)
-                    : null,
-              ),
+              _buildAvatar(review),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review['name'],
+                      review.userName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w800,
                         fontSize: 15,
                         color: AppColors.textDark,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
-                      review['date'],
+                      _relativeDate(review.createdAt),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textLight,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-              Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < review['rating'] ? Icons.star : Icons.star_border,
-                    color: AppColors.accent,
-                    size: 16,
-                  );
-                }),
-              ),
+              const SizedBox(width: 8),
+              _buildStars(rating: review.rating.toDouble(), size: 16),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            review['review'],
+            review.message,
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textLight,
-              height: 1.5,
+              height: 1.45,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildAvatar(AppReview review) {
+    final imageUrl = review.userPhotoUrl.trim();
+    return CircleAvatar(
+      radius: 23,
+      backgroundColor: AppColors.accent.withValues(alpha: 0.16),
+      backgroundImage: imageUrl.isEmpty ? null : NetworkImage(imageUrl),
+      child: imageUrl.isEmpty
+          ? Text(
+              review.initials,
+              style: const TextStyle(
+                color: AppColors.accent,
+                fontWeight: FontWeight.w900,
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildStars({required double rating, required double size}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        final starValue = index + 1;
+        final icon = rating >= starValue
+            ? Icons.star_rounded
+            : rating >= starValue - 0.5
+            ? Icons.star_half_rounded
+            : Icons.star_border_rounded;
+        return Icon(icon, color: AppColors.accent, size: size);
+      }),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.reviews_outlined, color: AppColors.accent, size: 38),
+          SizedBox(height: 12),
+          Text(
+            'No reviews yet',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'Be the first to share your Luxora experience.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _relativeDate(DateTime? date) {
+    if (date == null) {
+      return 'Just now';
+    }
+
+    final difference = DateTime.now().difference(date);
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    }
+    if (difference.inHours < 1) {
+      return _plural(difference.inMinutes, 'minute');
+    }
+    if (difference.inDays < 1) {
+      return _plural(difference.inHours, 'hour');
+    }
+    if (difference.inDays < 7) {
+      return _plural(difference.inDays, 'day');
+    }
+    if (difference.inDays < 30) {
+      return _plural((difference.inDays / 7).floor(), 'week');
+    }
+    if (difference.inDays < 365) {
+      return _plural((difference.inDays / 30).floor(), 'month');
+    }
+    return _plural((difference.inDays / 365).floor(), 'year');
+  }
+
+  String _plural(int value, String unit) {
+    return '$value $unit${value == 1 ? '' : 's'} ago';
   }
 }

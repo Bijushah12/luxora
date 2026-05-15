@@ -3,7 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin_auth_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/luxora_logo.dart';
+import 'admin_analytics_screen.dart';
+import 'admin_coupons_screen.dart';
 import 'admin_dashboard_screen.dart';
+import 'admin_notifications_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_products_screen.dart';
 import 'admin_settings_screen.dart';
@@ -22,7 +26,7 @@ class _AdminShellState extends State<AdminShell> {
   static const _destinations = [
     _AdminDestination(
       label: 'Dashboard',
-      subtitle: 'Live store pulse and smart sales insights',
+      subtitle: 'Luxury storefront pulse and AI sales insights',
       icon: Icons.dashboard_outlined,
       selectedIcon: Icons.dashboard,
     ),
@@ -39,10 +43,28 @@ class _AdminShellState extends State<AdminShell> {
       selectedIcon: Icons.inventory_2,
     ),
     _AdminDestination(
-      label: 'Users',
+      label: 'Customers',
       subtitle: 'Customer activity, VIP value and access control',
       icon: Icons.people_outline,
       selectedIcon: Icons.people,
+    ),
+    _AdminDestination(
+      label: 'Analytics',
+      subtitle: 'fl_chart revenue graphs, category performance and insights',
+      icon: Icons.auto_graph_outlined,
+      selectedIcon: Icons.auto_graph,
+    ),
+    _AdminDestination(
+      label: 'Coupons',
+      subtitle: 'Create offers, limits, expiry and premium campaign coupons',
+      icon: Icons.confirmation_number_outlined,
+      selectedIcon: Icons.confirmation_number,
+    ),
+    _AdminDestination(
+      label: 'Notifications',
+      subtitle: 'Queue push campaigns and customer engagement messages',
+      icon: Icons.notifications_active_outlined,
+      selectedIcon: Icons.notifications_active,
     ),
     _AdminDestination(
       label: 'Settings',
@@ -57,6 +79,9 @@ class _AdminShellState extends State<AdminShell> {
     AdminProductsScreen(),
     AdminOrdersScreen(),
     AdminUsersScreen(),
+    AdminAnalyticsScreen(),
+    AdminCouponsScreen(),
+    AdminNotificationsScreen(),
     AdminSettingsScreen(),
   ];
 
@@ -75,11 +100,11 @@ class _AdminShellState extends State<AdminShell> {
 
         if (isWide) {
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.primary,
             body: Row(
               children: [
                 SizedBox(
-                  width: 268,
+                  width: 282,
                   child: _AdminSidebar(
                     selectedIndex: _selectedIndex,
                     onSelected: _selectDestination,
@@ -97,15 +122,19 @@ class _AdminShellState extends State<AdminShell> {
         }
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.primary,
           appBar: AppBar(
-            backgroundColor: AppColors.scaffoldBg,
-            title: Text(_destinations[_selectedIndex].label),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.textInverse,
+            title: Text(
+              _destinations[_selectedIndex].label,
+              style: const TextStyle(color: AppColors.textInverse),
+            ),
             actions: [
               IconButton(
                 tooltip: 'Logout',
                 onPressed: () => context.read<AdminAuthProvider>().signOut(),
-                icon: const Icon(Icons.logout),
+                icon: const Icon(Icons.logout, color: AppColors.accent),
               ),
             ],
           ),
@@ -148,9 +177,13 @@ class _AdminPageFrame extends StatelessWidget {
             Container(
               height: 86,
               padding: const EdgeInsets.symmetric(horizontal: 28),
-              decoration: const BoxDecoration(
-                color: AppColors.scaffoldBg,
-                border: Border(bottom: BorderSide(color: AppColors.border)),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                ),
               ),
               child: Row(
                 children: [
@@ -160,7 +193,7 @@ class _AdminPageFrame extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: AppColors.textDark,
+                        color: AppColors.textInverse,
                         fontSize: 25,
                         fontWeight: FontWeight.w900,
                       ),
@@ -186,12 +219,12 @@ class _AdminPageFrame extends StatelessWidget {
           if (showTitle)
             Container(
               width: double.infinity,
-              color: AppColors.scaffoldBg,
+              color: AppColors.primary,
               padding: const EdgeInsets.fromLTRB(28, 0, 28, 12),
               child: Text(
                 destination.subtitle,
                 style: const TextStyle(
-                  color: AppColors.textLight,
+                  color: Color(0xFFD1D5DB),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -215,8 +248,8 @@ class _HeaderChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -267,53 +300,25 @@ class _AdminSidebar extends StatelessWidget {
     final user = context.watch<AdminAuthProvider>().user;
 
     return Container(
-      color: AppColors.primary,
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        border: Border(right: BorderSide(color: Color(0xFF2A2A2A))),
+      ),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.watch_outlined,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'LUXORA',
-                          style: TextStyle(
-                            color: AppColors.textInverse,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Admin',
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+              child: const LuxoraLogo(
+                direction: Axis.horizontal,
+                markSize: 36,
+                titleSize: 16,
+                subtitle: 'Premium Admin',
+                subtitleSize: 11,
+                markColor: AppColors.accent,
+                textColor: AppColors.textInverse,
+                subtitleColor: AppColors.accent,
               ),
             ),
             const Divider(color: Color(0xFF2A2A2A), height: 1),
@@ -326,35 +331,10 @@ class _AdminSidebar extends StatelessWidget {
                   final destination = _AdminShellState._destinations[index];
                   final selected = selectedIndex == index;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: ListTile(
-                      selected: selected,
-                      selectedTileColor: AppColors.accent.withValues(
-                        alpha: 0.16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      leading: Icon(
-                        selected ? destination.selectedIcon : destination.icon,
-                        color: selected
-                            ? AppColors.accent
-                            : const Color(0xFFD1D5DB),
-                      ),
-                      title: Text(
-                        destination.label,
-                        style: TextStyle(
-                          color: selected
-                              ? AppColors.textInverse
-                              : const Color(0xFFD1D5DB),
-                          fontWeight: selected
-                              ? FontWeight.w900
-                              : FontWeight.w700,
-                        ),
-                      ),
-                      onTap: () => onSelected(index),
-                    ),
+                  return _SidebarTile(
+                    destination: destination,
+                    selected: selected,
+                    onTap: () => onSelected(index),
                   );
                 },
               ),
@@ -364,8 +344,11 @@ class _AdminSidebar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -396,6 +379,79 @@ class _AdminSidebar extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarTile extends StatefulWidget {
+  final _AdminDestination destination;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SidebarTile({
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  State<_SidebarTile> createState() => _SidebarTileState();
+}
+
+class _SidebarTileState extends State<_SidebarTile> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = widget.selected || _hovering;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        margin: const EdgeInsets.only(bottom: 7),
+        decoration: BoxDecoration(
+          color: widget.selected
+              ? AppColors.accent.withValues(alpha: 0.16)
+              : _hovering
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: widget.selected
+                ? AppColors.accent.withValues(alpha: 0.28)
+                : Colors.transparent,
+          ),
+        ),
+        child: ListTile(
+          dense: true,
+          minLeadingWidth: 24,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          leading: Icon(
+            widget.selected
+                ? widget.destination.selectedIcon
+                : widget.destination.icon,
+            color: active ? AppColors.accent : const Color(0xFFD1D5DB),
+          ),
+          title: Text(
+            widget.destination.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: active ? AppColors.textInverse : const Color(0xFFD1D5DB),
+              fontWeight: widget.selected ? FontWeight.w900 : FontWeight.w700,
+            ),
+          ),
+          onTap: widget.onTap,
         ),
       ),
     );

@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/admin_broadcast_notification.dart';
 import '../models/admin_order.dart';
 import '../models/admin_product.dart';
+import '../models/admin_coupon.dart';
 import '../models/admin_storefront_settings.dart';
 import '../models/admin_user.dart';
 
@@ -130,6 +132,12 @@ class AdminFirestoreService {
   CollectionReference<Map<String, dynamic>> get _notifications =>
       _firestore.collection('notifications');
 
+  CollectionReference<Map<String, dynamic>> get _coupons =>
+      _firestore.collection('coupons');
+
+  CollectionReference<Map<String, dynamic>> get _adminNotifications =>
+      _firestore.collection('admin_notifications');
+
   DocumentReference<Map<String, dynamic>> get _storefrontSettings =>
       _firestore.collection('admin_settings').doc('storefront');
 
@@ -166,6 +174,75 @@ class AdminFirestoreService {
 
   Future<void> deleteProduct(String productId) {
     return _products.doc(productId).delete();
+  }
+
+  Stream<List<AdminCoupon>> couponsStream() {
+    return _coupons.snapshots().map((snapshot) {
+      final coupons = snapshot.docs
+          .map(AdminCoupon.fromFirestore)
+          .toList(growable: false);
+      coupons.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+      return coupons;
+    });
+  }
+
+  Future<void> saveCoupon(AdminCoupon coupon) {
+    final data = coupon.toFirestore();
+    if (coupon.id.isEmpty) {
+      data['createdAt'] = FieldValue.serverTimestamp();
+      return _coupons.add(data);
+    }
+    return _coupons.doc(coupon.id).set(data, SetOptions(merge: true));
+  }
+
+  Future<void> deleteCoupon(String couponId) {
+    return _coupons.doc(couponId).delete();
+  }
+
+  Stream<List<AdminBroadcastNotification>> adminNotificationsStream() {
+    return _adminNotifications.snapshots().map((snapshot) {
+      final notifications = snapshot.docs
+          .map(AdminBroadcastNotification.fromFirestore)
+          .toList(growable: false);
+      notifications.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+      return notifications;
+    });
+  }
+
+  Future<void> saveAdminNotification(AdminBroadcastNotification notification) {
+    final data = notification.toFirestore();
+    if (notification.id.isEmpty) {
+      data['createdAt'] = FieldValue.serverTimestamp();
+      data['status'] = notification.isScheduled ? 'scheduled' : 'draft';
+      return _adminNotifications.add(data);
+    }
+    return _adminNotifications
+        .doc(notification.id)
+        .set(data, SetOptions(merge: true));
+  }
+
+  Future<void> deleteAdminNotification(String notificationId) {
+    return _adminNotifications.doc(notificationId).delete();
+  }
+
+  Future<void> sendAdminNotification(AdminBroadcastNotification notification) {
+    final data = notification.toFirestore()
+      ..addAll({'status': 'queued', 'queuedAt': FieldValue.serverTimestamp()});
+    if (notification.id.isEmpty) {
+      data['createdAt'] = FieldValue.serverTimestamp();
+      return _adminNotifications.add(data);
+    }
+    return _adminNotifications
+        .doc(notification.id)
+        .set(data, SetOptions(merge: true));
   }
 
   Stream<List<AdminOrder>> ordersStream() {

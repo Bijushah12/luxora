@@ -11,10 +11,13 @@ import 'providers/wishlist_provider.dart';
 import 'providers/order_provider.dart';
 import 'providers/admin_auth_provider.dart';
 import 'providers/admin_dashboard_provider.dart';
+import 'providers/admin_coupons_provider.dart';
+import 'providers/admin_notifications_provider.dart';
 import 'providers/admin_orders_provider.dart';
 import 'providers/admin_products_provider.dart';
 import 'providers/admin_settings_provider.dart';
 import 'providers/admin_users_provider.dart';
+import 'providers/reviews_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/admin_gate.dart';
 import 'screens/splash_screen.dart';
@@ -44,6 +47,9 @@ class LuxoraApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminOrdersProvider()),
         ChangeNotifierProvider(create: (_) => AdminUsersProvider()),
         ChangeNotifierProvider(create: (_) => AdminSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => AdminCouponsProvider()),
+        ChangeNotifierProvider(create: (_) => AdminNotificationsProvider()),
+        ChangeNotifierProvider(create: (_) => ReviewsProvider()),
         ChangeNotifierProvider(
           create: (_) => AddressProvider()..loadAddresses(),
         ),
