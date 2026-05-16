@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../models/app_address.dart';
 import '../providers/address_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/coupons_provider.dart';
 import '../theme/app_colors.dart';
+import 'offers_screen.dart';
 import 'payment_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -54,7 +56,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   double _taxFor(double subtotal) => subtotal * 0.03;
 
-  double _discountFor(double subtotal) =>
+  double _memberDiscountFor(double subtotal) =>
       subtotal >= 25000 ? subtotal * 0.08 : 0;
 
   Map<String, String> _areaForPincode(String pincode) {
@@ -298,7 +300,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final subtotal = cart.totalPrice;
     final shipping = _shippingFor(subtotal);
     final tax = _taxFor(subtotal);
-    final discount = _discountFor(subtotal);
+    final coupons = context.read<CouponsProvider>();
+    final memberDiscount = _memberDiscountFor(subtotal);
+    final couponDiscount = coupons.discountFor(subtotal);
+    final discount = memberDiscount + couponDiscount;
     final grandTotal = subtotal + shipping + tax - discount;
     final flat = _flatController.text.trim();
     final addressLine = _addressController.text.trim();
@@ -320,6 +325,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'pincode': _pincodeController.text.trim(),
       'addressType': _addressType,
       'makeDefault': _makeDefaultAddress,
+      if (coupons.selectedCoupon != null) ...{
+        'couponCode': coupons.selectedCoupon!.code,
+        'couponDiscount': couponDiscount,
+      },
     };
 
     if (_makeDefaultAddress) {
@@ -378,11 +387,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
+        final coupons = context.watch<CouponsProvider>();
         final cartItems = cart.items.values.toList();
         final subtotal = cart.totalPrice;
         final shipping = _shippingFor(subtotal);
         final tax = _taxFor(subtotal);
-        final discount = _discountFor(subtotal);
+        final memberDiscount = _memberDiscountFor(subtotal);
+        final couponDiscount = coupons.discountFor(subtotal);
+        final discount = memberDiscount + couponDiscount;
         final grandTotal = subtotal + shipping + tax - discount;
 
         return Scaffold(
@@ -498,6 +510,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                             const SizedBox(height: 16),
                             _SectionCard(
+                              title: 'Offers & Coupons',
+                              icon: Icons.local_offer_outlined,
+                              trailing: coupons.selectedCoupon?.code,
+                              child: _CheckoutCouponPanel(
+                                subtotal: subtotal,
+                                couponDiscount: couponDiscount,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _SectionCard(
                               title: 'Order Summary',
                               icon: Icons.receipt_long_outlined,
                               trailing: '${cart.totalItems} items',
@@ -522,10 +544,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     freeText: shipping == 0 ? 'Free' : null,
                                   ),
                                   _PriceRow(label: 'Taxes & fees', value: tax),
-                                  if (discount > 0)
+                                  if (memberDiscount > 0)
                                     _PriceRow(
                                       label: 'Member discount',
-                                      value: -discount,
+                                      value: -memberDiscount,
+                                      isDiscount: true,
+                                    ),
+                                  if (couponDiscount > 0)
+                                    _PriceRow(
+                                      label:
+                                          '${coupons.selectedCoupon?.code ?? 'Coupon'} discount',
+                                      value: -couponDiscount,
                                       isDiscount: true,
                                     ),
                                   const Divider(height: 24),
@@ -601,6 +630,120 @@ class _EmptyCheckout extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CheckoutCouponPanel extends StatelessWidget {
+  final double subtotal;
+  final double couponDiscount;
+
+  const _CheckoutCouponPanel({
+    required this.subtotal,
+    required this.couponDiscount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final coupons = context.watch<CouponsProvider>();
+    final selected = coupons.selectedCoupon;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (selected == null)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.local_offer_outlined, color: AppColors.accent),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Browse active Luxora coupons and apply one to this order.',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const OffersScreen()),
+                    );
+                  },
+                  child: const Text('Browse'),
+                ),
+              ],
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.22),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_outline,
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${selected.code} applied',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        couponDiscount > 0
+                            ? 'You save Rs ${couponDiscount.toStringAsFixed(0)}'
+                            : 'Add Rs ${(selected.minOrderValue - subtotal).clamp(0, selected.minOrderValue).toStringAsFixed(0)} more to unlock',
+                        style: const TextStyle(
+                          color: AppColors.textLight,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: coupons.clearCoupon,
+                  child: const Text('Remove'),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

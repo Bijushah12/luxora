@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../models/app_notification.dart';
 import '../providers/cart_provider.dart';
+import '../providers/coupons_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/order_provider.dart';
 import '../theme/app_colors.dart';
@@ -137,6 +138,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       );
       cart.clearCart();
+      context.read<CouponsProvider>().clearCoupon();
 
       if (!mounted) {
         return;

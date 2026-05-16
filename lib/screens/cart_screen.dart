@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart_provider.dart';
+import '../providers/coupons_provider.dart';
 import '../theme/app_colors.dart';
 import 'checkout_screen.dart';
+import 'offers_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -11,7 +13,10 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
+    final couponsProvider = context.watch<CouponsProvider>();
     final cartItems = cartProvider.items.values.toList();
+    final couponDiscount = couponsProvider.discountFor(cartProvider.totalPrice);
+    final payableTotal = cartProvider.totalPrice - couponDiscount;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -194,6 +199,45 @@ class CartScreen extends StatelessWidget {
                           ],
                         ),
 
+                        const SizedBox(height: 12),
+                        _CartOfferStrip(
+                          couponDiscount: couponDiscount,
+                          selectedCode: couponsProvider.selectedCoupon?.code,
+                          onBrowse: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const OffersScreen(),
+                              ),
+                            );
+                          },
+                          onRemove: couponsProvider.clearCoupon,
+                        ),
+                        if (couponDiscount > 0) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Payable:',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              Text(
+                                'Rs ${payableTotal.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+
                         const SizedBox(height: 16),
 
                         SizedBox(
@@ -217,6 +261,66 @@ class CartScreen extends StatelessWidget {
                 ),
               ],
             ),
+    );
+  }
+}
+
+class _CartOfferStrip extends StatelessWidget {
+  final double couponDiscount;
+  final String? selectedCode;
+  final VoidCallback onBrowse;
+  final VoidCallback onRemove;
+
+  const _CartOfferStrip({
+    required this.couponDiscount,
+    required this.selectedCode,
+    required this.onBrowse,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCoupon = selectedCode != null;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: hasCoupon
+            ? AppColors.success.withValues(alpha: 0.08)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: hasCoupon
+              ? AppColors.success.withValues(alpha: 0.22)
+              : AppColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            hasCoupon ? Icons.check_circle_outline : Icons.local_offer_outlined,
+            color: hasCoupon ? AppColors.success : AppColors.accent,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              hasCoupon
+                  ? '$selectedCode applied | Save Rs ${couponDiscount.toStringAsFixed(0)}'
+                  : 'Browse active Luxora coupons',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: hasCoupon ? onRemove : onBrowse,
+            child: Text(hasCoupon ? 'Remove' : 'Offers'),
+          ),
+        ],
+      ),
     );
   }
 }

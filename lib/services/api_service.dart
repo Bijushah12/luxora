@@ -27,10 +27,23 @@ class ApiService {
 
   static Future<List<Watch>> getWatches() async {
     final firestoreWatches = await _getFirestoreWatches();
-    if (firestoreWatches.isNotEmpty) {
+    final onlineWatches = await _getOnlineWatches();
+
+    if (firestoreWatches.isEmpty) {
+      return onlineWatches;
+    }
+    if (onlineWatches.isEmpty) {
       return firestoreWatches;
     }
 
+    final firestoreIds = firestoreWatches.map((watch) => watch.id).toSet();
+    return [
+      ...firestoreWatches,
+      ...onlineWatches.where((watch) => !firestoreIds.contains(watch.id)),
+    ];
+  }
+
+  static Future<List<Watch>> _getOnlineWatches() async {
     try {
       final response = await http.get(Uri.parse(baseUrl));
 
@@ -65,7 +78,7 @@ class ApiService {
 
           watches.add(
             Watch(
-              id: item['id'].toString(),
+              id: 'online-${item['id']}',
               name: name,
               brand: brand,
               price: price,

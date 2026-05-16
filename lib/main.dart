@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'providers/cart_provider.dart';
+import 'providers/coupons_provider.dart';
 import 'providers/address_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
@@ -38,6 +39,7 @@ class LuxoraApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => CouponsProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),

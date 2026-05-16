@@ -41,6 +41,9 @@ class NotificationProvider extends ChangeNotifier {
   CollectionReference<Map<String, dynamic>> get _notificationsRef =>
       _firestore.collection('notifications');
 
+  CollectionReference<Map<String, dynamic>> get _adminNotificationsRef =>
+      _firestore.collection('admin_notifications');
+
   Future<void> loadNotifications() async {
     if (_isLoaded) return;
     await _loadForUser(_auth.currentUser);
@@ -53,6 +56,10 @@ class NotificationProvider extends ChangeNotifier {
 
     if (user == null) {
       await _loadLocalNotifications();
+      final mergedBroadcasts = await _mergeBroadcastNotifications();
+      if (mergedBroadcasts) {
+        await _saveNotifications();
+      }
       _isLoaded = true;
       _safeNotify();
       return;
@@ -73,11 +80,16 @@ class NotificationProvider extends ChangeNotifier {
 
       if (_notifications.isEmpty) {
         _notifications.addAll(_initialNotifications());
-        await _saveNotifications();
       }
+      await _mergeBroadcastNotifications();
+      await _saveNotifications();
     } catch (error) {
       debugPrint('Error loading cloud notifications: $error');
       await _loadLocalNotifications();
+      final mergedBroadcasts = await _mergeBroadcastNotifications();
+      if (mergedBroadcasts) {
+        await _saveNotifications();
+      }
     }
 
     _isLoaded = true;
@@ -154,6 +166,53 @@ class NotificationProvider extends ChangeNotifier {
     _safeNotify();
   }
 
+  Future<bool> _mergeBroadcastNotifications() async {
+    try {
+      final snapshot = await _adminNotificationsRef.get();
+      var changed = false;
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final status = data['status']?.toString().toLowerCase() ?? '';
+        if (status == 'draft' || status == 'scheduled') {
+          continue;
+        }
+
+        final id = 'broadcast-${doc.id}';
+        if (_notifications.any((notification) => notification.id == id)) {
+          continue;
+        }
+
+        final title = data['title']?.toString().trim() ?? '';
+        final message = data['message']?.toString().trim() ?? '';
+        if (title.isEmpty || message.isEmpty) {
+          continue;
+        }
+
+        _notifications.add(
+          AppNotification(
+            id: id,
+            type: data['type']?.toString() ?? 'offer',
+            title: title,
+            subtitle: message,
+            createdAt:
+                _toDateTime(
+                  data['queuedAt'] ?? data['createdAt'] ?? data['updatedAt'],
+                ) ??
+                DateTime.now(),
+            isRead: false,
+          ),
+        );
+        changed = true;
+      }
+
+      return changed;
+    } catch (error) {
+      debugPrint('Error loading broadcast notifications: $error');
+      return false;
+    }
+  }
+
   List<AppNotification> _initialNotifications() {
     final now = DateTime.now();
     return [
@@ -205,6 +264,19 @@ class NotificationProvider extends ChangeNotifier {
 
   Map<String, dynamic> _stringMap(Map<dynamic, dynamic> value) {
     return value.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  DateTime? _toDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    if (value is DateTime) {
+      return value;
+    }
+    if (value is String) {
+      return DateTime.tryParse(value);
+    }
+    return null;
   }
 
   void _safeNotify() {

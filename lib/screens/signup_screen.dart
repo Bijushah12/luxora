@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/app_colors.dart';
-import '../widgets/luxora_logo.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -66,6 +65,8 @@ class _SignupScreenState extends State<SignupScreen> {
         "uid": user.uid,
         "role": "customer",
         "isAdmin": false,
+        "photoUrl": "",
+        "avatarUrl": "",
         "createdAt": now,
         "updatedAt": now,
       });
@@ -200,7 +201,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   top: 54,
                   left: 0,
                   right: 0,
-                  child: const LuxoraLogo(
+                  child: const _LuxoraLogo(
                     markSize: 54,
                     titleSize: 28,
                     subtitle: 'CREATE ACCOUNT',
@@ -380,4 +381,122 @@ class WaveClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _LuxoraLogo extends StatelessWidget {
+  final double markSize;
+  final String subtitle;
+  final Color markColor;
+  final Color textColor;
+  final Color subtitleColor;
+  final double titleSize;
+  final double subtitleSize;
+
+  const _LuxoraLogo({
+    required this.markSize,
+    required this.titleSize,
+    required this.subtitle,
+    required this.subtitleSize,
+    required this.markColor,
+    required this.textColor,
+    required this.subtitleColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox.square(
+          dimension: markSize,
+          child: CustomPaint(painter: _LuxoraMarkPainter(markColor)),
+        ),
+        SizedBox(height: markSize * 0.1),
+        Text(
+          'LUXORA',
+          style: TextStyle(
+            color: textColor,
+            fontSize: titleSize,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: subtitleColor,
+            fontSize: subtitleSize,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LuxoraMarkPainter extends CustomPainter {
+  final Color color;
+
+  const _LuxoraMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.055
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+    final crown = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.42)
+      ..lineTo(size.width * 0.08, size.height * 0.18)
+      ..lineTo(size.width * 0.34, size.height * 0.32)
+      ..lineTo(size.width * 0.50, size.height * 0.05)
+      ..lineTo(size.width * 0.66, size.height * 0.32)
+      ..lineTo(size.width * 0.92, size.height * 0.18)
+      ..lineTo(size.width * 0.82, size.height * 0.42);
+    canvas.drawPath(crown, stroke);
+    canvas.drawCircle(
+      Offset(size.width * 0.50, size.height * 0.56),
+      size.width * 0.31,
+      stroke,
+    );
+    final base = Path()
+      ..moveTo(size.width * 0.24, size.height * 0.80)
+      ..quadraticBezierTo(
+        size.width * 0.50,
+        size.height * 0.91,
+        size.width * 0.76,
+        size.height * 0.80,
+      )
+      ..lineTo(size.width * 0.72, size.height * 0.94)
+      ..lineTo(size.width * 0.28, size.height * 0.94)
+      ..close();
+    canvas.drawPath(base, stroke);
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'L',
+        style: TextStyle(
+          color: color,
+          fontSize: size.width * 0.34,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Times New Roman',
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(size.width * 0.38, size.height * 0.39));
+    canvas.drawLine(
+      Offset(size.width * 0.52, size.height * 0.56),
+      Offset(size.width * 0.68, size.height * 0.62),
+      stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_LuxoraMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

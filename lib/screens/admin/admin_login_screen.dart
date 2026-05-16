@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin_auth_provider.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/luxora_logo.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -120,7 +119,7 @@ class _BrandPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const LuxoraLogo(
+        const _LuxoraLogo(
           markSize: 58,
           titleSize: 30,
           subtitle: 'Admin Console',
@@ -142,6 +141,110 @@ class _BrandPanel extends StatelessWidget {
       ],
     );
   }
+}
+
+class _LuxoraLogo extends StatelessWidget {
+  final double markSize;
+  final String subtitle;
+  final Color markColor;
+  final Color textColor;
+  final Color subtitleColor;
+  final double titleSize;
+  final double subtitleSize;
+  final CrossAxisAlignment crossAxisAlignment;
+
+  const _LuxoraLogo({
+    required this.markSize,
+    required this.titleSize,
+    required this.subtitle,
+    required this.subtitleSize,
+    required this.markColor,
+    required this.textColor,
+    required this.subtitleColor,
+    required this.crossAxisAlignment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        SizedBox.square(
+          dimension: markSize,
+          child: CustomPaint(painter: _LuxoraMarkPainter(markColor)),
+        ),
+        SizedBox(height: markSize * 0.1),
+        Text(
+          'LUXORA',
+          style: TextStyle(
+            color: textColor,
+            fontSize: titleSize,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: subtitleColor,
+            fontSize: subtitleSize,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LuxoraMarkPainter extends CustomPainter {
+  final Color color;
+
+  const _LuxoraMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.055
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+    final crown = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.42)
+      ..lineTo(size.width * 0.08, size.height * 0.18)
+      ..lineTo(size.width * 0.34, size.height * 0.32)
+      ..lineTo(size.width * 0.50, size.height * 0.05)
+      ..lineTo(size.width * 0.66, size.height * 0.32)
+      ..lineTo(size.width * 0.92, size.height * 0.18)
+      ..lineTo(size.width * 0.82, size.height * 0.42);
+    canvas.drawPath(crown, stroke);
+    canvas.drawCircle(
+      Offset(size.width * 0.50, size.height * 0.56),
+      size.width * 0.31,
+      stroke,
+    );
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'L',
+        style: TextStyle(
+          color: color,
+          fontSize: size.width * 0.34,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Times New Roman',
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(size.width * 0.38, size.height * 0.39));
+  }
+
+  @override
+  bool shouldRepaint(_LuxoraMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class _LoginForm extends StatelessWidget {

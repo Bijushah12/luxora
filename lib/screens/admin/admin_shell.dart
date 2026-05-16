@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin_auth_provider.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/luxora_logo.dart';
 import 'admin_analytics_screen.dart';
 import 'admin_coupons_screen.dart';
 import 'admin_dashboard_screen.dart';
@@ -43,8 +42,8 @@ class _AdminShellState extends State<AdminShell> {
       selectedIcon: Icons.inventory_2,
     ),
     _AdminDestination(
-      label: 'Customers',
-      subtitle: 'Customer activity, VIP value and access control',
+      label: 'Accounts',
+      subtitle: 'Customers, admins, activity and access control',
       icon: Icons.people_outline,
       selectedIcon: Icons.people,
     ),
@@ -123,9 +122,19 @@ class _AdminShellState extends State<AdminShell> {
 
         return Scaffold(
           backgroundColor: AppColors.primary,
+          drawerEnableOpenDragGesture: true,
           appBar: AppBar(
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.textInverse,
+            leading: Builder(
+              builder: (context) {
+                return IconButton(
+                  tooltip: 'Open menu',
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: const Icon(Icons.menu, color: AppColors.accent),
+                );
+              },
+            ),
             title: Text(
               _destinations[_selectedIndex].label,
               style: const TextStyle(color: AppColors.textInverse),
@@ -289,6 +298,119 @@ String _todayLabel() {
   return '${months[now.month - 1]} ${now.day}, ${now.year}';
 }
 
+class _LuxoraLogo extends StatelessWidget {
+  final double markSize;
+  final String subtitle;
+  final Color markColor;
+  final Color textColor;
+  final Color subtitleColor;
+  final double titleSize;
+  final double subtitleSize;
+
+  const _LuxoraLogo({
+    required this.markSize,
+    required this.titleSize,
+    required this.subtitle,
+    required this.subtitleSize,
+    required this.markColor,
+    required this.textColor,
+    required this.subtitleColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox.square(
+          dimension: markSize,
+          child: CustomPaint(painter: _LuxoraMarkPainter(markColor)),
+        ),
+        SizedBox(width: markSize * 0.22),
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'LUXORA',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: titleSize,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: subtitleColor,
+                  fontSize: subtitleSize,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LuxoraMarkPainter extends CustomPainter {
+  final Color color;
+
+  const _LuxoraMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.055
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+    final crown = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.42)
+      ..lineTo(size.width * 0.08, size.height * 0.18)
+      ..lineTo(size.width * 0.34, size.height * 0.32)
+      ..lineTo(size.width * 0.50, size.height * 0.05)
+      ..lineTo(size.width * 0.66, size.height * 0.32)
+      ..lineTo(size.width * 0.92, size.height * 0.18)
+      ..lineTo(size.width * 0.82, size.height * 0.42);
+    canvas.drawPath(crown, stroke);
+    canvas.drawCircle(
+      Offset(size.width * 0.50, size.height * 0.56),
+      size.width * 0.31,
+      stroke,
+    );
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'L',
+        style: TextStyle(
+          color: color,
+          fontSize: size.width * 0.34,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Times New Roman',
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(size.width * 0.38, size.height * 0.39));
+  }
+
+  @override
+  bool shouldRepaint(_LuxoraMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
 class _AdminSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -310,8 +432,7 @@ class _AdminSidebar extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
-              child: const LuxoraLogo(
-                direction: Axis.horizontal,
+              child: const _LuxoraLogo(
                 markSize: 36,
                 titleSize: 16,
                 subtitle: 'Premium Admin',

@@ -60,9 +60,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   onClose: provider.clearMessages,
                 ),
                 AdminSection(
-                  title: 'Users',
+                  title: 'Customers & Admins',
                   subtitle:
-                      'Registered customers with orders, cart, wishlist, addresses, and notifications',
+                      'Live accounts from users and admins with activity details',
                   icon: Icons.people_outline,
                   child: Column(
                     children: [
@@ -72,7 +72,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                         controller: _searchController,
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(
-                          labelText: 'Search users',
+                          labelText: 'Search customers or admins',
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: _searchController.text.isEmpty
                               ? null
@@ -140,12 +140,6 @@ class _UserSummaryStrip extends StatelessWidget {
     return _AdminSummaryGrid(
       items: [
         _AdminSummaryItem(
-          label: 'Total Users',
-          value: users.length.toString(),
-          icon: Icons.people_outline,
-          color: AppColors.primary,
-        ),
-        _AdminSummaryItem(
           label: 'Customers',
           value: customers.toString(),
           icon: Icons.person_outline,
@@ -156,6 +150,12 @@ class _UserSummaryStrip extends StatelessWidget {
           value: admins.toString(),
           icon: Icons.admin_panel_settings_outlined,
           color: AppColors.accent,
+        ),
+        _AdminSummaryItem(
+          label: 'Total Accounts',
+          value: users.length.toString(),
+          icon: Icons.people_outline,
+          color: AppColors.primary,
         ),
         _AdminSummaryItem(
           label: 'Blocked',

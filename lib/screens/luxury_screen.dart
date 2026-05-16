@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
-import '../providers/wishlist_provider.dart';
+import '../widgets/watch_filter_sheet.dart';
 import '../widgets/watch_card.dart';
 import 'cart_screen.dart';
 
@@ -17,6 +17,7 @@ class LuxuryScreen extends StatefulWidget {
 class _LuxuryScreenState extends State<LuxuryScreen> {
   List<Watch> categoryWatches = [];
   bool isLoading = true;
+  WatchFilterState _filter = const WatchFilterState();
 
   @override
   void initState() {
@@ -27,10 +28,12 @@ class _LuxuryScreenState extends State<LuxuryScreen> {
   Future<void> loadCategoryWatches() async {
     try {
       final allWatches = await ApiService.getWatches();
-      categoryWatches = allWatches.where((w) => w.category == 'Luxury').toList();
+      categoryWatches = allWatches
+          .where((w) => w.category == 'Luxury')
+          .toList();
       setState(() => isLoading = false);
     } catch (e) {
-      print('Error loading Luxury watches: $e');
+      debugPrint('Error loading Luxury watches: $e');
       setState(() => isLoading = false);
     }
   }
@@ -38,20 +41,33 @@ class _LuxuryScreenState extends State<LuxuryScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
-    final wishlist = Provider.of<WishlistProvider>(context);
+    final filteredWatches = WatchFilters.apply(categoryWatches, _filter);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Luxury Watches'),
         actions: [
+          WatchFilterButton(
+            isActive: _filter.hasActiveFilters,
+            onPressed: () async {
+              final next = await showWatchFilterSheet(
+                context: context,
+                current: _filter,
+                watches: categoryWatches,
+              );
+              if (next != null && mounted) {
+                setState(() => _filter = next);
+              }
+            },
+          ),
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const CartScreen()),
-                  );
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => const CartScreen()));
                 },
               ),
               if (cart.totalItems > 0)
@@ -60,8 +76,14 @@ class _LuxuryScreenState extends State<LuxuryScreen> {
                   top: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    child: Text(cart.totalItems.toString(), style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      cart.totalItems.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
                 ),
             ],
@@ -70,16 +92,40 @@ class _LuxuryScreenState extends State<LuxuryScreen> {
       ),
       body: SafeArea(
         child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : categoryWatches.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : categoryWatches.isEmpty
             ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.watch_outlined, size: 80, color: Colors.grey),
                     const SizedBox(height: 16),
-                    const Text('Luxury watches coming soon', style: TextStyle(fontSize: 20)),
-                    Text('High-quality selection loading...', style: TextStyle(color: Colors.grey[600])),
+                    const Text(
+                      'Luxury watches coming soon',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      'High-quality selection loading...',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              )
+            : filteredWatches.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.filter_alt_off, size: 76, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No watches match filters',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      'Try a different price or brand.',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                   ],
                 ),
               )
@@ -92,11 +138,11 @@ class _LuxuryScreenState extends State<LuxuryScreen> {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                itemCount: categoryWatches.length,
-                itemBuilder: (context, index) => WatchCard(watch: categoryWatches[index]),
+                itemCount: filteredWatches.length,
+                itemBuilder: (context, index) =>
+                    WatchCard(watch: filteredWatches[index]),
               ),
       ),
     );
   }
 }
-

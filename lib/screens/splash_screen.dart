@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../widgets/luxora_logo.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -77,70 +76,63 @@ class _SplashScreenState extends State<SplashScreen>
                 .clamp(210.0, 260.0)
                 .toDouble();
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compactWidth ? 16 : 24,
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              const SizedBox(height: 24),
-                              LuxoraLogo(
-                                markSize: logoSize,
-                                titleSize: compactWidth ? 21 : 24,
-                                subtitle: 'LUXURY WATCH',
-                                subtitleSize: compactWidth ? 9 : 10,
-                                markColor: AppColors.accent,
-                                textColor: AppColors.textDark,
-                                subtitleColor: AppColors.textLight,
-                              ),
-                              SizedBox(height: compactWidth ? 28 : 38),
-                              _buildWatchShowcase(watchSize),
-                              SizedBox(height: compactWidth ? 24 : 30),
-                              const SizedBox(
-                                width: double.infinity,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    'THE ART OF TIMEKEEPING',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 3,
-                                      color: AppColors.textDark,
-                                    ),
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: compactWidth ? 16 : 24),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      _LuxoraLogo(
+                        markSize: logoSize,
+                        titleSize: compactWidth ? 35 : 25,
+                        subtitle: 'LUXURY WATCH',
+                        subtitleSize: compactWidth ? 20 : 20,
+                        markColor: AppColors.accent,
+                        textColor: AppColors.textDark,
+                        subtitleColor: AppColors.textLight,
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildWatchShowcase(watchSize),
+                            SizedBox(height: compactWidth ? 22 : 28),
+                            const SizedBox(
+                              width: double.infinity,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'THE ART OF TIMEKEEPING',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 3,
+                                    color: AppColors.textDark,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Luxury Watches crafted for distinction',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.textLight,
-                                  letterSpacing: 0.8,
-                                ),
+                            ),
+                            const SizedBox(height: 14),
+                            const Text(
+                              'Luxury Watches crafted for distinction',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: AppColors.textLight,
+                                letterSpacing: 0.8,
                               ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 28, bottom: 24),
-                            child: _buildSwipeButton(),
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 22),
+                        child: _buildSwipeButton(),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -277,5 +269,128 @@ class _SplashScreenState extends State<SplashScreen>
         );
       },
     );
+  }
+}
+
+class _LuxoraLogo extends StatelessWidget {
+  final double markSize;
+  final String? subtitle;
+  final Color markColor;
+  final Color textColor;
+  final Color? subtitleColor;
+  final double titleSize;
+  final double subtitleSize;
+
+  const _LuxoraLogo({
+    required this.markSize,
+    this.subtitle,
+    required this.markColor,
+    required this.textColor,
+    this.subtitleColor,
+    required this.titleSize,
+    required this.subtitleSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox.square(
+          dimension: markSize,
+          child: CustomPaint(painter: _LuxoraMarkPainter(markColor)),
+        ),
+        SizedBox(height: markSize * 0.1),
+        Text(
+          'LUXORA',
+          style: TextStyle(
+            color: textColor,
+            fontSize: titleSize,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            subtitle!,
+            style: TextStyle(
+              color: subtitleColor ?? textColor,
+              fontSize: subtitleSize,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _LuxoraMarkPainter extends CustomPainter {
+  final Color color;
+
+  const _LuxoraMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.055
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+
+    final crown = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.42)
+      ..lineTo(size.width * 0.08, size.height * 0.18)
+      ..lineTo(size.width * 0.34, size.height * 0.32)
+      ..lineTo(size.width * 0.50, size.height * 0.05)
+      ..lineTo(size.width * 0.66, size.height * 0.32)
+      ..lineTo(size.width * 0.92, size.height * 0.18)
+      ..lineTo(size.width * 0.82, size.height * 0.42);
+    canvas.drawPath(crown, stroke);
+    canvas.drawCircle(
+      Offset(size.width * 0.50, size.height * 0.56),
+      size.width * 0.31,
+      stroke,
+    );
+    final base = Path()
+      ..moveTo(size.width * 0.24, size.height * 0.80)
+      ..quadraticBezierTo(
+        size.width * 0.50,
+        size.height * 0.91,
+        size.width * 0.76,
+        size.height * 0.80,
+      )
+      ..lineTo(size.width * 0.72, size.height * 0.94)
+      ..lineTo(size.width * 0.28, size.height * 0.94)
+      ..close();
+    canvas.drawPath(base, stroke);
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'L',
+        style: TextStyle(
+          color: color,
+          fontSize: size.width * 0.34,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Times New Roman',
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(size.width * 0.38, size.height * 0.39));
+    canvas.drawLine(
+      Offset(size.width * 0.52, size.height * 0.56),
+      Offset(size.width * 0.68, size.height * 0.62),
+      stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_LuxoraMarkPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }

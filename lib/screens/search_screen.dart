@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
+import '../widgets/watch_filter_sheet.dart';
 import '../widgets/watch_card.dart';
 import 'cart_screen.dart';
 
@@ -22,6 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   Timer? _debounce;
+  WatchFilterState _filter = const WatchFilterState();
 
   List<String> recentSearches = [];
   final List<String> suggestions = [
@@ -55,7 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> loadWatches() async {
     try {
       allWatches = await ApiService.getWatches();
-      filtered = allWatches;
+      filtered = WatchFilters.apply(allWatches, _filter);
       setState(() => isLoading = false);
     } catch (e) {
       debugPrint('Error loading watches: $e');
@@ -97,18 +99,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _performSearch(String value) {
     final query = value.trim().toLowerCase();
-    if (query.isEmpty) {
-      setState(() => filtered = allWatches);
-      return;
-    }
     setState(() {
-      filtered = allWatches.where((watch) {
-        return watch.name.toLowerCase().contains(query) ||
-            watch.brand.toLowerCase().contains(query) ||
-            watch.category.toLowerCase().contains(query);
-      }).toList();
+      filtered = WatchFilters.apply(allWatches, _filter, query: query);
     });
-    saveRecentSearch(value.trim());
+    if (query.isNotEmpty) {
+      saveRecentSearch(value.trim());
+    }
   }
 
   void _submitSearch(String value) {
@@ -127,16 +123,35 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: const Text("Search Watches"),
         actions: [
+          WatchFilterButton(
+            isActive: _filter.hasActiveFilters,
+            onPressed: () async {
+              final next = await showWatchFilterSheet(
+                context: context,
+                current: _filter,
+                watches: allWatches,
+                includeCategory: true,
+              );
+              if (next != null && mounted) {
+                setState(() {
+                  _filter = next;
+                  filtered = WatchFilters.apply(
+                    allWatches,
+                    _filter,
+                    query: _controller.text,
+                  );
+                });
+              }
+            },
+          ),
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const CartScreen(),
-                    ),
-                  );
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => const CartScreen()));
                 },
               ),
               if (cart.totalItems > 0)
@@ -145,11 +160,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   top: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration:
-                        const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    child: Text(cart.totalItems.toString(),
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 12)),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      cart.totalItems.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
                 ),
             ],
@@ -262,17 +280,24 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.search_off,
-                              size: 80, color: Colors.grey),
+                          const Icon(
+                            Icons.search_off,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'No watches found',
                             style: TextStyle(
-                                fontSize: 18, color: Colors.grey.shade700),
+                              fontSize: 18,
+                              color: Colors.grey.shade700,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Try different keywords',
+                            _filter.hasActiveFilters
+                                ? 'Try changing filters'
+                                : 'Try different keywords',
                             style: TextStyle(color: Colors.grey.shade600),
                           ),
                         ],
@@ -282,11 +307,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: WatchCard.cardHeight,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                            crossAxisCount: 2,
+                            mainAxisExtent: WatchCard.cardHeight,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) =>
                           WatchCard(watch: filtered[index]),

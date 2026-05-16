@@ -76,30 +76,42 @@ class NotificationScreen extends StatelessWidget {
 
           final grouped = _groupNotifications(notifications);
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _NotificationSummary(unreadCount: provider.unreadCount),
-              const SizedBox(height: 18),
-              ...grouped.entries.expand((entry) {
-                return [
-                  _SectionTitle(title: entry.key),
-                  const SizedBox(height: 10),
-                  ...entry.value.map(
-                    (notification) => _NotificationCard(
-                      notification: notification,
-                      time: _relativeTime(notification.createdAt),
-                      icon: _iconForType(notification.type),
-                      color: _colorForType(notification.type),
-                      onTap: () => provider.markAsRead(notification.id),
-                      onDelete: () =>
-                          provider.deleteNotification(notification.id),
-                    ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth >= 900 ? 860 : double.infinity,
                   ),
-                  const SizedBox(height: 12),
-                ];
-              }),
-            ],
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _NotificationSummary(unreadCount: provider.unreadCount),
+                      const SizedBox(height: 18),
+                      ...grouped.entries.expand((entry) {
+                        return [
+                          _SectionTitle(title: entry.key),
+                          const SizedBox(height: 10),
+                          ...entry.value.map(
+                            (notification) => _NotificationCard(
+                              notification: notification,
+                              time: _relativeTime(notification.createdAt),
+                              icon: _iconForType(notification.type),
+                              color: _colorForType(notification.type),
+                              onTap: () => provider.markAsRead(notification.id),
+                              onDelete: () => provider.deleteNotification(
+                                notification.id,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ];
+                      }),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

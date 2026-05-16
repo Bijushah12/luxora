@@ -43,7 +43,44 @@ class AdminAuthService {
     }
 
     final data = userDocument.data() ?? <String, dynamic>{};
-    final role = data['role']?.toString().toLowerCase();
-    return data['isAdmin'] == true || role == 'admin';
+    final role = _firstNonEmpty([
+      data['role']?.toString() ?? '',
+      data['userRole']?.toString() ?? '',
+      data['type']?.toString() ?? '',
+      data['accountType']?.toString() ?? '',
+    ]).toLowerCase();
+    return _toBool(data['isAdmin']) ||
+        _toBool(data['admin']) ||
+        _toBool(data['is_admin']) ||
+        role == 'admin' ||
+        role == 'administrator' ||
+        role.contains('admin');
   }
+}
+
+String _firstNonEmpty(Iterable<String> values) {
+  for (final value in values) {
+    final trimmed = value.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed;
+    }
+  }
+  return '';
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  if (value is String) {
+    final normalized = value.trim().toLowerCase();
+    return normalized == 'true' ||
+        normalized == 'yes' ||
+        normalized == '1' ||
+        normalized == 'admin';
+  }
+  return false;
 }

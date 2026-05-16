@@ -1,7 +1,10 @@
-import 'dart:io';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +21,7 @@ import 'cart_screen.dart';
 import 'login_screen.dart';
 import 'notification_screen.dart';
 import 'orders_screen.dart';
+import 'offers_screen.dart';
 import 'reviews_screen.dart';
 import 'wishlist_screen.dart';
 
@@ -30,11 +34,15 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
-  File? image;
+  Uint8List? selectedImageBytes;
   String name = "";
   String email = "";
+  String photoUrl = "";
+  String photoDataUrl = "";
   bool isLoading = true;
+  bool isUploadingPhoto = false;
 
+  final ImagePicker _imagePicker = ImagePicker();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   late AnimationController _animationController;
@@ -65,12 +73,15 @@ class _ProfileScreenState extends State<ProfileScreen>
   Future<void> loadUserData() async {
     var nextName = "";
     var nextEmail = "";
+    var nextPhotoUrl = "";
+    var nextPhotoDataUrl = "";
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         nextName = user.displayName ?? "";
         nextEmail = user.email ?? "";
+        nextPhotoUrl = user.photoURL ?? "";
 
         final doc = await FirebaseFirestore.instance
             .collection('users')
@@ -80,12 +91,24 @@ class _ProfileScreenState extends State<ProfileScreen>
 
         final firestoreName = data?['name'] as String?;
         final firestoreEmail = data?['email'] as String?;
+        final firestorePhotoUrl =
+            data?['photoUrl'] as String? ?? data?['avatarUrl'] as String?;
+        final firestorePhotoDataUrl =
+            data?['photoDataUrl'] as String? ??
+            data?['profilePhotoDataUrl'] as String?;
 
         if (firestoreName != null && firestoreName.trim().isNotEmpty) {
           nextName = firestoreName.trim();
         }
         if (firestoreEmail != null && firestoreEmail.trim().isNotEmpty) {
           nextEmail = firestoreEmail.trim();
+        }
+        if (firestorePhotoUrl != null && firestorePhotoUrl.trim().isNotEmpty) {
+          nextPhotoUrl = firestorePhotoUrl.trim();
+        }
+        if (firestorePhotoDataUrl != null &&
+            firestorePhotoDataUrl.trim().isNotEmpty) {
+          nextPhotoDataUrl = firestorePhotoDataUrl.trim();
         }
       }
     } catch (e) {
@@ -96,6 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     setState(() {
       name = nextName;
       email = nextEmail;
+      photoUrl = nextPhotoUrl;
+      photoDataUrl = nextPhotoDataUrl;
       isLoading = false;
     });
     _animationController.forward(from: 0);
@@ -109,6 +134,12 @@ class _ProfileScreenState extends State<ProfileScreen>
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'name': name.trim(),
         'email': email.trim(),
+        if (photoUrl.trim().isNotEmpty) 'photoUrl': photoUrl.trim(),
+        if (photoUrl.trim().isNotEmpty) 'avatarUrl': photoUrl.trim(),
+        if (photoDataUrl.trim().isNotEmpty) 'photoDataUrl': photoDataUrl.trim(),
+        if (photoDataUrl.trim().isNotEmpty)
+          'profilePhotoDataUrl': photoDataUrl.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving profile: $e');
@@ -116,12 +147,121 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<void> pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (isUploadingPhoto) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final picked = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 60,
+      maxWidth: 420,
+      maxHeight: 420,
+    );
     if (picked == null || !mounted) return;
 
+    final bytes = await picked.readAsBytes();
+    final extension = _extensionFor(picked.name);
+    final contentType = _contentTypeFor(extension);
+    final dataUrl = 'data:$contentType;base64,${base64Encode(bytes)}';
+
     setState(() {
-      image = File(picked.path);
+      selectedImageBytes = bytes;
+      isUploadingPhoto = true;
     });
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'photoDataUrl': dataUrl,
+        'profilePhotoDataUrl': dataUrl,
+        'profilePhotoUpdatedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      if (!mounted) return;
+      setState(() {
+        photoDataUrl = dataUrl;
+        selectedImageBytes = null;
+        isUploadingPhoto = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Profile photo saved')));
+
+      unawaited(
+        _uploadProfilePhotoToStorage(
+          user: user,
+          bytes: bytes,
+          extension: extension,
+          contentType: contentType,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error saving profile photo: $e');
+      if (!mounted) return;
+      setState(() {
+        selectedImageBytes = null;
+        isUploadingPhoto = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Photo save failed. Please try again.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _uploadProfilePhotoToStorage({
+    required User user,
+    required Uint8List bytes,
+    required String extension,
+    required String contentType,
+  }) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_profiles')
+          .child(user.uid)
+          .child('profile.$extension');
+
+      await storageRef
+          .putData(bytes, SettableMetadata(contentType: contentType))
+          .timeout(const Duration(minutes: 2));
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'photoUrl': downloadUrl,
+        'avatarUrl': downloadUrl,
+        'profilePhotoUpdatedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      await user.updatePhotoURL(downloadUrl);
+
+      if (mounted) {
+        setState(() => photoUrl = downloadUrl);
+      }
+    } catch (e) {
+      debugPrint('Error uploading profile photo: $e');
+    }
+  }
+
+  String _extensionFor(String fileName) {
+    final name = fileName.toLowerCase();
+    if (name.endsWith('.png')) return 'png';
+    if (name.endsWith('.webp')) return 'webp';
+    return 'jpg';
+  }
+
+  String _contentTypeFor(String extension) {
+    switch (extension) {
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/jpeg';
+    }
   }
 
   void editProfile() {
@@ -325,6 +465,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                               iconColor: const Color(0xFF7C3AED),
                               screen: const NotificationScreen(),
                             ),
+                            _MenuItem(
+                              icon: Icons.local_offer_outlined,
+                              title: "Offers & Coupons",
+                              subtitle: "Apply active Luxora deals",
+                              color: const Color(0xFFFFF7E6),
+                              iconColor: AppColors.accent,
+                              screen: const OffersScreen(),
+                            ),
                           ]),
                           const SizedBox(height: 24),
                           _buildSectionTitle("Support"),
@@ -369,11 +517,18 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildHeader() {
-    final avatarImage = image != null
-        ? FileImage(image!) as ImageProvider
-        : const NetworkImage(
-            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
-          );
+    final ImageProvider avatarImage;
+    if (selectedImageBytes != null) {
+      avatarImage = MemoryImage(selectedImageBytes!);
+    } else if (photoDataUrl.trim().isNotEmpty) {
+      avatarImage = MemoryImage(_bytesFromDataUrl(photoDataUrl.trim()));
+    } else if (photoUrl.trim().isNotEmpty) {
+      avatarImage = NetworkImage(photoUrl.trim());
+    } else {
+      avatarImage = const NetworkImage(
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -424,7 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: pickImage,
+                      onTap: isUploadingPhoto ? null : pickImage,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
@@ -454,6 +609,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                             ),
                             child: CircleAvatar(backgroundImage: avatarImage),
                           ),
+                          if (isUploadingPhoto)
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.38),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.4,
+                                  ),
+                                ),
+                              ),
+                            ),
                           Positioned(
                             right: 2,
                             bottom: 2,
@@ -539,6 +709,14 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ),
     );
+  }
+
+  Uint8List _bytesFromDataUrl(String dataUrl) {
+    final commaIndex = dataUrl.indexOf(',');
+    final encoded = commaIndex == -1
+        ? dataUrl
+        : dataUrl.substring(commaIndex + 1);
+    return base64Decode(encoded);
   }
 
   Widget _buildStatsRow(

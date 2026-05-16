@@ -1153,10 +1153,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       return;
     }
 
-    if (_pickedImages.isEmpty && !hasExistingImage) {
-      setState(() => _imageError = 'Upload at least one product image');
-      return;
-    }
+    final fallbackImageUrl = hasExistingImage
+        ? null
+        : _fallbackImageForCategory(_category);
 
     final product = (existing ?? AdminProduct.empty()).copyWith(
       name: _nameController.text.trim(),
@@ -1182,6 +1181,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       isTrending: _isTrending,
       variants: _parseVariants(_variantsController.text),
       isActive: _isActive,
+      imageUrl: fallbackImageUrl,
+      imageUrls: fallbackImageUrl == null ? null : [fallbackImageUrl],
     );
 
     final ok = await context.read<AdminProductsProvider>().saveProduct(
@@ -1189,9 +1190,23 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       images: _pickedImages,
     );
 
-    if (ok && mounted) {
-      Navigator.pop(context);
+    if (!mounted) {
+      return;
     }
+
+    if (ok) {
+      Navigator.pop(context);
+      return;
+    }
+
+    final error = context.read<AdminProductsProvider>().errorMessage;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error ?? 'Unable to save product.'),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   List<AdminWatchVariant> _parseVariants(String raw) {
@@ -1214,6 +1229,22 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         })
         .whereType<AdminWatchVariant>()
         .toList(growable: false);
+  }
+
+  String _fallbackImageForCategory(String category) {
+    switch (category) {
+      case 'Women':
+        return 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=80';
+      case 'Luxury':
+        return 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=900&q=80';
+      case 'Sports':
+        return 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=900&q=80';
+      case 'Smart':
+        return 'https://images.unsplash.com/photo-1544117519-31a4b719223d?auto=format&fit=crop&w=900&q=80';
+      case 'Men':
+      default:
+        return 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=900&q=80';
+    }
   }
 
   @override
@@ -1256,6 +1287,13 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     ],
                   ),
                   const SizedBox(height: 18),
+                  if (provider.errorMessage != null ||
+                      provider.successMessage != null)
+                    AdminFeedbackBanner(
+                      error: provider.errorMessage,
+                      success: provider.successMessage,
+                      onClose: provider.clearMessages,
+                    ),
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final isWide = constraints.maxWidth >= 620;
@@ -1807,7 +1845,7 @@ class _ImagePickerPanel extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.collections_outlined),
-            label: Text(isPicking ? 'Opening' : 'Upload Images'),
+            label: Text(isPicking ? 'Opening' : 'Upload Images (optional)'),
           ),
         ),
       ],

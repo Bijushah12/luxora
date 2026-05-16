@@ -29,7 +29,21 @@ class AdminAppUser {
     DocumentSnapshot<Map<String, dynamic>> snapshot,
   ) {
     final data = snapshot.data() ?? <String, dynamic>{};
-    final role = data['role'] as String? ?? 'customer';
+    final rawRole = _firstNonEmpty([
+      _string(data['role']),
+      _string(data['userRole']),
+      _string(data['type']),
+      _string(data['accountType']),
+    ]);
+    final role = rawRole.isEmpty ? 'customer' : rawRole;
+    final normalizedRole = role.trim().toLowerCase();
+    final isAdmin =
+        _toBool(data['isAdmin']) ||
+        _toBool(data['admin']) ||
+        _toBool(data['is_admin']) ||
+        normalizedRole == 'admin' ||
+        normalizedRole == 'administrator' ||
+        normalizedRole.contains('admin');
 
     return AdminAppUser(
       id: snapshot.id,
@@ -37,9 +51,9 @@ class AdminAppUser {
       email: data['email'] as String? ?? '',
       phoneNumber:
           data['phoneNumber'] as String? ?? data['phone'] as String? ?? '',
-      role: role,
-      isAdmin: data['isAdmin'] as bool? ?? role.toLowerCase() == 'admin',
-      isBlocked: data['isBlocked'] as bool? ?? data['blocked'] == true,
+      role: isAdmin ? 'admin' : role,
+      isAdmin: isAdmin,
+      isBlocked: _toBool(data['isBlocked']) || _toBool(data['blocked']),
       createdAt: _toDateTime(data['createdAt']),
       lastLoginAt: _toDateTime(data['lastLoginAt']),
     );
@@ -320,6 +334,33 @@ Map<String, dynamic> _toMap(dynamic value) {
 }
 
 String _string(dynamic value) => value?.toString() ?? '';
+
+String _firstNonEmpty(Iterable<String> values) {
+  for (final value in values) {
+    final trimmed = value.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed;
+    }
+  }
+  return '';
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  if (value is String) {
+    final normalized = value.trim().toLowerCase();
+    return normalized == 'true' ||
+        normalized == 'yes' ||
+        normalized == '1' ||
+        normalized == 'admin';
+  }
+  return false;
+}
 
 int _toInt(dynamic value) {
   if (value is int) {

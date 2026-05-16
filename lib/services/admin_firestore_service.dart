@@ -120,6 +120,9 @@ class AdminFirestoreService {
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
 
+  CollectionReference<Map<String, dynamic>> get _admins =>
+      _firestore.collection('admins');
+
   CollectionReference<Map<String, dynamic>> get _carts =>
       _firestore.collection('carts');
 
@@ -163,9 +166,13 @@ class AdminFirestoreService {
   }
 
   Future<void> addProduct(AdminProduct product) async {
+    final productRef = _products.doc();
     final data = product.toFirestore()
-      ..['createdAt'] = FieldValue.serverTimestamp();
-    await _products.add(data);
+      ..addAll({
+        'id': productRef.id,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    await productRef.set(data);
   }
 
   Future<void> updateProduct(AdminProduct product) {
@@ -264,11 +271,69 @@ class AdminFirestoreService {
   }
 
   Stream<List<AdminAppUser>> usersStream() {
-    return _users.snapshots().map(
-      (snapshot) => _sortUsersNewestFirst(
-        snapshot.docs.map(AdminAppUser.fromFirestore).toList(growable: false),
-      ),
+    late final StreamController<List<AdminAppUser>> controller;
+    QuerySnapshot<Map<String, dynamic>>? usersSnapshot;
+    QuerySnapshot<Map<String, dynamic>>? adminsSnapshot;
+    final subscriptions = <StreamSubscription>[];
+
+    void emit() {
+      if (controller.isClosed) {
+        return;
+      }
+
+      final usersById = <String, AdminAppUser>{};
+      for (final doc
+          in usersSnapshot?.docs ??
+              const <QueryDocumentSnapshot<Map<String, dynamic>>>[]) {
+        usersById[doc.id] = AdminAppUser.fromFirestore(doc);
+      }
+
+      for (final doc
+          in adminsSnapshot?.docs ??
+              const <QueryDocumentSnapshot<Map<String, dynamic>>>[]) {
+        final admin = _adminUserFromFirestore(doc);
+        final existingId = usersById.containsKey(doc.id)
+            ? doc.id
+            : _userIdForEmail(usersById, admin.email);
+        usersById[existingId ?? doc.id] = _mergeAdminWithUser(
+          existingId == null ? null : usersById[existingId],
+          admin,
+        );
+      }
+
+      controller.add(_sortUsersNewestFirst(usersById.values.toList()));
+    }
+
+    void addError(Object error, StackTrace stackTrace) {
+      if (!controller.isClosed) {
+        controller.addError(error, stackTrace);
+      }
+    }
+
+    controller = StreamController<List<AdminAppUser>>(
+      onListen: () {
+        subscriptions
+          ..add(
+            _users.snapshots().listen((snapshot) {
+              usersSnapshot = snapshot;
+              emit();
+            }, onError: addError),
+          )
+          ..add(
+            _admins.snapshots().listen((snapshot) {
+              adminsSnapshot = snapshot;
+              emit();
+            }, onError: addError),
+          );
+      },
+      onCancel: () async {
+        for (final subscription in subscriptions) {
+          await subscription.cancel();
+        }
+      },
     );
+
+    return controller.stream;
   }
 
   Future<void> updateUserBlocked(String userId, bool isBlocked) {
@@ -277,6 +342,63 @@ class AdminFirestoreService {
       'blocked': isBlocked,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  AdminAppUser _adminUserFromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data() ?? <String, dynamic>{};
+    final active = data['active'] != false;
+    return AdminAppUser(
+      id: snapshot.id,
+      name: _firstNonEmpty([
+        _string(data['name']),
+        _string(data['displayName']),
+        _string(data['fullName']),
+      ]),
+      email: _string(data['email']),
+      phoneNumber: _string(data['phoneNumber'] ?? data['phone']),
+      role: 'admin',
+      isAdmin: true,
+      isBlocked:
+          !active || data['isBlocked'] == true || data['blocked'] == true,
+      createdAt: _dateTimeFrom(data['createdAt']),
+      lastLoginAt: _dateTimeFrom(data['lastLoginAt']),
+    );
+  }
+
+  AdminAppUser _mergeAdminWithUser(AdminAppUser? user, AdminAppUser admin) {
+    if (user == null) {
+      return admin;
+    }
+
+    return AdminAppUser(
+      id: user.id,
+      name: user.name.trim().isNotEmpty ? user.name : admin.name,
+      email: user.email.trim().isNotEmpty ? user.email : admin.email,
+      phoneNumber: user.phoneNumber.trim().isNotEmpty
+          ? user.phoneNumber
+          : admin.phoneNumber,
+      role: 'admin',
+      isAdmin: true,
+      isBlocked: user.isBlocked || admin.isBlocked,
+      createdAt: user.createdAt ?? admin.createdAt,
+      lastLoginAt: user.lastLoginAt ?? admin.lastLoginAt,
+    );
+  }
+
+  String? _userIdForEmail(Map<String, AdminAppUser> usersById, String email) {
+    final normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail.isEmpty) {
+      return null;
+    }
+
+    for (final entry in usersById.entries) {
+      if (entry.value.email.trim().toLowerCase() == normalizedEmail) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 
   Stream<AdminUserActivity> userActivityStream(String userId) {
@@ -367,6 +489,7 @@ class AdminFirestoreService {
   Future<AdminDashboardStats> fetchDashboardStats() async {
     final results = await Future.wait([
       _users.get(),
+      _admins.get(),
       _orders.get(),
       _products.get(),
       _carts.get(),
@@ -375,11 +498,16 @@ class AdminFirestoreService {
     ]);
 
     final usersSnapshot = results[0];
-    final ordersSnapshot = results[1];
-    final productsSnapshot = results[2];
-    final cartsSnapshot = results[3];
-    final wishlistsSnapshot = results[4];
-    final addressesSnapshot = results[5];
+    final adminsSnapshot = results[1];
+    final ordersSnapshot = results[2];
+    final productsSnapshot = results[3];
+    final cartsSnapshot = results[4];
+    final wishlistsSnapshot = results[5];
+    final addressesSnapshot = results[6];
+    final totalUserIds = {
+      ...usersSnapshot.docs.map((doc) => doc.id),
+      ...adminsSnapshot.docs.map((doc) => doc.id),
+    };
     final orders = _sortOrdersNewestFirst(
       ordersSnapshot.docs.map(AdminOrder.fromFirestore).toList(growable: false),
     );
@@ -420,7 +548,7 @@ class AdminFirestoreService {
     );
 
     return AdminDashboardStats(
-      usersCount: usersSnapshot.size,
+      usersCount: totalUserIds.length,
       ordersCount: ordersSnapshot.size,
       productsCount: productsSnapshot.size,
       activeProductsCount: products.where((product) => product.isActive).length,
@@ -814,6 +942,31 @@ class AdminFirestoreService {
 
     return 0;
   }
+
+  DateTime? _dateTimeFrom(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    if (value is DateTime) {
+      return value;
+    }
+    if (value is String) {
+      return DateTime.tryParse(value);
+    }
+    return null;
+  }
+
+  String _firstNonEmpty(List<String> values) {
+    for (final value in values) {
+      final clean = value.trim();
+      if (clean.isNotEmpty) {
+        return clean;
+      }
+    }
+    return '';
+  }
+
+  String _string(dynamic value) => value?.toString() ?? '';
 
   int _toInt(dynamic value) {
     if (value is int) {

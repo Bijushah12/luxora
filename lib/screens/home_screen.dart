@@ -8,7 +8,6 @@ import '../services/unsplash_service.dart';
 import '../models/watch_model.dart';
 import '../providers/reviews_provider.dart';
 import '../widgets/watch_card.dart';
-import '../widgets/luxora_logo.dart';
 import '../screens/search_screen.dart';
 import '../screens/men_screen.dart';
 import '../screens/women_screen.dart';
@@ -16,6 +15,7 @@ import '../screens/luxury_screen.dart';
 import '../screens/sports_screen.dart';
 import '../screens/smart_screen.dart';
 import '../screens/Category_screen.dart';
+import '../screens/offers_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui' as ui;
 import '../screens/product_screen.dart';
@@ -533,7 +533,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         elevation: 0,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
-          onTap: () => _openCategory('Special Member Deals'),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const OffersScreen())),
           child: Ink(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -612,8 +614,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         toolbarHeight: 70,
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        title: const LuxoraLogo(
-          direction: Axis.horizontal,
+        title: const _LuxoraLogo(
           markSize: 28,
           titleSize: 22,
           markColor: AppColors.accent,
@@ -819,32 +820,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ],
                               ),
                             ),
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                    mainAxisExtent: WatchCard.cardHeight,
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final crossAxisCount =
+                                    constraints.maxWidth >= 1100
+                                    ? 4
+                                    : constraints.maxWidth >= 720
+                                    ? 3
+                                    : 2;
+                                final maxItems = crossAxisCount * 2;
+                                final itemCount = arrivals.length > maxItems
+                                    ? maxItems
+                                    : arrivals.length;
+
+                                return GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
                                   ),
-                              itemCount: arrivals.length > 4
-                                  ? 4
-                                  : arrivals.length,
-                              itemBuilder: (context, index) {
-                                final watch = arrivals[index];
-                                return WatchCard(
-                                  watch: watch,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ProductScreen(watch),
-                                    ),
-                                  ),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: crossAxisCount,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        mainAxisExtent: WatchCard.cardHeight,
+                                      ),
+                                  itemCount: itemCount,
+                                  itemBuilder: (context, index) {
+                                    final watch = arrivals[index];
+                                    return WatchCard(
+                                      watch: watch,
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => ProductScreen(watch),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -933,4 +947,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
     );
   }
+}
+
+class _LuxoraLogo extends StatelessWidget {
+  final double markSize;
+  final Color markColor;
+  final Color textColor;
+  final double titleSize;
+
+  const _LuxoraLogo({
+    required this.markSize,
+    required this.markColor,
+    required this.textColor,
+    required this.titleSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox.square(
+          dimension: markSize,
+          child: CustomPaint(painter: _LuxoraMarkPainter(markColor)),
+        ),
+        SizedBox(width: markSize * 0.22),
+        Text(
+          'LUXORA',
+          style: TextStyle(
+            color: textColor,
+            fontSize: titleSize,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LuxoraMarkPainter extends CustomPainter {
+  final Color color;
+
+  const _LuxoraMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.055
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+    final crown = Path()
+      ..moveTo(size.width * 0.18, size.height * 0.42)
+      ..lineTo(size.width * 0.08, size.height * 0.18)
+      ..lineTo(size.width * 0.34, size.height * 0.32)
+      ..lineTo(size.width * 0.50, size.height * 0.05)
+      ..lineTo(size.width * 0.66, size.height * 0.32)
+      ..lineTo(size.width * 0.92, size.height * 0.18)
+      ..lineTo(size.width * 0.82, size.height * 0.42);
+    canvas.drawPath(crown, stroke);
+    canvas.drawCircle(
+      Offset(size.width * 0.50, size.height * 0.56),
+      size.width * 0.31,
+      stroke,
+    );
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'L',
+        style: TextStyle(
+          color: color,
+          fontSize: size.width * 0.34,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Times New Roman',
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(size.width * 0.38, size.height * 0.39));
+  }
+
+  @override
+  bool shouldRepaint(_LuxoraMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

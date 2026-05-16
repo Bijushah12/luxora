@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -6,6 +8,8 @@ import '../services/admin_firestore_service.dart';
 import '../services/admin_storage_service.dart';
 
 class AdminProductsProvider extends ChangeNotifier {
+  static const Duration _saveTimeout = Duration(seconds: 20);
+
   final AdminFirestoreService _firestoreService;
   final AdminStorageService _storageService;
 
@@ -43,43 +47,68 @@ class AdminProductsProvider extends ChangeNotifier {
 
     try {
       var productToSave = product;
+      String uploadWarning = '';
       final imagesToUpload = [
         ...?(image == null ? null : [image]),
         ...images,
       ];
 
       if (imagesToUpload.isNotEmpty) {
-        uploadedImages.addAll(
-          await _storageService.uploadProductImages(imagesToUpload),
-        );
-        final galleryUrls = _mergeStrings([
-          ...product.imageUrls,
-          product.imageUrl,
-          ...uploadedImages.map((upload) => upload.downloadUrl),
-        ]);
-        final galleryPaths = _mergeStrings([
-          ...product.imagePaths,
-          product.imagePath,
-          ...uploadedImages.map((upload) => upload.storagePath),
-        ]);
+        try {
+          uploadedImages.addAll(
+            await _storageService
+                .uploadProductImages(imagesToUpload)
+                .timeout(_saveTimeout),
+          );
+          final galleryUrls = _mergeStrings([
+            ...product.imageUrls,
+            product.imageUrl,
+            ...uploadedImages.map((upload) => upload.downloadUrl),
+          ]);
+          final galleryPaths = _mergeStrings([
+            ...product.imagePaths,
+            product.imagePath,
+            ...uploadedImages.map((upload) => upload.storagePath),
+          ]);
 
-        productToSave = product.copyWith(
-          imageUrl: galleryUrls.first,
-          imagePath: galleryPaths.isEmpty ? '' : galleryPaths.first,
-          imageUrls: galleryUrls,
-          imagePaths: galleryPaths,
-        );
+          productToSave = product.copyWith(
+            imageUrl: galleryUrls.first,
+            imagePath: galleryPaths.isEmpty ? '' : galleryPaths.first,
+            imageUrls: galleryUrls,
+            imagePaths: galleryPaths,
+          );
+        } catch (uploadError) {
+          if (product.primaryImageUrl.trim().isEmpty) {
+            rethrow;
+          }
+          try {
+            for (final upload in uploadedImages) {
+              await _storageService.deleteProductImage(upload.storagePath);
+            }
+          } catch (cleanupError) {
+            debugPrint('Unable to clean partial product image: $cleanupError');
+          }
+          uploadedImages.clear();
+          uploadWarning = ' Image upload failed, default image used.';
+          debugPrint('Product image upload failed: $uploadError');
+        }
       }
 
       if (productToSave.id.isEmpty) {
-        await _firestoreService.addProduct(productToSave);
-        _successMessage = 'Product added successfully.';
+        await _firestoreService.addProduct(productToSave).timeout(_saveTimeout);
+        _successMessage = 'Product added successfully.$uploadWarning';
       } else {
-        await _firestoreService.updateProduct(productToSave);
-        _successMessage = 'Product updated successfully.';
+        await _firestoreService
+            .updateProduct(productToSave)
+            .timeout(_saveTimeout);
+        _successMessage = 'Product updated successfully.$uploadWarning';
       }
 
       return true;
+    } on TimeoutException {
+      _errorMessage =
+          'Product save timed out. Check Firebase rules/network, then try again.';
+      return false;
     } catch (error) {
       if (uploadedImages.isNotEmpty) {
         try {
