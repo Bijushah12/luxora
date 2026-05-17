@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
+import '../services/share_service.dart';
 import '../services/watch_content_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/theme_toggle_button.dart';
@@ -131,6 +133,55 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const _ProductAppBar({required this.watch});
 
+  String get _shareText {
+    final buffer = StringBuffer()
+      ..writeln('Check out ${watch.brand} ${watch.name} on Luxora.')
+      ..writeln('Price: Rs ${watch.price.toStringAsFixed(0)}');
+
+    if (watch.category.isNotEmpty) {
+      buffer.writeln('Category: ${watch.category}');
+    }
+
+    if (watch.description.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln(watch.description);
+    }
+
+    if (watch.image.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln(watch.image);
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _shareProduct(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final text = _shareText;
+
+    try {
+      final didOpenShareSheet = await ShareService.shareText(
+        title: '${watch.brand} ${watch.name}',
+        text: text,
+      );
+      if (!didOpenShareSheet) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Product details copied to clipboard'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } on PlatformException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Unable to open share options. ${error.message ?? ''}'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
@@ -230,14 +281,7 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         IconButton(
           tooltip: 'Share',
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Share option coming soon'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
+          onPressed: () => _shareProduct(context),
           icon: const Icon(Icons.ios_share_outlined),
         ),
         const ThemeToggleButton(margin: EdgeInsets.only(right: 4)),

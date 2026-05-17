@@ -217,7 +217,7 @@ class _SplashScreenState extends State<SplashScreen>
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 74),
               child: Text(
-                'SWIPE TO ENTER',
+                'SWIPE TO START',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(

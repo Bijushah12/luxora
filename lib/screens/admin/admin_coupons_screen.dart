@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/admin_coupon.dart';
 import '../../providers/admin_coupons_provider.dart';
+import '../../services/share_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/admin/admin_empty_state.dart';
 import '../../widgets/admin/admin_feedback.dart';
@@ -318,6 +320,51 @@ class _CouponCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  String get _shareText {
+    final buffer = StringBuffer()
+      ..writeln('Use coupon ${coupon.code} on Luxora.')
+      ..writeln(
+        'Save ${coupon.displayDiscount} on orders above Rs ${coupon.minOrderValue.toStringAsFixed(0)}.',
+      );
+
+    if (coupon.title.isNotEmpty) {
+      buffer.writeln(coupon.title);
+    }
+
+    if (coupon.expiresAt != null) {
+      buffer.writeln('Valid until ${_formatDate(coupon.expiresAt!)}.');
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _shareCoupon(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final didOpenShareSheet = await ShareService.shareText(
+        title: 'Luxora coupon ${coupon.code}',
+        text: _shareText,
+      );
+
+      if (!didOpenShareSheet) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Coupon details copied to clipboard'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } on PlatformException catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Unable to open share options. ${error.message ?? ''}'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     AppColors.watch(context);
@@ -404,6 +451,12 @@ class _CouponCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
+              IconButton(
+                tooltip: 'Share coupon',
+                onPressed: () => _shareCoupon(context),
+                icon: const Icon(Icons.ios_share_outlined),
+                color: AppColors.accent,
+              ),
               IconButton(
                 tooltip: 'Delete coupon',
                 onPressed: isDeleting ? null : onDelete,

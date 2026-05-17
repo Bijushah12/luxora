@@ -1553,7 +1553,7 @@ class _CheckoutBottomBar extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'ADD ADDRESS - Rs ${total.toStringAsFixed(0)}',
+                  'ADD ADDRESS',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w900),
