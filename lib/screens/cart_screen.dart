@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/coupons_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'checkout_screen.dart';
 import 'offers_screen.dart';
 
@@ -12,6 +13,7 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final cartProvider = Provider.of<CartProvider>(context);
     final couponsProvider = context.watch<CouponsProvider>();
     final cartItems = cartProvider.items.values.toList();
@@ -23,16 +25,17 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
+        iconTheme: IconThemeData(color: AppColors.textDark),
         title: Text(
           "My Cart (${cartProvider.totalItems})",
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textDark,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
+        actions: const [ThemeToggleButton()],
       ),
 
       body: cartItems.isEmpty
@@ -46,7 +49,7 @@ class CartScreen extends StatelessWidget {
                     color: AppColors.textLight.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "Your cart is empty",
                     style: TextStyle(
                       fontSize: 18,
@@ -75,7 +78,7 @@ class CartScreen extends StatelessWidget {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(color: AppColors.border),
+                          side: BorderSide(color: AppColors.border),
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(12),
@@ -91,7 +94,7 @@ class CartScreen extends StatelessWidget {
 
                           title: Text(
                             watch.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: AppColors.textDark,
                             ),
@@ -102,7 +105,7 @@ class CartScreen extends StatelessWidget {
                             children: [
                               Text(
                                 "₹${watch.price}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.goldAccent,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -115,7 +118,7 @@ class CartScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.remove,
                                   color: AppColors.textDark,
                                 ),
@@ -126,14 +129,14 @@ class CartScreen extends StatelessWidget {
 
                               Text(
                                 item.quantity.toString(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textDark,
                                 ),
                               ),
 
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.add,
                                   color: AppColors.textDark,
                                 ),
@@ -143,7 +146,7 @@ class CartScreen extends StatelessWidget {
                               ),
 
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.delete_outline,
                                   color: AppColors.error,
                                 ),
@@ -180,7 +183,7 @@ class CartScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Total:",
                               style: TextStyle(
                                 fontSize: 18,
@@ -190,7 +193,7 @@ class CartScreen extends StatelessWidget {
                             ),
                             Text(
                               "₹${cartProvider.totalPrice.toStringAsFixed(2)}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.goldAccent,
@@ -218,7 +221,7 @@ class CartScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Payable:',
                                 style: TextStyle(
                                   fontSize: 18,
@@ -228,7 +231,7 @@ class CartScreen extends StatelessWidget {
                               ),
                               Text(
                                 'Rs ${payableTotal.toStringAsFixed(2)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w900,
                                   color: AppColors.success,
@@ -280,6 +283,7 @@ class _CartOfferStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final hasCoupon = selectedCode != null;
 
     return Container(
@@ -309,7 +313,7 @@ class _CartOfferStrip extends StatelessWidget {
                   : 'Browse active Luxora coupons',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.w800,
               ),

@@ -10,6 +10,7 @@ import '../providers/coupons_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/order_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 enum _PaymentMethod { upi, card, netBanking, wallet, cod }
 
@@ -177,14 +178,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     color: AppColors.success.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle,
                     color: AppColors.success,
                     size: 42,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Payment Successful',
                   style: TextStyle(
                     color: AppColors.textDark,
@@ -195,7 +196,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Rs ${amount.toStringAsFixed(2)} paid using $_methodName',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontWeight: FontWeight.w600,
                   ),
@@ -240,6 +241,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer2<CartProvider, OrderProvider>(
       builder: (context, cart, orders, child) {
         final amount = _payableAmount(cart);
@@ -249,8 +251,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.scaffoldBg,
             elevation: 0,
-            iconTheme: const IconThemeData(color: AppColors.textDark),
-            title: const Text(
+            iconTheme: IconThemeData(color: AppColors.textDark),
+            title: Text(
               'Secure Payment',
               style: TextStyle(
                 color: AppColors.textDark,
@@ -259,6 +261,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             centerTitle: true,
+            actions: const [ThemeToggleButton()],
           ),
           body: Form(
             key: _formKey,
@@ -358,7 +361,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Payable Amount',
                             style: TextStyle(
                               color: AppColors.textDark,
@@ -368,7 +371,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ),
                           Text(
                             'Rs ${amount.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.success,
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -452,12 +455,13 @@ class _PaymentHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 16,
@@ -474,7 +478,7 @@ class _PaymentHeader extends StatelessWidget {
               color: AppColors.textInverse.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.watch_outlined,
               color: AppColors.accent,
               size: 28,
@@ -489,7 +493,7 @@ class _PaymentHeader extends StatelessWidget {
                   itemCount > 0
                       ? '$itemCount item${itemCount == 1 ? '' : 's'} in this order'
                       : 'Ready for checkout',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontWeight: FontWeight.w700,
                   ),
@@ -497,7 +501,7 @@ class _PaymentHeader extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   'Rs ${amount.toStringAsFixed(2)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.accent,
                     fontSize: 26,
                     fontWeight: FontWeight.w900,
@@ -525,13 +529,14 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 14,
@@ -548,7 +553,7 @@ class _SectionCard extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
@@ -583,6 +588,7 @@ class _MethodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -618,7 +624,7 @@ class _MethodTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.w900,
                     ),
@@ -626,10 +632,7 @@ class _MethodTile extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
                   ),
                 ],
               ),
@@ -652,26 +655,24 @@ class _UpiDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         labelText: 'UPI ID',
         hintText: 'name@bank',
-        prefixIcon: const Icon(
-          Icons.alternate_email,
-          color: AppColors.textLight,
-        ),
+        prefixIcon: Icon(Icons.alternate_email, color: AppColors.textLight),
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.4),
         ),
       ),
       validator: (value) {
@@ -701,6 +702,7 @@ class _DropdownDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return DropdownButtonFormField<String>(
       initialValue: value,
       items: values
@@ -709,16 +711,13 @@ class _DropdownDetails extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: const Icon(
-          Icons.account_balance,
-          color: AppColors.textLight,
-        ),
+        prefixIcon: Icon(Icons.account_balance, color: AppColors.textLight),
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
       ),
     );
@@ -733,6 +732,7 @@ class _StaticDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _InfoStrip(label: label, value: value);
   }
 }
@@ -745,6 +745,7 @@ class _InfoStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -757,7 +758,7 @@ class _InfoStrip extends StatelessWidget {
         children: [
           Text(
             '$label: ',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -765,7 +766,7 @@ class _InfoStrip extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontWeight: FontWeight.w600,
               ),
@@ -792,6 +793,7 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -799,7 +801,7 @@ class _PriceRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontWeight: FontWeight.w600,
             ),
@@ -835,9 +837,10 @@ class _PaymentBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.card,
         border: Border(top: BorderSide(color: AppColors.border)),
         boxShadow: [
@@ -864,7 +867,7 @@ class _PaymentBottomBar extends StatelessWidget {
               ),
             ),
             child: isProcessing
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(

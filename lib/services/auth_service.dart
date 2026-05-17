@@ -1,11 +1,9 @@
 class AuthService {
-
   static String? registeredEmail;
   static String? registeredPassword;
 
   /// SIGNUP
   static bool signup(String email, String password) {
-
     registeredEmail = email;
     registeredPassword = password;
 
@@ -14,13 +12,10 @@ class AuthService {
 
   /// LOGIN
   static bool login(String email, String password) {
-
-    if (email == registeredEmail &&
-        password == registeredPassword) {
+    if (email == registeredEmail && password == registeredPassword) {
       return true;
     }
 
     return false;
   }
-
 }

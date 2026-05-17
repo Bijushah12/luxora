@@ -57,6 +57,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminNotificationsProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<List<AdminBroadcastNotification>>(
@@ -105,7 +106,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
                         if (snapshot.connectionState == ConnectionState.waiting)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: const LinearProgressIndicator(
+                            child: LinearProgressIndicator(
                               minHeight: 4,
                               color: AppColors.accent,
                             ),
@@ -162,6 +163,7 @@ class _NotificationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final scheduled = notifications.where((item) => item.isScheduled).length;
     final immediate = notifications.length - scheduled;
     final audiences = notifications.map((item) => item.audience).toSet().length;
@@ -196,6 +198,7 @@ class _NotificationToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final search = AdminLuxuryTextField(
@@ -207,14 +210,11 @@ class _NotificationToolbar extends StatelessWidget {
         final dropdown = DropdownButtonFormField<String>(
           initialValue: audienceFilter,
           dropdownColor: AppColors.primary,
-          style: const TextStyle(color: AppColors.textInverse),
+          style: TextStyle(color: AppColors.textInverse),
           decoration: InputDecoration(
             labelText: 'Audience',
             labelStyle: const TextStyle(color: Color(0xFFD1D5DB)),
-            prefixIcon: const Icon(
-              Icons.groups_outlined,
-              color: AppColors.accent,
-            ),
+            prefixIcon: Icon(Icons.groups_outlined, color: AppColors.accent),
             filled: true,
             fillColor: Colors.white.withValues(alpha: 0.07),
             enabledBorder: OutlineInputBorder(
@@ -225,7 +225,7 @@ class _NotificationToolbar extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+              borderSide: BorderSide(color: AppColors.accent, width: 1.4),
             ),
           ),
           items:
@@ -275,6 +275,7 @@ class _NotificationList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       children: notifications
           .map(
@@ -311,6 +312,7 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final statusColor = notification.isScheduled
         ? AppColors.warning
         : AppColors.success;
@@ -345,7 +347,7 @@ class _NotificationCard extends StatelessWidget {
                 notification.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textInverse,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
@@ -365,7 +367,7 @@ class _NotificationCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 notification.audience,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.accent,
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
@@ -492,6 +494,7 @@ class _NotificationFormDialogState extends State<_NotificationFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminNotificationsProvider>(
       builder: (context, provider, child) {
         return AlertDialog(
@@ -652,6 +655,7 @@ class _SummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -673,7 +677,7 @@ class _SummaryTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 22,
               fontWeight: FontWeight.w900,
@@ -692,6 +696,7 @@ class _DarkError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -701,7 +706,7 @@ class _DarkError extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.textInverse,
           fontWeight: FontWeight.w700,
         ),

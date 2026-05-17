@@ -18,13 +18,14 @@ class AdminStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.glassShadow,
             blurRadius: 14,
@@ -54,7 +55,7 @@ class AdminStatCard extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
@@ -65,7 +66,7 @@ class AdminStatCard extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,

@@ -16,8 +16,9 @@ class AdminLuxuryBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -51,6 +52,7 @@ class _AdminGlassCardState extends State<AdminGlassCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
@@ -108,6 +110,7 @@ class AdminSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       children: [
         Container(
@@ -129,7 +132,7 @@ class AdminSectionHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textInverse,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
@@ -170,6 +173,7 @@ class AdminStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
@@ -216,6 +220,7 @@ class AdminResponsiveGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final count = (constraints.maxWidth / minItemWidth).floor().clamp(
@@ -253,10 +258,11 @@ class AdminLuxuryTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      style: const TextStyle(color: AppColors.textInverse),
+      style: TextStyle(color: AppColors.textInverse),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Color(0xFFD1D5DB)),
@@ -269,7 +275,7 @@ class AdminLuxuryTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.4),
         ),
       ),
     );

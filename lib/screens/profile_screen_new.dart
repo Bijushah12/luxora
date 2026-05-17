@@ -13,7 +13,6 @@ import '../../theme/app_colors.dart';
 import '../widgets/profile_stat_card.dart';
 import '../widgets/watch_card.dart';
 import 'cart_screen.dart';
-import 'orders_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -86,8 +85,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
@@ -97,8 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 (route) => false,
               );
             },
-            child: const Text('Sign Out',
-                style: TextStyle(color: Colors.red)),
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -107,6 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         final isDark = themeProvider.isDark;
@@ -115,16 +115,18 @@ class _ProfileScreenState extends State<ProfileScreen>
         final orders = Provider.of<OrderProvider>(context);
 
         return Scaffold(
-          backgroundColor:
-              isDark ? AppColors.darkSurface : AppColors.background,
+          backgroundColor: isDark
+              ? AppColors.darkSurface
+              : AppColors.background,
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             title: const Text(
               'Profile',
               style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2),
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
             ),
             centerTitle: true,
             backgroundColor: Colors.transparent,
@@ -157,21 +159,26 @@ class _ProfileScreenState extends State<ProfileScreen>
                               backgroundImage: image != null
                                   ? FileImage(image!)
                                   : const NetworkImage(
-                                          "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d")
-                                      as ImageProvider,
+                                          "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d",
+                                        )
+                                        as ImageProvider,
                             ),
                           ),
 
                           const SizedBox(height: 10),
 
-                          Text(name,
-                              style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
 
-                          Text(email,
-                              style:
-                                  const TextStyle(color: Colors.black54)),
+                          Text(
+                            email,
+                            style: const TextStyle(color: Colors.black54),
+                          ),
 
                           const SizedBox(height: 20),
 
@@ -208,9 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       itemCount: orders.orders.length,
                       itemBuilder: (context, index) {
                         final order = orders.orders[index];
-                        return ListTile(
-                          title: Text("Order ${order.id}"),
-                        );
+                        return ListTile(title: Text("Order ${order.id}"));
                       },
                     ),
 
@@ -230,8 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             title: const Text('Notifications'),
                             value: notificationsEnabled,
                             onChanged: (val) {
-                              setState(() =>
-                                  notificationsEnabled = val);
+                              setState(() => notificationsEnabled = val);
                             },
                           ),
                           const Spacer(),
@@ -239,11 +243,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                             width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red),
+                                backgroundColor: Colors.red,
+                              ),
                               onPressed: logout,
                               child: const Text("Sign Out"),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),

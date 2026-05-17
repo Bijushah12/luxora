@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/app_address.dart';
 import '../providers/address_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class AddressScreen extends StatelessWidget {
   const AddressScreen({super.key});
@@ -43,10 +44,7 @@ class AddressScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: Text('Delete', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -59,13 +57,14 @@ class AddressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           'Shipping Address',
           style: TextStyle(
             color: AppColors.textDark,
@@ -81,12 +80,13 @@ class AddressScreen extends StatelessWidget {
             onPressed: () => _openAddressSheet(context),
             icon: const Icon(Icons.add_location_alt_outlined),
           ),
+          const ThemeToggleButton(),
         ],
       ),
       body: Consumer<AddressProvider>(
         builder: (context, provider, child) {
           if (!provider.isLoaded) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );
           }
@@ -134,6 +134,7 @@ class _AddressSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -149,10 +150,7 @@ class _AddressSummary extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
-              Icons.local_shipping_outlined,
-              color: AppColors.accent,
-            ),
+            child: Icon(Icons.local_shipping_outlined, color: AppColors.accent),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -161,7 +159,7 @@ class _AddressSummary extends StatelessWidget {
               children: [
                 Text(
                   '$count saved ${count == 1 ? 'address' : 'addresses'}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -199,6 +197,7 @@ class _AddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -240,7 +239,7 @@ class _AddressCard extends StatelessWidget {
                             address.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textDark,
@@ -256,7 +255,7 @@ class _AddressCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       address.fullName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontWeight: FontWeight.w600,
                       ),
@@ -277,7 +276,7 @@ class _AddressCard extends StatelessWidget {
                       value: 'default',
                       child: Text('Make Default'),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Text(
                       'Delete',
@@ -291,20 +290,16 @@ class _AddressCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             address.addressLine,
-            style: const TextStyle(color: AppColors.textLight, height: 1.5),
+            style: TextStyle(color: AppColors.textLight, height: 1.5),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(
-                Icons.phone_outlined,
-                color: AppColors.textLight,
-                size: 16,
-              ),
+              Icon(Icons.phone_outlined, color: AppColors.textLight, size: 16),
               const SizedBox(width: 6),
               Text(
                 address.phone,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
                   fontWeight: FontWeight.w600,
                 ),
@@ -331,13 +326,14 @@ class _AddressCard extends StatelessWidget {
 class _DefaultChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.accent.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
+      child: Text(
         'Default',
         style: TextStyle(
           color: AppColors.accent,
@@ -356,6 +352,7 @@ class _EmptyAddressState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
@@ -369,14 +366,14 @@ class _EmptyAddressState extends StatelessWidget {
                 color: AppColors.accent.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.location_on_outlined,
                 size: 40,
                 color: AppColors.accent,
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'No saved address',
               style: TextStyle(
                 fontSize: 20,
@@ -385,7 +382,7 @@ class _EmptyAddressState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Add your delivery address to make checkout faster.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textLight, height: 1.5),
@@ -464,10 +461,11 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final isEditing = widget.address != null;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -500,7 +498,7 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
                   const SizedBox(height: 20),
                   Text(
                     isEditing ? 'Edit Address' : 'Add Address',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textDark,
@@ -563,7 +561,7 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
                     },
                     contentPadding: EdgeInsets.zero,
                     activeColor: AppColors.accent,
-                    title: const Text(
+                    title: Text(
                       'Make this my default address',
                       style: TextStyle(
                         color: AppColors.textDark,
@@ -609,12 +607,13 @@ class _AddressTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(color: AppColors.textDark),
+      style: TextStyle(color: AppColors.textDark),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.accent),
@@ -626,11 +625,11 @@ class _AddressTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.5),
         ),
       ),
     );

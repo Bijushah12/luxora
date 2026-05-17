@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('About Luxora')),
+      appBar: AppBar(
+        title: const Text('About Luxora'),
+        actions: const [ThemeToggleButton()],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         child: Center(
@@ -48,6 +53,7 @@ class _AboutHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 820;
@@ -57,7 +63,7 @@ class _AboutHero extends StatelessWidget {
             color: AppColors.card,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.border),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: AppColors.shadow,
                 blurRadius: 20,
@@ -84,6 +90,7 @@ class _HeroCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -95,7 +102,7 @@ class _HeroCopy extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
+            child: Text(
               'LUXORA WATCH HOUSE',
               style: TextStyle(
                 color: AppColors.primary,
@@ -106,7 +113,7 @@ class _HeroCopy extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
+          Text(
             'Luxury that feels precise, personal, and trustworthy.',
             style: TextStyle(
               color: AppColors.textDark,
@@ -116,7 +123,7 @@ class _HeroCopy extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'We curate watches for real ownership: style that fits your life, authenticity you can trust, and support that stays available after checkout.',
             style: TextStyle(
               color: AppColors.textLight,
@@ -152,6 +159,7 @@ class _HeroImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: AspectRatio(
@@ -162,7 +170,7 @@ class _HeroImage extends StatelessWidget {
           errorBuilder: (context, error, stackTrace) {
             return Container(
               color: AppColors.surface,
-              child: const Icon(
+              child: Icon(
                 Icons.watch_outlined,
                 color: AppColors.textLight,
                 size: 76,
@@ -188,12 +196,13 @@ class _SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.accent,
             fontSize: 12,
             fontWeight: FontWeight.w900,
@@ -203,7 +212,7 @@ class _SectionHeading extends StatelessWidget {
         const SizedBox(height: 7),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textDark,
             fontSize: 24,
             height: 1.18,
@@ -213,7 +222,7 @@ class _SectionHeading extends StatelessWidget {
         const SizedBox(height: 9),
         Text(
           subtitle,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textLight,
             height: 1.55,
             fontWeight: FontWeight.w600,
@@ -229,6 +238,7 @@ class _TrustGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const items = [
       _TrustItem(
         icon: Icons.verified_user_outlined,
@@ -287,6 +297,7 @@ class _TrustCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       height: 168,
       padding: const EdgeInsets.all(16),
@@ -312,7 +323,7 @@ class _TrustCard extends StatelessWidget {
             item.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
               fontSize: 15,
@@ -323,7 +334,7 @@ class _TrustCard extends StatelessWidget {
             item.text,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               height: 1.4,
               fontWeight: FontWeight.w600,
@@ -340,6 +351,7 @@ class _StoryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -386,7 +398,8 @@ class _StoryCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    AppColors.watch(context);
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -427,6 +440,7 @@ class _ProcessSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const steps = [
       _ProcessStep(
         icon: Icons.search_outlined,
@@ -471,6 +485,7 @@ class _ProcessTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -498,7 +513,7 @@ class _ProcessTile extends StatelessWidget {
               children: [
                 Text(
                   step.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                     fontSize: 15,
@@ -507,7 +522,7 @@ class _ProcessTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   step.text,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     height: 1.4,
                     fontWeight: FontWeight.w600,
@@ -527,6 +542,7 @@ class _ValuesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -569,6 +585,7 @@ class _MetricPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
@@ -583,7 +600,7 @@ class _MetricPill extends StatelessWidget {
           const SizedBox(width: 7),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 12,
               fontWeight: FontWeight.w900,
@@ -603,6 +620,7 @@ class _DarkStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: 132,
       padding: const EdgeInsets.all(14),
@@ -616,7 +634,7 @@ class _DarkStat extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.accent,
               fontSize: 24,
               fontWeight: FontWeight.w900,

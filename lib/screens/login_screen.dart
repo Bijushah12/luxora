@@ -109,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       body: SingleChildScrollView(
@@ -135,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   top: 54,
                   left: 0,
                   right: 0,
-                  child: const _LuxoraLogo(
+                  child: _LuxoraLogo(
                     markSize: 54,
                     titleSize: 28,
                     subtitle: 'PREMIUM WATCHES',
@@ -159,11 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: emailController,
                       validator: validateEmail,
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: InputDecoration(
                         hintText: "Email Address",
-                        hintStyle: const TextStyle(color: AppColors.textLight),
-                        prefixIcon: const Icon(
+                        hintStyle: TextStyle(color: AppColors.textLight),
+                        prefixIcon: Icon(
                           Icons.email_outlined,
                           color: AppColors.textDark,
                         ),
@@ -182,11 +183,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: passwordController,
                       validator: validatePassword,
                       obscureText: hidePassword,
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: InputDecoration(
                         hintText: "Password",
-                        hintStyle: const TextStyle(color: AppColors.textLight),
-                        prefixIcon: const Icon(
+                        hintStyle: TextStyle(color: AppColors.textLight),
+                        prefixIcon: Icon(
                           Icons.lock_outline,
                           color: AppColors.textDark,
                         ),
@@ -242,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "New to Luxora?",
                           style: TextStyle(color: AppColors.textLight),
                         ),
@@ -255,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             "Create Account",
                             style: TextStyle(
                               color: AppColors.accent,
@@ -319,6 +320,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/customer_support_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
@@ -84,9 +85,13 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Contact Us')),
+      appBar: AppBar(
+        title: const Text('Contact Us'),
+        actions: const [ThemeToggleButton()],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         child: Center(
@@ -130,6 +135,7 @@ class _ContactHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -147,13 +153,10 @@ class _ContactHeader extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.support_agent_outlined,
-              color: AppColors.accent,
-            ),
+            child: Icon(Icons.support_agent_outlined, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -212,13 +215,14 @@ class _ContactForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 16,
@@ -306,7 +310,7 @@ class _ContactForm extends StatelessWidget {
                   ),
                 ),
                 icon: isSending
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
@@ -333,6 +337,7 @@ class _SupportDirectory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const items = [
       _DirectoryItem(Icons.mail_outline, 'Email', 'luxora@gmail.com'),
       _DirectoryItem(Icons.call_outlined, 'Phone', '+91 98765 43210'),
@@ -371,7 +376,7 @@ class _SupportDirectory extends StatelessWidget {
                   children: [
                     Text(
                       item.label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textLight,
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
@@ -380,7 +385,7 @@ class _SupportDirectory extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       item.value,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontWeight: FontWeight.w900,
                       ),
@@ -417,6 +422,7 @@ class _ContactTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -437,19 +443,19 @@ InputDecoration _fieldDecoration(String label, IconData icon) {
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: AppColors.border),
+      borderSide: BorderSide(color: AppColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: AppColors.border),
+      borderSide: BorderSide(color: AppColors.border),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+      borderSide: BorderSide(color: AppColors.accent, width: 1.4),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: AppColors.error),
+      borderSide: BorderSide(color: AppColors.error),
     ),
   );
 }

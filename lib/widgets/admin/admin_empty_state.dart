@@ -18,6 +18,7 @@ class AdminEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
@@ -42,7 +43,7 @@ class AdminEmptyState extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
@@ -52,10 +53,7 @@ class AdminEmptyState extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.textLight,
-                  height: 1.35,
-                ),
+                style: TextStyle(color: AppColors.textLight, height: 1.35),
               ),
               if (action != null) ...[const SizedBox(height: 18), action!],
             ],

@@ -19,6 +19,7 @@ class ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -32,7 +33,10 @@ class ProfileStatCard extends StatelessWidget {
               Colors.white.withOpacity(0.1),
             ],
           ),
-          border: Border.all(color: AppColors.primaryGold.withOpacity(0.4), width: 1),
+          border: Border.all(
+            color: AppColors.primaryGold.withOpacity(0.4),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryGold.withOpacity(0.3),
@@ -48,7 +52,7 @@ class ProfileStatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               count,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.darkBg,
@@ -69,4 +73,3 @@ class ProfileStatCard extends StatelessWidget {
     );
   }
 }
-

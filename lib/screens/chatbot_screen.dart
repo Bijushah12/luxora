@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../services/customer_support_service.dart';
 import '../services/luxora_assistant_engine.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -88,9 +89,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Luxora Concierge')),
+      appBar: AppBar(
+        title: const Text('Luxora Concierge'),
+        actions: const [ThemeToggleButton()],
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -143,6 +148,7 @@ class _AssistantHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -160,13 +166,10 @@ class _AssistantHeader extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.auto_awesome_outlined,
-              color: AppColors.accent,
-            ),
+            child: Icon(Icons.auto_awesome_outlined, color: AppColors.accent),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -209,6 +212,7 @@ class _QuickQuestionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
@@ -219,14 +223,14 @@ class _QuickQuestionBar extends StatelessWidget {
             child: ActionChip(
               onPressed: isDisabled ? null : () => onTap(question),
               label: Text(question),
-              labelStyle: const TextStyle(
+              labelStyle: TextStyle(
                 color: AppColors.textDark,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
               backgroundColor: AppColors.card,
               disabledColor: AppColors.surface,
-              side: const BorderSide(color: AppColors.border),
+              side: BorderSide(color: AppColors.border),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -251,6 +255,7 @@ class _Composer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       child: Row(
@@ -272,15 +277,15 @@ class _Composer extends StatelessWidget {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.accent),
+                  borderSide: BorderSide(color: AppColors.accent),
                 ),
               ),
               onSubmitted: isDisabled ? null : (_) => onSend(),
@@ -316,6 +321,7 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final isUser = message.isUser;
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -350,6 +356,7 @@ class _TypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -359,7 +366,7 @@ class _TypingBubble extends StatelessWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Text(
+        child: Text(
           'Concierge is checking...',
           style: TextStyle(
             color: AppColors.textLight,

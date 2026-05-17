@@ -43,6 +43,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminUsersProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<List<AdminAppUser>>(
@@ -133,6 +134,7 @@ class _UserSummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final admins = users.where((user) => user.isAdmin).length;
     final blocked = users.where((user) => user.isBlocked).length;
     final customers = users.where((user) => !user.isAdmin).length;
@@ -175,6 +177,7 @@ class _AdminSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 760) {
@@ -232,6 +235,7 @@ class _AdminSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -260,7 +264,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -270,7 +274,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -293,6 +297,7 @@ class _UsersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       children: users
           .map((user) => _UserActivityPanel(user: user, provider: provider))
@@ -309,6 +314,7 @@ class _UserActivityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return StreamBuilder<AdminUserActivity>(
       stream: provider.userActivityStream(user.id),
       builder: (context, snapshot) {
@@ -333,7 +339,7 @@ class _UserActivityPanel extends StatelessWidget {
               backgroundColor: AppColors.primary,
               child: Text(
                 _initialsFor(user),
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textInverse,
                   fontWeight: FontWeight.w900,
                 ),
@@ -346,7 +352,7 @@ class _UserActivityPanel extends StatelessWidget {
                     user.name.isEmpty ? 'Unnamed user' : user.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.w900,
                     ),
@@ -369,7 +375,7 @@ class _UserActivityPanel extends StatelessWidget {
                     _contactLine(user),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppColors.textLight),
+                    style: TextStyle(color: AppColors.textLight),
                   ),
                   const SizedBox(height: 8),
                   if (isLoading)
@@ -411,6 +417,7 @@ class _ActivityChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -459,6 +466,7 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -473,7 +481,7 @@ class _MetricChip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             '$label $value',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -498,6 +506,7 @@ class _ActivityDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final blocks = [
       _DetailBlock(
         title: 'Customer',
@@ -616,6 +625,7 @@ class _DetailBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -634,7 +644,7 @@ class _DetailBlock extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -648,7 +658,7 @@ class _DetailBlock extends StatelessWidget {
             const Divider(height: 20),
             Text(
               footer!,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.w900,
               ),
@@ -668,6 +678,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -677,7 +688,7 @@ class _DetailRow extends StatelessWidget {
             width: 82,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontWeight: FontWeight.w700,
               ),
@@ -686,7 +697,7 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.w700,
               ),
@@ -705,6 +716,7 @@ class _OrderMiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _PlainTile(
       icon: Icons.inventory_2_outlined,
       iconColor: _statusColor(order.status),
@@ -724,6 +736,7 @@ class _CartMiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _ProductTile(
       imageUrl: item.imageUrl,
       title: item.name,
@@ -740,6 +753,7 @@ class _WishlistMiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _ProductTile(
       imageUrl: item.imageUrl,
       title: item.name,
@@ -756,6 +770,7 @@ class _AddressMiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _PlainTile(
       icon: address.isDefault
           ? Icons.home_work_outlined
@@ -775,6 +790,7 @@ class _NotificationMiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _PlainTile(
       icon: notification.isRead
           ? Icons.notifications_none
@@ -802,6 +818,7 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -813,11 +830,11 @@ class _ProductTile extends StatelessWidget {
               height: 44,
               color: AppColors.surface,
               child: imageUrl.trim().isEmpty
-                  ? const Icon(Icons.watch_outlined, color: AppColors.textLight)
+                  ? Icon(Icons.watch_outlined, color: AppColors.textLight)
                   : Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.watch_outlined,
                         color: AppColors.textLight,
                       ),
@@ -833,7 +850,7 @@ class _ProductTile extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -843,10 +860,7 @@ class _ProductTile extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, fontSize: 12),
                 ),
               ],
             ),
@@ -854,7 +868,7 @@ class _ProductTile extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             trailing,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -882,6 +896,7 @@ class _PlainTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -905,7 +920,7 @@ class _PlainTile extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -915,10 +930,7 @@ class _PlainTile extends StatelessWidget {
                   subtitle,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, fontSize: 12),
                 ),
               ],
             ),
@@ -927,7 +939,7 @@ class _PlainTile extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               trailing!,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -947,7 +959,8 @@ class _MutedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: const TextStyle(color: AppColors.textLight));
+    AppColors.watch(context);
+    return Text(text, style: TextStyle(color: AppColors.textLight));
   }
 }
 
@@ -958,6 +971,7 @@ class _RoleBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final color = user.isAdmin ? AppColors.accent : AppColors.textLight;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -982,13 +996,14 @@ class _BlockedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: AppColors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
+      child: Text(
         'Blocked',
         style: TextStyle(
           color: AppColors.error,
@@ -1008,6 +1023,7 @@ class _UserAccessAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final isUpdating = provider.isUpdating(user.id);
     return SizedBox(
       width: double.infinity,
@@ -1039,6 +1055,7 @@ class _InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1048,12 +1065,12 @@ class _InlineError extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error),
+          Icon(Icons.error_outline, color: AppColors.error),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.w700,
               ),

@@ -5,6 +5,7 @@ import '../models/admin_coupon.dart';
 import '../providers/cart_provider.dart';
 import '../providers/coupons_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class OffersScreen extends StatefulWidget {
   const OffersScreen({super.key});
@@ -27,14 +28,17 @@ class _OffersScreenState extends State<OffersScreen> {
     if (query.isEmpty) {
       return coupons;
     }
-    return coupons.where((coupon) {
-      return coupon.code.toLowerCase().contains(query) ||
-          coupon.title.toLowerCase().contains(query);
-    }).toList(growable: false);
+    return coupons
+        .where((coupon) {
+          return coupon.code.toLowerCase().contains(query) ||
+              coupon.title.toLowerCase().contains(query);
+        })
+        .toList(growable: false);
   }
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
@@ -43,13 +47,14 @@ class _OffersScreenState extends State<OffersScreen> {
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Offers',
           style: TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.w900,
           ),
         ),
+        actions: const [ThemeToggleButton()],
       ),
       body: StreamBuilder<List<AdminCoupon>>(
         stream: context.read<CouponsProvider>().activeCouponsStream(),
@@ -97,7 +102,7 @@ class _OffersScreenState extends State<OffersScreen> {
                   ),
                 ),
                 if (snapshot.connectionState == ConnectionState.waiting)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
                       child: CircularProgressIndicator(color: AppColors.accent),
@@ -180,13 +185,14 @@ class _OffersHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 16,
@@ -209,7 +215,7 @@ class _OffersHero extends StatelessWidget {
                   color: AppColors.accent.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Text(
+                child: Text(
                   'LUXORA MEMBER DEALS',
                   style: TextStyle(
                     color: AppColors.accent,
@@ -220,7 +226,7 @@ class _OffersHero extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Premium offers for your next smartwatch',
                 style: TextStyle(
                   color: AppColors.textInverse,
@@ -285,6 +291,7 @@ class _HeroStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -310,7 +317,7 @@ class _HeroStat extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 20,
               fontWeight: FontWeight.w900,
@@ -330,12 +337,13 @@ class _OfferSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextField(
       controller: controller,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: 'Search offers or coupon codes',
-        prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
+        prefixIcon: Icon(Icons.search, color: AppColors.textLight),
         suffixIcon: controller.text.isEmpty
             ? null
             : IconButton(
@@ -358,6 +366,7 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final couponsProvider = context.watch<CouponsProvider>();
     final isSelected = couponsProvider.selectedCoupon?.id == coupon.id;
     final canApply = couponsProvider.canUse(coupon, subtotal);
@@ -377,7 +386,7 @@ class _OfferCard extends StatelessWidget {
           color: isSelected ? AppColors.accent : AppColors.border,
           width: isSelected ? 1.4 : 1,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 14,
@@ -397,7 +406,7 @@ class _OfferCard extends StatelessWidget {
                   color: AppColors.accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.local_offer_outlined,
                   color: AppColors.accent,
                 ),
@@ -408,7 +417,7 @@ class _OfferCard extends StatelessWidget {
                   coupon.code,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -423,7 +432,7 @@ class _OfferCard extends StatelessWidget {
             coupon.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -433,7 +442,7 @@ class _OfferCard extends StatelessWidget {
             'Save ${coupon.displayDiscount} on orders above Rs ${coupon.minOrderValue.toStringAsFixed(0)}',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -494,6 +503,7 @@ class _OfferFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final isError = error != null;
     final color = isError ? AppColors.error : AppColors.success;
     return Container(
@@ -505,8 +515,10 @@ class _OfferFeedback extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(isError ? Icons.error_outline : Icons.check_circle_outline,
-              color: color),
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: color,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -534,6 +546,7 @@ class _OffersEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
@@ -545,7 +558,7 @@ class _OffersEmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
@@ -555,7 +568,7 @@ class _OffersEmptyState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textLight),
+              style: TextStyle(color: AppColors.textLight),
             ),
           ],
         ),

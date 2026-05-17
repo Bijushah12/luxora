@@ -5,6 +5,7 @@ import '../models/watch_model.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/watch_filter_sheet.dart';
 import '../widgets/watch_card.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'cart_screen.dart';
 
 class WomenScreen extends StatefulWidget {
@@ -86,6 +87,7 @@ class _WomenScreenState extends State<WomenScreen> {
                 ),
             ],
           ),
+          const ThemeToggleButton(),
         ],
       ),
       body: SafeArea(

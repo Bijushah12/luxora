@@ -25,6 +25,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminDashboardProvider>(
       builder: (context, provider, child) {
         final stats = provider.stats;
@@ -38,7 +39,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                 if (provider.isLoading) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: const LinearProgressIndicator(
+                    child: LinearProgressIndicator(
                       minHeight: 4,
                       color: AppColors.accent,
                     ),
@@ -159,6 +160,7 @@ class _AnalyticsHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return AdminGlassCard(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -170,14 +172,14 @@ class _AnalyticsHero extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(18),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.auto_graph_outlined,
               color: AppColors.accent,
               size: 30,
             ),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -224,6 +226,7 @@ class _AnalyticsMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return AdminGlassCard(
       child: Row(
         children: [
@@ -256,7 +259,7 @@ class _AnalyticsMetric extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontSize: 23,
                     fontWeight: FontWeight.w900,
@@ -278,6 +281,7 @@ class _SalesGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final spots = <FlSpot>[
       for (var i = 0; i < points.length; i++)
         FlSpot(i.toDouble(), points[i].value),
@@ -384,6 +388,7 @@ class _RevenueChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final total = luxuryRevenue + budgetRevenue;
     final sections = total <= 0
         ? [
@@ -392,7 +397,7 @@ class _RevenueChart extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.12),
               title: 'No data',
               radius: 78,
-              titleStyle: const TextStyle(
+              titleStyle: TextStyle(
                 color: AppColors.textInverse,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -405,7 +410,7 @@ class _RevenueChart extends StatelessWidget {
               color: AppColors.accent,
               title: 'Luxury',
               radius: 82,
-              titleStyle: const TextStyle(
+              titleStyle: TextStyle(
                 color: AppColors.primary,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -416,7 +421,7 @@ class _RevenueChart extends StatelessWidget {
               color: const Color(0xFF60A5FA),
               title: 'Budget',
               radius: 70,
-              titleStyle: const TextStyle(
+              titleStyle: TextStyle(
                 color: AppColors.textInverse,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -477,6 +482,7 @@ class _TopSellingPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return AdminGlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,7 +513,7 @@ class _TopSellingPanel extends StatelessWidget {
                         height: 52,
                         color: Colors.white.withValues(alpha: 0.08),
                         child: watch.imageUrl.isEmpty
-                            ? const Icon(
+                            ? Icon(
                                 Icons.watch_outlined,
                                 color: AppColors.accent,
                               )
@@ -515,7 +521,7 @@ class _TopSellingPanel extends StatelessWidget {
                                 watch.imageUrl,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(
+                                    Icon(
                                       Icons.watch_outlined,
                                       color: AppColors.accent,
                                     ),
@@ -531,7 +537,7 @@ class _TopSellingPanel extends StatelessWidget {
                             watch.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textInverse,
                               fontWeight: FontWeight.w900,
                             ),
@@ -550,7 +556,7 @@ class _TopSellingPanel extends StatelessWidget {
                     ),
                     Text(
                       _compactCurrency(watch.revenue),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.accent,
                         fontWeight: FontWeight.w900,
                       ),
@@ -580,6 +586,7 @@ class _PerformancePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final entries = values.entries.take(6).toList(growable: false);
     final maxY = entries.fold<double>(
       0,
@@ -676,6 +683,7 @@ class _AiInsightsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final insights = [
       if (stats.pendingOrdersCount > 0)
         'Prioritize ${stats.pendingOrdersCount} pending orders to protect premium delivery experience.',
@@ -705,7 +713,7 @@ class _AiInsightsPanel extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.bolt_outlined,
                         color: AppColors.accent,
                         size: 20,
@@ -744,6 +752,7 @@ class _LegendTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -772,7 +781,7 @@ class _LegendTile extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 12,
               fontWeight: FontWeight.w900,
@@ -791,6 +800,7 @@ class _EmptyChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Text(
         message,

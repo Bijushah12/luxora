@@ -28,6 +28,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminDashboardProvider>(
       builder: (context, provider, child) {
         final stats = provider.stats;
@@ -77,9 +78,10 @@ class _DashboardLoadingBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: const LinearProgressIndicator(
+      child: LinearProgressIndicator(
         minHeight: 4,
         color: AppColors.accent,
         backgroundColor: AppColors.surface,
@@ -95,12 +97,13 @@ class _DashboardHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 22,
@@ -116,7 +119,7 @@ class _DashboardHero extends StatelessWidget {
             children: [
               const _HeroBadge(),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Luxora Admin Home',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -189,6 +192,7 @@ class _HeroBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -196,7 +200,7 @@ class _HeroBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: AppColors.accent.withValues(alpha: 0.28)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.emoji_events, color: AppColors.accent, size: 17),
@@ -224,6 +228,7 @@ class _HeroChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
@@ -238,7 +243,7 @@ class _HeroChip extends StatelessWidget {
           const SizedBox(width: 7),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -257,6 +262,7 @@ class _TopWatchSpotlight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final imageUrl = stats.topSellingWatchImageUrl.trim();
 
     return Container(
@@ -275,7 +281,7 @@ class _TopWatchSpotlight extends StatelessWidget {
               height: 126,
               color: AppColors.scaffoldBg,
               child: imageUrl.isEmpty
-                  ? const Icon(
+                  ? Icon(
                       Icons.watch_outlined,
                       color: AppColors.accent,
                       size: 46,
@@ -283,7 +289,7 @@ class _TopWatchSpotlight extends StatelessWidget {
                   : Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.watch_outlined,
                         color: AppColors.accent,
                         size: 46,
@@ -296,7 +302,7 @@ class _TopWatchSpotlight extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Best Performer',
                   style: TextStyle(
                     color: AppColors.accent,
@@ -309,7 +315,7 @@ class _TopWatchSpotlight extends StatelessWidget {
                   stats.topSellingWatchName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -362,6 +368,7 @@ class _SpotlightMiniMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       decoration: BoxDecoration(
@@ -386,7 +393,7 @@ class _SpotlightMiniMetric extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 13,
               fontWeight: FontWeight.w900,
@@ -405,6 +412,7 @@ class _MetricGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final completionRate = stats.ordersCount == 0
         ? 0
         : (((stats.ordersCount - stats.pendingOrdersCount) /
@@ -509,6 +517,7 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _SurfaceCard(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -532,7 +541,7 @@ class _MetricCard extends StatelessWidget {
                   data.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -543,7 +552,7 @@ class _MetricCard extends StatelessWidget {
                   data.value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 23,
                     fontWeight: FontWeight.w900,
@@ -554,7 +563,7 @@ class _MetricCard extends StatelessWidget {
                   data.helper,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -576,6 +585,7 @@ class _CommandLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 960) {
@@ -608,6 +618,7 @@ class _SalesPerformancePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,6 +645,7 @@ class _SalesBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final maxValue = points.fold<double>(
       0,
       (max, point) => point.value > max ? point.value : max,
@@ -681,7 +693,7 @@ class _SalesBars extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     points[index].label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -719,6 +731,7 @@ class _MonthTrend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     if (points.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -741,7 +754,7 @@ class _MonthTrend extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Six Month Revenue',
                   maxLines: 1,
@@ -754,7 +767,7 @@ class _MonthTrend extends StatelessWidget {
               ),
               Text(
                 _compactCurrency(total),
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.accent,
                   fontWeight: FontWeight.w900,
                 ),
@@ -786,6 +799,7 @@ class _StoreHealthPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final fulfillment = stats.ordersCount == 0
         ? 0.0
         : ((stats.ordersCount - stats.pendingOrdersCount) / stats.ordersCount)
@@ -858,6 +872,7 @@ class _HealthProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -868,7 +883,7 @@ class _HealthProgress extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w900,
                 ),
@@ -895,7 +910,7 @@ class _HealthProgress extends StatelessWidget {
           helper,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textLight,
             fontSize: 12,
             fontWeight: FontWeight.w700,
@@ -913,6 +928,7 @@ class _CustomerSignalGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final items = [
       _SignalData(
         label: 'Cart',
@@ -965,6 +981,7 @@ class _SignalTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -981,7 +998,7 @@ class _SignalTile extends StatelessWidget {
             data.value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 20,
               fontWeight: FontWeight.w900,
@@ -991,7 +1008,7 @@ class _SignalTile extends StatelessWidget {
             data.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -1010,6 +1027,7 @@ class _MarketLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 980;
@@ -1061,6 +1079,7 @@ class _RevenueSplitPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final total = stats.luxuryRevenue + stats.budgetRevenue;
     final luxuryShare = total <= 0 ? 0.0 : stats.luxuryRevenue / total;
     final budgetShare = total <= 0 ? 0.0 : stats.budgetRevenue / total;
@@ -1110,7 +1129,7 @@ class _RevenueSplitPanel extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   _compactCurrency(total),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -1140,6 +1159,7 @@ class _SplitMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1150,7 +1170,7 @@ class _SplitMetric extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1158,7 +1178,7 @@ class _SplitMetric extends StatelessWidget {
             ),
             Text(
               _compactCurrency(value),
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.w900,
               ),
@@ -1195,6 +1215,7 @@ class _RankingPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final entries = values.entries.take(5).toList(growable: false);
     final maxValue = entries.fold<double>(
       0,
@@ -1249,6 +1270,7 @@ class _SlimBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1259,7 +1281,7 @@ class _SlimBar extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -1268,7 +1290,7 @@ class _SlimBar extends StatelessWidget {
             ),
             Text(
               _compactCurrency(value),
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -1298,6 +1320,7 @@ class _ActionLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 900) {
@@ -1332,6 +1355,7 @@ class _SmartAlertsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1361,6 +1385,7 @@ class _AlertTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final color = _alertColor(alert.level);
     return Container(
       padding: const EdgeInsets.all(13),
@@ -1389,7 +1414,7 @@ class _AlertTile extends StatelessWidget {
                   alert.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1399,7 +1424,7 @@ class _AlertTile extends StatelessWidget {
                   alert.message,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1422,6 +1447,7 @@ class _InventoryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1461,6 +1487,7 @@ class _InventoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final imageUrl = product.primaryImageUrl.trim();
 
     return Container(
@@ -1479,11 +1506,11 @@ class _InventoryTile extends StatelessWidget {
               height: 50,
               color: AppColors.surface,
               child: imageUrl.isEmpty
-                  ? const Icon(Icons.watch_outlined, color: AppColors.textLight)
+                  ? Icon(Icons.watch_outlined, color: AppColors.textLight)
                   : Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.watch_outlined,
                         color: AppColors.textLight,
                       ),
@@ -1499,7 +1526,7 @@ class _InventoryTile extends StatelessWidget {
                   product.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1509,7 +1536,7 @@ class _InventoryTile extends StatelessWidget {
                   '${product.brand} | ${product.category}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1527,7 +1554,7 @@ class _InventoryTile extends StatelessWidget {
             ),
             child: Text(
               '${product.stockQuantity} left',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.warning,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -1547,6 +1574,7 @@ class _RecentOrdersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1586,6 +1614,7 @@ class _RecentOrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final statusColor = _statusColor(order.status);
 
     return Container(
@@ -1614,7 +1643,7 @@ class _RecentOrderTile extends StatelessWidget {
                 '#${_shortOrderId(order.id)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1624,7 +1653,7 @@ class _RecentOrderTile extends StatelessWidget {
                 '${order.customerDisplayName} | ${_formatDate(order.createdAt)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1641,7 +1670,7 @@ class _RecentOrderTile extends StatelessWidget {
                 _fullCurrency(order.totalAmount),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1691,6 +1720,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -1722,6 +1752,7 @@ class _PanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       children: [
         Container(
@@ -1742,7 +1773,7 @@ class _PanelHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
@@ -1753,7 +1784,7 @@ class _PanelHeader extends StatelessWidget {
                 subtitle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -1779,6 +1810,7 @@ class _SurfaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: padding,
@@ -1786,7 +1818,7 @@ class _SurfaceCard extends StatelessWidget {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.glassShadow,
             blurRadius: 18,
@@ -1812,6 +1844,7 @@ class _SoftEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1821,7 +1854,7 @@ class _SoftEmptyState extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -1830,7 +1863,7 @@ class _SoftEmptyState extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -1850,6 +1883,7 @@ class _ErrorStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1859,12 +1893,12 @@ class _ErrorStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error),
+          Icon(Icons.error_outline, color: AppColors.error),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.w700,
               ),

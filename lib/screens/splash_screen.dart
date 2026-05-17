@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigate() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         settings: const RouteSettings(name: '/login'),
@@ -63,6 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -99,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             _buildWatchShowcase(watchSize),
                             SizedBox(height: compactWidth ? 22 : 28),
-                            const SizedBox(
+                            SizedBox(
                               width: double.infinity,
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -116,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen>
                               ),
                             ),
                             const SizedBox(height: 14),
-                            const Text(
+                            Text(
                               'Luxury Watches crafted for distinction',
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -156,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: Container(
             width: watchSize,
             height: watchSize,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.card,
               boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 20)],
@@ -244,7 +245,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Container(
                   width: knobSize,
                   height: knobSize,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.accent,
                   ),
@@ -258,7 +259,7 @@ class _SplashScreenState extends State<SplashScreen>
               bottom: 8,
               child: Container(
                 width: 50,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.primary,
                 ),
@@ -293,6 +294,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

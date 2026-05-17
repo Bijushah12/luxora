@@ -73,5 +73,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'luxora-watch.firebasestorage.app',
     measurementId: 'G-7FF2X0VEL0',
   );
-
 }

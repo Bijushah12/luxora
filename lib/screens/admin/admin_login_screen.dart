@@ -39,6 +39,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: LayoutBuilder(
@@ -83,7 +84,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColors.border),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
                         color: AppColors.shadow,
                         blurRadius: 22,
@@ -115,11 +116,12 @@ class _BrandPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _LuxoraLogo(
+        _LuxoraLogo(
           markSize: 58,
           titleSize: 30,
           subtitle: 'Admin Console',
@@ -166,6 +168,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: crossAxisAlignment,
@@ -266,6 +269,7 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminAuthProvider>(
       builder: (context, auth, child) {
         return AutofillGroup(
@@ -275,7 +279,7 @@ class _LoginForm extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Sign In',
                   style: TextStyle(
                     color: AppColors.textDark,
@@ -284,7 +288,7 @@ class _LoginForm extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Use an email/password account marked as admin in Firebase.',
                   style: TextStyle(
                     color: AppColors.textLight,
@@ -305,7 +309,7 @@ class _LoginForm extends StatelessWidget {
                     ),
                     child: Text(
                       auth.errorMessage!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.error,
                         fontWeight: FontWeight.w700,
                       ),
@@ -370,7 +374,7 @@ class _LoginForm extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: auth.isSigningIn ? null : onSubmit,
                     icon: auth.isSigningIn
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(

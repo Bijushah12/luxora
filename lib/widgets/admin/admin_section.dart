@@ -20,6 +20,7 @@ class AdminSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -27,7 +28,7 @@ class AdminSection extends StatelessWidget {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.glassShadow,
             blurRadius: 16,
@@ -63,7 +64,7 @@ class AdminSection extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
@@ -75,7 +76,7 @@ class AdminSection extends StatelessWidget {
                         subtitle!,
                         maxLines: placeTrailingBelow ? 3 : 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textLight,
                           fontSize: 13,
                         ),

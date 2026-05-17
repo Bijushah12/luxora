@@ -6,6 +6,7 @@ import '../providers/address_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/coupons_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'offers_screen.dart';
 import 'payment_screen.dart';
 
@@ -99,7 +100,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Contact Details',
                         style: TextStyle(
@@ -199,7 +200,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   children: [
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Detect Delivery Location',
                             style: TextStyle(
@@ -216,7 +217,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Text(
+                    Text(
                       'Enter your current pincode and we will fill city and state automatically.',
                       style: TextStyle(
                         color: AppColors.textLight,
@@ -230,7 +231,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       decoration: InputDecoration(
                         labelText: 'Current Pincode',
                         errorText: errorText.isEmpty ? null : errorText,
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.my_location,
                           color: AppColors.textLight,
                         ),
@@ -385,6 +386,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
         final coupons = context.watch<CouponsProvider>();
@@ -402,8 +404,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.scaffoldBg,
             elevation: 0,
-            iconTheme: const IconThemeData(color: AppColors.textDark),
-            title: const Text(
+            iconTheme: IconThemeData(color: AppColors.textDark),
+            title: Text(
               'Checkout',
               style: TextStyle(
                 color: AppColors.textDark,
@@ -412,6 +414,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
             centerTitle: true,
+            actions: const [ThemeToggleButton()],
           ),
           body: cartItems.isEmpty
               ? const _EmptyCheckout()
@@ -562,7 +565,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'Grand Total',
                                         style: TextStyle(
                                           color: AppColors.textDark,
@@ -572,7 +575,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       ),
                                       Text(
                                         'Rs ${grandTotal.toStringAsFixed(2)}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.success,
                                           fontSize: 24,
                                           fontWeight: FontWeight.w900,
@@ -605,6 +608,7 @@ class _EmptyCheckout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -615,7 +619,7 @@ class _EmptyCheckout extends StatelessWidget {
             size: 76,
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'No items to checkout',
             style: TextStyle(
               color: AppColors.textDark,
@@ -624,7 +628,7 @@ class _EmptyCheckout extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Add a watch to your cart first.',
             style: TextStyle(color: AppColors.textLight),
           ),
@@ -645,6 +649,7 @@ class _CheckoutCouponPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final coupons = context.watch<CouponsProvider>();
     final selected = coupons.selectedCoupon;
 
@@ -661,9 +666,9 @@ class _CheckoutCouponPanel extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.local_offer_outlined, color: AppColors.accent),
+                Icon(Icons.local_offer_outlined, color: AppColors.accent),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Browse active Luxora coupons and apply one to this order.',
                     style: TextStyle(
@@ -703,7 +708,7 @@ class _CheckoutCouponPanel extends StatelessWidget {
                     color: AppColors.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle_outline,
                     color: AppColors.success,
                   ),
@@ -717,7 +722,7 @@ class _CheckoutCouponPanel extends StatelessWidget {
                         '${selected.code} applied',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w900,
                         ),
@@ -727,7 +732,7 @@ class _CheckoutCouponPanel extends StatelessWidget {
                         couponDiscount > 0
                             ? 'You save Rs ${couponDiscount.toStringAsFixed(0)}'
                             : 'Add Rs ${(selected.minOrderValue - subtotal).clamp(0, selected.minOrderValue).toStringAsFixed(0)} more to unlock',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textLight,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -763,13 +768,14 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 14,
@@ -787,7 +793,7 @@ class _SectionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -797,7 +803,7 @@ class _SectionCard extends StatelessWidget {
               if (trailing != null)
                 Text(
                   trailing!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontWeight: FontWeight.w700,
                   ),
@@ -817,6 +823,7 @@ class _CheckoutStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
       decoration: BoxDecoration(
@@ -852,6 +859,7 @@ class _StepLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Text(
       text,
       maxLines: 1,
@@ -875,6 +883,7 @@ class _StepLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(width: 28, height: 1, color: AppColors.border);
   }
 }
@@ -916,6 +925,7 @@ class _AddressForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 720;
@@ -953,7 +963,7 @@ class _AddressForm extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.person_outline, color: AppColors.textDark),
+                    Icon(Icons.person_outline, color: AppColors.textDark),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -965,7 +975,7 @@ class _AddressForm extends StatelessWidget {
                                 : '${contactName.isEmpty ? 'Contact' : contactName}, +91 ${phoneController.text.trim()}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textDark,
                               fontWeight: FontWeight.w800,
                             ),
@@ -976,15 +986,13 @@ class _AddressForm extends StatelessWidget {
                               contactEmail,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppColors.textLight,
-                              ),
+                              style: TextStyle(color: AppColors.textLight),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, color: AppColors.textDark),
+                    Icon(Icons.chevron_right, color: AppColors.textDark),
                   ],
                 ),
               ),
@@ -1012,7 +1020,7 @@ class _AddressForm extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Center(
+            Center(
               child: Text(
                 'Click to use current Location',
                 style: TextStyle(color: AppColors.textLight, fontSize: 12),
@@ -1112,7 +1120,7 @@ class _AddressForm extends StatelessWidget {
               value: makeDefaultAddress,
               onChanged: onDefaultChanged,
               controlAffinity: ListTileControlAffinity.leading,
-              title: const Text(
+              title: Text(
                 'Make this my default address',
                 style: TextStyle(
                   color: AppColors.textDark,
@@ -1166,6 +1174,7 @@ class _AddressTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(28),
@@ -1222,6 +1231,7 @@ class _CheckoutField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -1235,15 +1245,15 @@ class _CheckoutField extends StatelessWidget {
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.4),
         ),
       ),
     );
@@ -1267,6 +1277,7 @@ class _ChoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final selected = value == groupValue;
 
     return InkWell(
@@ -1286,7 +1297,7 @@ class _ChoiceTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textDark,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -1295,10 +1306,7 @@ class _ChoiceTile extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
                   ),
                 ],
               ),
@@ -1325,6 +1333,7 @@ class _CheckoutItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final watch = item.watch;
     final itemTotal = watch.price * item.quantity;
 
@@ -1344,7 +1353,7 @@ class _CheckoutItem extends StatelessWidget {
                 width: 64,
                 height: 64,
                 color: AppColors.surface,
-                child: const Icon(Icons.watch, color: AppColors.textLight),
+                child: Icon(Icons.watch, color: AppColors.textLight),
               ),
             ),
           ),
@@ -1357,7 +1366,7 @@ class _CheckoutItem extends StatelessWidget {
                   watch.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1367,10 +1376,7 @@ class _CheckoutItem extends StatelessWidget {
                   '${watch.brand} | ${watch.category}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, fontSize: 12),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -1380,7 +1386,7 @@ class _CheckoutItem extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         item.quantity.toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w900,
                         ),
@@ -1391,7 +1397,7 @@ class _CheckoutItem extends StatelessWidget {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       onPressed: onRemove,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.delete_outline,
                         color: AppColors.error,
                         size: 20,
@@ -1405,7 +1411,7 @@ class _CheckoutItem extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Rs ${itemTotal.toStringAsFixed(0)}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -1424,6 +1430,7 @@ class _QtyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -1456,6 +1463,7 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -1463,7 +1471,7 @@ class _PriceRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontWeight: FontWeight.w600,
             ),
@@ -1497,12 +1505,13 @@ class _CheckoutBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
         color: AppColors.card,
-        border: const Border(top: BorderSide(color: AppColors.border)),
-        boxShadow: const [
+        border: Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 14,
@@ -1519,7 +1528,7 @@ class _CheckoutBottomBar extends StatelessWidget {
                 onPressed: onCancel,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textDark,
-                  side: const BorderSide(color: AppColors.primary),
+                  side: BorderSide(color: AppColors.primary),
                   padding: const EdgeInsets.symmetric(vertical: 17),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

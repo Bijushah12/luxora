@@ -173,6 +173,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
 
@@ -201,7 +202,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   top: 54,
                   left: 0,
                   right: 0,
-                  child: const _LuxoraLogo(
+                  child: _LuxoraLogo(
                     markSize: 54,
                     titleSize: 28,
                     subtitle: 'CREATE ACCOUNT',
@@ -225,7 +226,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextFormField(
                       controller: nameController,
                       validator: (v) => v!.isEmpty ? "Enter name" : null,
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("User Name", Icons.person),
                     ),
 
@@ -234,7 +235,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextFormField(
                       controller: emailController,
                       validator: (v) => v!.isEmpty ? "Enter email" : null,
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("Email Address", Icons.email),
                     ),
 
@@ -248,7 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         if (v.length < 6) return "Min 6 characters";
                         return null;
                       },
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration("Password", Icons.lock)
                           .copyWith(
                             suffixIcon: IconButton(
@@ -278,7 +279,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         }
                         return null;
                       },
-                      style: const TextStyle(color: AppColors.textDark),
+                      style: TextStyle(color: AppColors.textDark),
                       decoration: inputDecoration(
                         "Confirm Password",
                         Icons.lock_outline,
@@ -318,7 +319,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "Already have account?",
                           style: TextStyle(color: AppColors.textLight),
                         ),
@@ -326,7 +327,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: const Text(
+                          child: Text(
                             "Login",
                             style: TextStyle(
                               color: AppColors.accent,
@@ -351,7 +352,7 @@ class _SignupScreenState extends State<SignupScreen> {
   InputDecoration inputDecoration(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.textLight),
+      hintStyle: TextStyle(color: AppColors.textLight),
       prefixIcon: Icon(icon, color: AppColors.textDark),
       filled: true,
       fillColor: AppColors.surface,
@@ -404,6 +405,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

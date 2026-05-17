@@ -11,10 +11,11 @@ class AdminGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminAuthProvider>(
       builder: (context, auth, child) {
         if (auth.isChecking) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: AppColors.background,
             body: Center(child: CircularProgressIndicator()),
           );
@@ -45,6 +46,7 @@ class _AccessDenied extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
@@ -68,14 +70,14 @@ class _AccessDenied extends StatelessWidget {
                     color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_outline,
                     color: AppColors.error,
                     size: 34,
                   ),
                 ),
                 const SizedBox(height: 18),
-                const Text(
+                Text(
                   'Admin Access Required',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -88,10 +90,7 @@ class _AccessDenied extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    height: 1.35,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, height: 1.35),
                 ),
                 const SizedBox(height: 22),
                 SizedBox(

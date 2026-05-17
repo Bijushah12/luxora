@@ -16,6 +16,7 @@ class AdminFeedbackBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final message = error ?? success;
     if (message == null || message.isEmpty) {
       return const SizedBox.shrink();

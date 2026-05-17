@@ -52,6 +52,7 @@ class _WatchCardState extends State<WatchCard>
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     if (widget.isSkeleton) {
       return Container(
         height: WatchCard.cardHeight,
@@ -212,7 +213,7 @@ class _WatchCardState extends State<WatchCard>
                           widget.watch.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
                             color: AppColors.textDark,
@@ -224,7 +225,7 @@ class _WatchCardState extends State<WatchCard>
                         /// BRAND
                         Text(
                           widget.watch.brand,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textLight,
                             fontSize: 12,
                           ),
@@ -245,7 +246,7 @@ class _WatchCardState extends State<WatchCard>
                                     "Rs ${widget.watch.price.toInt()}",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.goldAccent,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
@@ -264,7 +265,7 @@ class _WatchCardState extends State<WatchCard>
                                         color: AppColors.accent,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         'Luxury',
                                         style: TextStyle(
                                           color: AppColors.textInverse,

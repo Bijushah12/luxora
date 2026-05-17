@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/order_model.dart';
 import '../providers/order_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import '../widgets/watch_card.dart';
 
 class OrdersScreen extends StatelessWidget {
@@ -11,13 +12,14 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           'My Orders',
           style: TextStyle(
             color: AppColors.textDark,
@@ -27,6 +29,7 @@ class OrdersScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: const [ThemeToggleButton()],
       ),
       body: SafeArea(
         child: Padding(
@@ -75,6 +78,7 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final orderCode = order.id.length > 8
         ? order.id.substring(order.id.length - 8)
         : order.id;
@@ -87,7 +91,7 @@ class _OrderCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: AppColors.border),
       ),
       child: ExpansionTile(
         leading: CircleAvatar(
@@ -96,7 +100,7 @@ class _OrderCard extends StatelessWidget {
         ),
         title: Text(
           '#$orderCode',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textDark,
           ),
@@ -121,7 +125,7 @@ class _OrderCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           'Qty: ${item.quantity} | Rs ${item.subtotal.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textLight,
                             fontWeight: FontWeight.w700,
                           ),
@@ -130,7 +134,7 @@ class _OrderCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Divider(color: AppColors.divider),
+                Divider(color: AppColors.divider),
                 _OrderMeta(label: 'Payment', value: order.paymentMethod),
                 if (order.transactionId.isNotEmpty)
                   _OrderMeta(label: 'Transaction', value: order.transactionId),
@@ -138,7 +142,7 @@ class _OrderCard extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Text(
                     'Total: Rs ${order.total.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textDark,
@@ -162,6 +166,7 @@ class _OrderMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     if (value.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -170,7 +175,7 @@ class _OrderMeta extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         '$label: $value',
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.textLight,
           fontWeight: FontWeight.w600,
         ),
@@ -192,6 +197,7 @@ class _OrdersMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -205,7 +211,7 @@ class _OrdersMessage extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
               color: AppColors.textLight,

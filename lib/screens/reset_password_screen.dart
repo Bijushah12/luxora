@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/custom_textfield.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'home_screen.dart';
 
 class ResetPasswordScreen extends StatelessWidget {
@@ -8,31 +9,45 @@ class ResetPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           'Reset Password',
-          style: TextStyle(color: AppColors.textDark, fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
+        actions: const [ThemeToggleButton()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(25),
         child: Column(
           children: [
             const SizedBox(height: 40),
-            Icon(Icons.lock_reset, size: 80, color: AppColors.accent.withOpacity(0.5)),
+            Icon(
+              Icons.lock_reset,
+              size: 80,
+              color: AppColors.accent.withOpacity(0.5),
+            ),
             const SizedBox(height: 30),
-            const Text(
+            Text(
               "Create New Password",
-              style: TextStyle(color: AppColors.textDark, fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               "Enter your new password below",
               style: TextStyle(color: AppColors.textLight, fontSize: 14),
             ),
@@ -52,7 +67,7 @@ class ResetPasswordScreen extends StatelessWidget {
                 },
                 child: const Text("Continue"),
               ),
-            )
+            ),
           ],
         ),
       ),

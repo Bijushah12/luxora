@@ -7,6 +7,7 @@ import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../services/watch_content_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'cart_screen.dart';
 import 'checkout_screen.dart';
 
@@ -44,6 +45,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final isWide = MediaQuery.sizeOf(context).width >= 900;
     final galleryImages = _galleryImages;
     final selectedImageIndex = _selectedImageIndex < galleryImages.length
@@ -134,10 +136,11 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return AppBar(
       backgroundColor: AppColors.scaffoldBg,
       elevation: 0,
-      iconTheme: const IconThemeData(color: AppColors.textDark),
+      iconTheme: IconThemeData(color: AppColors.textDark),
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -145,7 +148,7 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
             watch.brand,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 17,
               fontWeight: FontWeight.w900,
@@ -155,7 +158,7 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
             watch.category.isEmpty ? 'Signature timepiece' : watch.category,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -213,7 +216,7 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
                       child: Text(
                         cart.totalItems.toString(),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
@@ -237,6 +240,7 @@ class _ProductAppBar extends StatelessWidget implements PreferredSizeWidget {
           },
           icon: const Icon(Icons.ios_share_outlined),
         ),
+        const ThemeToggleButton(margin: EdgeInsets.only(right: 4)),
         const SizedBox(width: 4),
       ],
     );
@@ -260,6 +264,7 @@ class _ProductGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final hasMultipleImages = images.length > 1;
 
     return Column(
@@ -270,7 +275,7 @@ class _ProductGallery extends StatelessWidget {
             color: AppColors.card,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.border),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: AppColors.shadow,
                 blurRadius: 24,
@@ -309,7 +314,7 @@ class _ProductGallery extends StatelessWidget {
                         width: double.infinity,
                         placeholder: (context, url) => Container(
                           color: AppColors.surface,
-                          child: const Center(
+                          child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.accent,
                             ),
@@ -317,7 +322,7 @@ class _ProductGallery extends StatelessWidget {
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.surface,
-                          child: const Icon(
+                          child: Icon(
                             Icons.watch_outlined,
                             color: AppColors.textLight,
                             size: 76,
@@ -375,7 +380,7 @@ class _ProductGallery extends StatelessWidget {
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: isSelected
-                          ? const [
+                          ? [
                               BoxShadow(
                                 color: AppColors.shadow,
                                 blurRadius: 12,
@@ -391,7 +396,7 @@ class _ProductGallery extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.surface,
-                          child: const Icon(
+                          child: Icon(
                             Icons.watch_outlined,
                             color: AppColors.textLight,
                           ),
@@ -436,6 +441,7 @@ class _ProductDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final category = watch.category.trim().isEmpty
         ? 'Signature'
         : watch.category;
@@ -459,7 +465,7 @@ class _ProductDetails extends StatelessWidget {
         const SizedBox(height: 18),
         Text(
           watch.name,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textDark,
             fontSize: 32,
             fontWeight: FontWeight.w900,
@@ -469,27 +475,11 @@ class _ProductDetails extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            const Icon(
-              Icons.star_rounded,
-              color: AppColors.goldAccent,
-              size: 20,
-            ),
-            const Icon(
-              Icons.star_rounded,
-              color: AppColors.goldAccent,
-              size: 20,
-            ),
-            const Icon(
-              Icons.star_rounded,
-              color: AppColors.goldAccent,
-              size: 20,
-            ),
-            const Icon(
-              Icons.star_rounded,
-              color: AppColors.goldAccent,
-              size: 20,
-            ),
-            const Icon(
+            Icon(Icons.star_rounded, color: AppColors.goldAccent, size: 20),
+            Icon(Icons.star_rounded, color: AppColors.goldAccent, size: 20),
+            Icon(Icons.star_rounded, color: AppColors.goldAccent, size: 20),
+            Icon(Icons.star_rounded, color: AppColors.goldAccent, size: 20),
+            Icon(
               Icons.star_half_rounded,
               color: AppColors.goldAccent,
               size: 20,
@@ -499,7 +489,7 @@ class _ProductDetails extends StatelessWidget {
               '${watch.id} | Curated ${category.toLowerCase()} pick',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -510,7 +500,7 @@ class _ProductDetails extends StatelessWidget {
         const SizedBox(height: 18),
         Text(
           'Rs ${watch.price.toStringAsFixed(2)}',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textDark,
             fontSize: 34,
             fontWeight: FontWeight.w900,
@@ -518,7 +508,7 @@ class _ProductDetails extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'MRP inclusive of all taxes',
           style: TextStyle(
             color: AppColors.textLight,
@@ -560,6 +550,7 @@ class _StickyPurchaseBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Material(
       color: AppColors.card,
       elevation: 18,
@@ -567,7 +558,7 @@ class _StickyPurchaseBar extends StatelessWidget {
         top: false,
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
           child: Column(
@@ -580,14 +571,14 @@ class _StickyPurchaseBar extends StatelessWidget {
                       'Rs ${watch.price.toStringAsFixed(2)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontSize: 19,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
-                  const Text(
+                  Text(
                     'Free shipping',
                     style: TextStyle(
                       color: AppColors.success,
@@ -638,6 +629,7 @@ class _DesktopActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       children: [
         Expanded(
@@ -677,6 +669,7 @@ class _PurchaseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final foreground = filled ? AppColors.textInverse : AppColors.textDark;
     final background = filled ? AppColors.primary : AppColors.card;
 
@@ -708,6 +701,7 @@ class _OfferStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -725,17 +719,14 @@ class _OfferStrip extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.auto_awesome_outlined,
-              color: AppColors.accent,
-            ),
+            child: Icon(Icons.auto_awesome_outlined, color: AppColors.accent),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Luxora Privilege',
                   style: TextStyle(
                     color: AppColors.textInverse,
@@ -768,6 +759,7 @@ class _InfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final description = WatchContentService.descriptionFor(watch);
 
     return Material(
@@ -786,7 +778,7 @@ class _InfoBox extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
                   Icon(
                     Icons.local_shipping_outlined,
@@ -807,7 +799,7 @@ class _InfoBox extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(left: 36),
                 child: Text(
                   'Free insured shipping across India',
@@ -822,7 +814,7 @@ class _InfoBox extends StatelessWidget {
                 description,
                 maxLines: 5,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
                   height: 1.45,
                   fontWeight: FontWeight.w500,
@@ -841,6 +833,7 @@ class _TrustMetricStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const metrics = [
       _MetricData(
         icon: Icons.verified_user_outlined,
@@ -890,7 +883,7 @@ class _TrustMetricStrip extends StatelessWidget {
                             metric.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textDark,
                               fontWeight: FontWeight.w900,
                             ),
@@ -899,7 +892,7 @@ class _TrustMetricStrip extends StatelessWidget {
                             metric.subtitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textLight,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -956,6 +949,7 @@ class _StyleProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -992,6 +986,7 @@ class _ProfileBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: point.value),
       duration: const Duration(milliseconds: 700),
@@ -1007,7 +1002,7 @@ class _ProfileBar extends StatelessWidget {
                     point.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1015,7 +1010,7 @@ class _ProfileBar extends StatelessWidget {
                 ),
                 Text(
                   '${(value * 100).round()}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontWeight: FontWeight.w800,
                     fontSize: 12,
@@ -1054,6 +1049,7 @@ class _ProductStoryTabsState extends State<_ProductStoryTabs> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const labels = ['Details', 'Care', 'Guarantee'];
 
     return Container(
@@ -1146,6 +1142,7 @@ class _SpecGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final category = watch.category.trim().isEmpty
         ? 'Signature'
         : watch.category;
@@ -1187,6 +1184,7 @@ class _SpecTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 76),
       padding: const EdgeInsets.all(12),
@@ -1203,7 +1201,7 @@ class _SpecTile extends StatelessWidget {
             spec.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -1214,7 +1212,7 @@ class _SpecTile extends StatelessWidget {
             spec.value.trim().isEmpty ? 'Luxora' : spec.value,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
               height: 1.2,
@@ -1233,6 +1231,7 @@ class _BulletList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       children: bullets.map((bullet) {
         return Padding(
@@ -1247,17 +1246,13 @@ class _BulletList extends StatelessWidget {
                   color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: AppColors.accent,
-                  size: 15,
-                ),
+                child: Icon(Icons.check, color: AppColors.accent, size: 15),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   bullet,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     height: 1.4,
                     fontWeight: FontWeight.w600,
@@ -1277,6 +1272,7 @@ class _ServiceStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     const services = [
       _MetricData(
         icon: Icons.verified_user_outlined,
@@ -1329,7 +1325,7 @@ class _ServiceStrip extends StatelessWidget {
                       service.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontWeight: FontWeight.w900,
                         fontSize: 12,
@@ -1340,7 +1336,7 @@ class _ServiceStrip extends StatelessWidget {
                       service.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textLight,
                         fontWeight: FontWeight.w600,
                         fontSize: 11,
@@ -1392,6 +1388,7 @@ class _DeliveryAvailabilitySheetState
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final query = _controller.text.trim();
     final isTypedPincodeValid = RegExp(r'^[1-9][0-9]{5}$').hasMatch(query);
     final filteredLocations = query.isEmpty
@@ -1423,7 +1420,7 @@ class _DeliveryAvailabilitySheetState
           children: [
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Delivery estimate',
                     style: TextStyle(
@@ -1436,7 +1433,7 @@ class _DeliveryAvailabilitySheetState
                 IconButton(
                   tooltip: 'Close',
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: AppColors.textDark),
+                  icon: Icon(Icons.close, color: AppColors.textDark),
                 ),
               ],
             ),
@@ -1449,7 +1446,7 @@ class _DeliveryAvailabilitySheetState
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.border),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.location_on_outlined, color: AppColors.accent),
@@ -1534,7 +1531,7 @@ class _DeliveryAvailabilitySheetState
                   shrinkWrap: true,
                   itemCount: displayLocations.length,
                   separatorBuilder: (_, _) =>
-                      const Divider(height: 1, color: AppColors.divider),
+                      Divider(height: 1, color: AppColors.divider),
                   itemBuilder: (context, index) {
                     final location = displayLocations[index];
                     final pin = location['pin']!;
@@ -1551,17 +1548,14 @@ class _DeliveryAvailabilitySheetState
                       },
                       title: Text(
                         pin,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       subtitle: Text(location['city']!),
                       trailing: isSelected
-                          ? const Icon(
-                              Icons.check_circle,
-                              color: AppColors.success,
-                            )
+                          ? Icon(Icons.check_circle, color: AppColors.success)
                           : null,
                     );
                   },
@@ -1585,7 +1579,7 @@ class _DeliveryAvailabilitySheetState
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check_circle,
                           color: AppColors.success,
                           size: 20,
@@ -1594,7 +1588,7 @@ class _DeliveryAvailabilitySheetState
                         Expanded(
                           child: Text(
                             'Delivery available at $_checkedPincode',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.success,
                               fontWeight: FontWeight.w900,
                             ),
@@ -1606,14 +1600,14 @@ class _DeliveryAvailabilitySheetState
                       const SizedBox(height: 8),
                       Text(
                         _checkedLocation,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Expected delivery in 3-5 days with free insured shipping.',
                       style: TextStyle(
                         color: AppColors.textLight,
@@ -1666,6 +1660,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1685,7 +1680,7 @@ class _SectionTitle extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
@@ -1694,7 +1689,7 @@ class _SectionTitle extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
                   height: 1.3,
                   fontWeight: FontWeight.w600,
@@ -1717,6 +1712,7 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       constraints: const BoxConstraints(minHeight: 34),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1762,13 +1758,14 @@ class _GlassBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.card.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.glassBorder),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.glassShadow,
             blurRadius: 12,
@@ -1783,7 +1780,7 @@ class _GlassBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 12,
               fontWeight: FontWeight.w900,

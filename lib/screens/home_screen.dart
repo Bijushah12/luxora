@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import '../services/unsplash_service.dart';
 import '../models/watch_model.dart';
 import '../providers/reviews_provider.dart';
+import '../widgets/theme_toggle_button.dart';
 import '../widgets/watch_card.dart';
 import '../screens/search_screen.dart';
 import '../screens/men_screen.dart';
@@ -177,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 14),
           child: Text(
             'Categories',
@@ -212,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           shape: BoxShape.circle,
                           color: AppColors.card,
                           border: Border.all(color: AppColors.border),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
                               color: AppColors.shadow,
                               blurRadius: 10,
@@ -226,14 +227,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: AppColors.surface,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.watch,
                                 color: AppColors.textLight,
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
                               color: AppColors.surface,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.watch_outlined,
                                 color: AppColors.textLight,
                               ),
@@ -247,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textDark,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -329,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.border),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: AppColors.shadow,
                     blurRadius: 10,
@@ -350,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textDark,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -362,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 10,
                       height: 1.2,
@@ -384,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
           child: Text(
             'Customer Reviews',
@@ -396,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         if (reviewsProvider.isLoading && reviews.isEmpty)
-          const SizedBox(
+          SizedBox(
             height: 128,
             child: Center(
               child: CircularProgressIndicator(color: AppColors.accent),
@@ -430,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 12,
@@ -452,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: imageUrl.isEmpty
                     ? Text(
                         review.initials,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textInverse,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -466,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   review.userName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -492,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             review.message,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textLight,
               fontSize: 13,
               height: 1.35,
@@ -513,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      child: const Text(
+      child: Text(
         'Customer feedback will appear here after the first review.',
         textAlign: TextAlign.center,
         style: TextStyle(
@@ -541,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
                   color: AppColors.shadow,
                   blurRadius: 14,
@@ -557,14 +558,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: AppColors.accent.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.card_giftcard_outlined,
                     color: AppColors.accent,
                     size: 28,
                   ),
                 ),
                 const SizedBox(width: 14),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -593,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios,
                   color: AppColors.textInverse,
                   size: 16,
@@ -608,13 +609,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         toolbarHeight: 70,
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        title: const _LuxoraLogo(
+        title: _LuxoraLogo(
           markSize: 28,
           titleSize: 22,
           markColor: AppColors.accent,
@@ -622,11 +624,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        actions: const [ThemeToggleButton()],
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
-            )
+          ? Center(child: CircularProgressIndicator(color: AppColors.accent))
           : RefreshIndicator(
               onRefresh: _loadData,
               child: CustomScrollView(
@@ -749,10 +750,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               },
                               decoration: InputDecoration(
                                 hintText: 'Search luxury watches...',
-                                hintStyle: const TextStyle(
+                                hintStyle: TextStyle(
                                   color: AppColors.textLight,
                                 ),
-                                prefixIcon: const Icon(
+                                prefixIcon: Icon(
                                   Icons.search,
                                   color: AppColors.textLight,
                                 ),
@@ -791,7 +792,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'New Arrivals',
                                     style: TextStyle(
                                       fontSize: 22,
@@ -808,7 +809,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             ),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'View All',
                                       style: TextStyle(
                                         color: AppColors.accent,
@@ -876,7 +877,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
                               child: Row(
                                 mainAxisAlignment:
@@ -964,6 +965,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

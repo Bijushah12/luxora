@@ -53,6 +53,7 @@ class _AdminCouponsScreenState extends State<AdminCouponsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminCouponsProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<List<AdminCoupon>>(
@@ -100,7 +101,7 @@ class _AdminCouponsScreenState extends State<AdminCouponsScreen> {
                         if (snapshot.connectionState == ConnectionState.waiting)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: const LinearProgressIndicator(
+                            child: LinearProgressIndicator(
                               minHeight: 4,
                               color: AppColors.accent,
                             ),
@@ -157,6 +158,7 @@ class _CouponSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final active = coupons
         .where((coupon) => coupon.isActive && !coupon.isExpired)
         .length;
@@ -183,6 +185,7 @@ class _SummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -204,7 +207,7 @@ class _SummaryTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontSize: 22,
               fontWeight: FontWeight.w900,
@@ -231,6 +234,7 @@ class _CouponToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final search = AdminLuxuryTextField(
@@ -243,7 +247,7 @@ class _CouponToolbar extends StatelessWidget {
           value: activeOnly,
           onChanged: onActiveOnlyChanged,
           activeThumbColor: AppColors.accent,
-          title: const Text(
+          title: Text(
             'Active only',
             style: TextStyle(
               color: AppColors.textInverse,
@@ -284,6 +288,7 @@ class _CouponsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return AdminResponsiveGrid(
       minItemWidth: 310,
       children: coupons
@@ -315,6 +320,7 @@ class _CouponCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final color = coupon.isExpired
         ? AppColors.error
         : coupon.isActive
@@ -343,7 +349,7 @@ class _CouponCard extends StatelessWidget {
                   coupon.code,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.accent,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -359,7 +365,7 @@ class _CouponCard extends StatelessWidget {
             coupon.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textInverse,
               fontWeight: FontWeight.w900,
             ),
@@ -426,6 +432,7 @@ class _CouponDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -444,7 +451,7 @@ class _CouponDetail extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textInverse,
             fontSize: 13,
             fontWeight: FontWeight.w900,
@@ -528,6 +535,7 @@ class _CouponFormDialogState extends State<_CouponFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminCouponsProvider>(
       builder: (context, provider, child) {
         return AlertDialog(
@@ -676,6 +684,7 @@ class _DarkError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -685,7 +694,7 @@ class _DarkError extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.textInverse,
           fontWeight: FontWeight.w700,
         ),

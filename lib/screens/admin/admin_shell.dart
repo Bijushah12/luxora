@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin_auth_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/theme_toggle_button.dart';
 import 'admin_analytics_screen.dart';
 import 'admin_coupons_screen.dart';
 import 'admin_dashboard_screen.dart';
@@ -93,6 +94,7 @@ class _AdminShellState extends State<AdminShell> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 980;
@@ -131,19 +133,20 @@ class _AdminShellState extends State<AdminShell> {
                 return IconButton(
                   tooltip: 'Open menu',
                   onPressed: () => Scaffold.of(context).openDrawer(),
-                  icon: const Icon(Icons.menu, color: AppColors.accent),
+                  icon: Icon(Icons.menu, color: AppColors.accent),
                 );
               },
             ),
             title: Text(
               _destinations[_selectedIndex].label,
-              style: const TextStyle(color: AppColors.textInverse),
+              style: TextStyle(color: AppColors.textInverse),
             ),
             actions: [
+              const ThemeToggleButton(margin: EdgeInsets.only(right: 6)),
               IconButton(
                 tooltip: 'Logout',
                 onPressed: () => context.read<AdminAuthProvider>().signOut(),
-                icon: const Icon(Icons.logout, color: AppColors.accent),
+                icon: Icon(Icons.logout, color: AppColors.accent),
               ),
             ],
           ),
@@ -178,6 +181,7 @@ class _AdminPageFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,7 +205,7 @@ class _AdminPageFrame extends StatelessWidget {
                       destination.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textInverse,
                         fontSize: 25,
                         fontWeight: FontWeight.w900,
@@ -216,6 +220,8 @@ class _AdminPageFrame extends StatelessWidget {
                   const SizedBox(width: 10),
                   _HeaderChip(icon: Icons.calendar_today, label: _todayLabel()),
                   const SizedBox(width: 10),
+                  const ThemeToggleButton(margin: EdgeInsets.only(right: 2)),
+                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: () =>
                         context.read<AdminAuthProvider>().signOut(),
@@ -253,6 +259,7 @@ class _HeaderChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
@@ -267,7 +274,7 @@ class _HeaderChip extends StatelessWidget {
           const SizedBox(width: 7),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontSize: 12,
               fontWeight: FontWeight.w900,
@@ -319,6 +326,7 @@ class _LuxoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -419,10 +427,11 @@ class _AdminSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final user = context.watch<AdminAuthProvider>().user;
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         border: Border(right: BorderSide(color: Color(0xFF2A2A2A))),
       ),
@@ -432,7 +441,7 @@ class _AdminSidebar extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
-              child: const _LuxoraLogo(
+              child: _LuxoraLogo(
                 markSize: 36,
                 titleSize: 16,
                 subtitle: 'Premium Admin',
@@ -473,7 +482,7 @@ class _AdminSidebar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 18,
                       backgroundColor: AppColors.accent,
                       child: Icon(
@@ -488,7 +497,7 @@ class _AdminSidebar extends StatelessWidget {
                         user?.email ?? 'Admin',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textInverse,
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
@@ -526,6 +535,7 @@ class _SidebarTileState extends State<_SidebarTile> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final active = widget.selected || _hovering;
 
     return MouseRegion(

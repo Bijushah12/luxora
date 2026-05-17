@@ -8,6 +8,7 @@ class ChatbotLauncher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return FloatingActionButton.small(
       heroTag: 'luxora-chatbot-launcher',
       tooltip: 'Ask Luxora Concierge',

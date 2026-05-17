@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../models/watch_model.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'product_screen.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -11,6 +12,7 @@ class WishlistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
 
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     List<Watch> wishlistItems = wishlistProvider.wishlistItems;
@@ -20,8 +22,8 @@ class WishlistScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           "My Wishlist",
           style: TextStyle(
             color: AppColors.textDark,
@@ -31,6 +33,7 @@ class WishlistScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: const [ThemeToggleButton()],
       ),
 
       body: wishlistItems.isEmpty
@@ -38,9 +41,13 @@ class WishlistScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.favorite_border, size: 80, color: AppColors.textLight.withOpacity(0.5)),
+                  Icon(
+                    Icons.favorite_border,
+                    size: 80,
+                    color: AppColors.textLight.withOpacity(0.5),
+                  ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "No items in wishlist",
                     style: TextStyle(
                       fontSize: 18,
@@ -55,7 +62,6 @@ class WishlistScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: wishlistItems.length,
               itemBuilder: (context, index) {
-
                 final watch = wishlistItems[index];
 
                 return Card(
@@ -63,7 +69,7 @@ class WishlistScreen extends StatelessWidget {
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.border),
+                    side: BorderSide(color: AppColors.border),
                   ),
                   child: ListTile(
                     onTap: () {
@@ -83,20 +89,20 @@ class WishlistScreen extends StatelessWidget {
                     ),
                     title: Text(
                       watch.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: AppColors.textDark,
                       ),
                     ),
                     subtitle: Text(
                       "₹${watch.price}",
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.goldAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.favorite, color: AppColors.error),
+                      icon: Icon(Icons.favorite, color: AppColors.error),
                       onPressed: () => wishlistProvider.toggleWishlist(watch),
                     ),
                   ),

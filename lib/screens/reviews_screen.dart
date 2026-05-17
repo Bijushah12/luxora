@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/review_model.dart';
 import '../providers/reviews_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key});
@@ -67,6 +68,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final reviewsProvider = context.watch<ReviewsProvider>();
     final reviews = reviewsProvider.reviews;
     final summary = reviewsProvider.summary;
@@ -77,8 +79,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           'Reviews & Feedback',
           style: TextStyle(
             color: AppColors.textDark,
@@ -86,6 +88,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
         ),
         centerTitle: true,
+        actions: const [ThemeToggleButton()],
       ),
       body: SafeArea(
         child: CustomScrollView(
@@ -114,7 +117,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Latest Reviews',
                         style: TextStyle(
@@ -126,7 +129,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     ),
                     Text(
                       '${summary.totalReviews}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.accent,
                         fontWeight: FontWeight.w900,
                       ),
@@ -136,7 +139,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               ),
             ),
             if (reviewsProvider.isLoading && reviews.isEmpty)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
                   child: CircularProgressIndicator(color: AppColors.accent),
@@ -180,14 +183,14 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       margin: const EdgeInsets.fromLTRB(16, 14, 16, 12),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [AppColors.card, AppColors.surface],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 16,
@@ -207,7 +210,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 children: [
                   Text(
                     averageText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 46,
                       height: 1,
                       fontWeight: FontWeight.w900,
@@ -221,7 +224,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     isLoading && summary.totalReviews == 0
                         ? 'Loading reviews'
                         : '${summary.totalReviews} $reviewLabel',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -273,14 +276,14 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               children: [
                 Text(
                   '$star',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(width: 3),
-                const Icon(Icons.star, color: AppColors.accent, size: 12),
+                Icon(Icons.star, color: AppColors.accent, size: 12),
               ],
             ),
           ),
@@ -291,9 +294,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               child: LinearProgressIndicator(
                 value: percentage,
                 backgroundColor: AppColors.divider,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.accent,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
                 minHeight: 7,
               ),
             ),
@@ -304,7 +305,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             child: Text(
               '$count',
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -369,7 +370,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 14,
@@ -380,7 +381,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.rate_review_outlined, color: AppColors.accent),
               SizedBox(width: 10),
@@ -406,14 +407,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             minLines: 2,
             maxLines: 4,
             maxLength: 800,
-            style: const TextStyle(color: AppColors.textDark),
+            style: TextStyle(color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: 'Share your experience with Luxora...',
-              hintStyle: const TextStyle(color: AppColors.textLight),
-              counterStyle: const TextStyle(
-                color: AppColors.textLight,
-                fontSize: 11,
-              ),
+              hintStyle: TextStyle(color: AppColors.textLight),
+              counterStyle: TextStyle(color: AppColors.textLight, fontSize: 11),
               filled: true,
               fillColor: AppColors.surface,
               border: OutlineInputBorder(
@@ -422,14 +420,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: AppColors.accent,
-                  width: 1.5,
-                ),
+                borderSide: BorderSide(color: AppColors.accent, width: 1.5),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -451,7 +446,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 ),
               ),
               icon: isSubmitting
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
@@ -517,7 +512,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       review.userName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                         color: AppColors.textDark,
@@ -528,7 +523,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       _relativeDate(review.createdAt),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textLight,
                         fontWeight: FontWeight.w600,
@@ -544,7 +539,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           const SizedBox(height: 12),
           Text(
             review.message,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               color: AppColors.textLight,
               height: 1.45,
@@ -565,7 +560,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       child: imageUrl.isEmpty
           ? Text(
               review.initials,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.accent,
                 fontWeight: FontWeight.w900,
               ),
@@ -598,7 +593,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
       ),
-      child: const Column(
+      child: Column(
         children: [
           Icon(Icons.reviews_outlined, color: AppColors.accent, size: 38),
           SizedBox(height: 12),

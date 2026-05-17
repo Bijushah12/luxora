@@ -17,6 +17,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int index = 0;
+  final List<int> _tabHistory = [0];
 
   final List<Widget> screens = [
     const HomeScreen(),
@@ -54,90 +55,114 @@ class _MainNavigationState extends State<MainNavigation> {
     ),
   ];
 
+  void _selectTab(int nextIndex) {
+    if (nextIndex == index) return;
+
+    setState(() {
+      _tabHistory
+        ..remove(nextIndex)
+        ..add(nextIndex);
+      index = nextIndex;
+    });
+  }
+
+  void _handleBackGesture(bool didPop, Object? result) {
+    if (didPop || _tabHistory.length <= 1) return;
+
+    setState(() {
+      _tabHistory.removeLast();
+      index = _tabHistory.last;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final useRail = constraints.maxWidth >= 720;
-        final extendedRail = constraints.maxWidth >= 1080;
+    AppColors.watch(context);
+    return PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: _handleBackGesture,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final useRail = constraints.maxWidth >= 720;
+          final extendedRail = constraints.maxWidth >= 1080;
 
-        if (useRail) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            body: Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: index,
-                  extended: extendedRail,
-                  backgroundColor: AppColors.scaffoldBg,
-                  selectedIconTheme: const IconThemeData(
-                    color: AppColors.accent,
-                  ),
-                  unselectedIconTheme: const IconThemeData(
-                    color: AppColors.textLight,
-                  ),
-                  selectedLabelTextStyle: const TextStyle(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.w900,
-                  ),
-                  unselectedLabelTextStyle: const TextStyle(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  leading: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.watch_outlined,
-                        color: AppColors.accent,
+          if (useRail) {
+            return Scaffold(
+              backgroundColor: AppColors.background,
+              body: Row(
+                children: [
+                  NavigationRail(
+                    selectedIndex: index,
+                    extended: extendedRail,
+                    backgroundColor: AppColors.scaffoldBg,
+                    selectedIconTheme: IconThemeData(color: AppColors.accent),
+                    unselectedIconTheme: IconThemeData(
+                      color: AppColors.textLight,
+                    ),
+                    selectedLabelTextStyle: TextStyle(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w900,
+                    ),
+                    unselectedLabelTextStyle: TextStyle(
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    leading: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.watch_outlined,
+                          color: AppColors.accent,
+                        ),
                       ),
                     ),
+                    destinations: _destinations
+                        .map(
+                          (item) => NavigationRailDestination(
+                            icon: Icon(item.icon),
+                            selectedIcon: Icon(item.selectedIcon),
+                            label: Text(item.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onDestinationSelected: _selectTab,
                   ),
-                  destinations: _destinations
-                      .map(
-                        (item) => NavigationRailDestination(
-                          icon: Icon(item.icon),
-                          selectedIcon: Icon(item.selectedIcon),
-                          label: Text(item.label),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onDestinationSelected: (i) => setState(() => index = i),
-                ),
-                const VerticalDivider(width: 1, color: AppColors.border),
-                Expanded(child: screens[index]),
-              ],
-            ),
+                  VerticalDivider(width: 1, color: AppColors.border),
+                  Expanded(child: screens[index]),
+                ],
+              ),
+              floatingActionButton: const ChatbotLauncher(),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endFloat,
+            );
+          }
+
+          return Scaffold(
+            body: screens[index],
             floatingActionButton: const ChatbotLauncher(),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: index,
+              onTap: _selectTab,
+              items: _destinations
+                  .map(
+                    (item) => BottomNavigationBarItem(
+                      icon: Icon(item.icon),
+                      activeIcon: Icon(item.selectedIcon),
+                      label: item.label,
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
           );
-        }
-
-        return Scaffold(
-          body: screens[index],
-          floatingActionButton: const ChatbotLauncher(),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: index,
-            onTap: (i) => setState(() => index = i),
-            items: _destinations
-                .map(
-                  (item) => BottomNavigationBarItem(
-                    icon: Icon(item.icon),
-                    activeIcon: Icon(item.selectedIcon),
-                    label: item.label,
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 }

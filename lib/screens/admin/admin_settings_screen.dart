@@ -65,6 +65,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminSettingsProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<AdminStorefrontSettings>(
@@ -160,7 +161,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                                       ? null
                                       : () => _save(provider),
                                   icon: provider.isSaving
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 18,
                                           height: 18,
                                           child: CircularProgressIndicator(
@@ -206,6 +207,7 @@ class _SettingsSummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _AdminSummaryGrid(
       items: [
         _AdminSummaryItem(
@@ -244,6 +246,7 @@ class _AdminSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 760) {
@@ -301,6 +304,7 @@ class _AdminSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -329,7 +333,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -339,7 +343,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -371,6 +375,7 @@ class _SettingsTextBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       minLines: 5,
@@ -409,6 +414,7 @@ class _DiscountBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return TextFormField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -440,6 +446,7 @@ class _InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
@@ -450,10 +457,7 @@ class _InlineError extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: const TextStyle(
-          color: AppColors.error,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700),
       ),
     );
   }

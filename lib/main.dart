@@ -19,6 +19,7 @@ import 'providers/admin_products_provider.dart';
 import 'providers/admin_settings_provider.dart';
 import 'providers/admin_users_provider.dart';
 import 'providers/reviews_provider.dart';
+import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/admin_gate.dart';
 import 'screens/splash_screen.dart';
@@ -28,20 +29,26 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const LuxoraApp());
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
+
+  runApp(LuxoraApp(themeProvider: themeProvider));
 }
 
 class LuxoraApp extends StatelessWidget {
-  const LuxoraApp({super.key});
+  final ThemeProvider themeProvider;
+
+  const LuxoraApp({super.key, required this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => CouponsProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => AdminAuthProvider()),
         ChangeNotifierProvider(create: (_) => AdminDashboardProvider()),
@@ -62,11 +69,14 @@ class LuxoraApp extends StatelessWidget {
 
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
+          AppColors.useDarkMode(themeProvider.isDark);
+
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: "Luxora Watch",
 
             themeAnimationDuration: const Duration(milliseconds: 400),
+            themeAnimationCurve: Curves.easeInOutCubic,
 
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

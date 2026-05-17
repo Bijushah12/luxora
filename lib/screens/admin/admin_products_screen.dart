@@ -106,6 +106,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminProductsProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<List<AdminProduct>>(
@@ -227,6 +228,7 @@ class _ProductSummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final active = products.where((product) => product.isActive).length;
     final featured = products.where((product) => product.isFeatured).length;
     final trending = products.where((product) => product.isTrending).length;
@@ -276,6 +278,7 @@ class _AdminSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 860) {
@@ -333,6 +336,7 @@ class _AdminSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -361,7 +365,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -371,7 +375,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -419,6 +423,7 @@ class _ProductToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 920;
@@ -582,6 +587,7 @@ class _ProductsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 860;
@@ -605,7 +611,7 @@ class _ProductsList extends StatelessWidget {
           child: DataTable(
             dataRowMinHeight: 76,
             dataRowMaxHeight: 88,
-            headingTextStyle: const TextStyle(
+            headingTextStyle: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -642,7 +648,7 @@ class _ProductsList extends StatelessWidget {
                                   product.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.textDark,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -652,7 +658,7 @@ class _ProductsList extends StatelessWidget {
                                   '${product.dialColor} dial | ${product.strapMaterial} | ${product.warranty}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.textLight,
                                     fontSize: 12,
                                   ),
@@ -677,7 +683,7 @@ class _ProductsList extends StatelessWidget {
                         if (product.hasDiscount)
                           Text(
                             '${product.discount.toStringAsFixed(0)}% off',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.success,
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
@@ -693,20 +699,14 @@ class _ProductsList extends StatelessWidget {
                       runSpacing: 6,
                       children: [
                         if (product.isFeatured)
-                          const _TagBadge(
-                            label: 'Featured',
-                            color: AppColors.accent,
-                          ),
+                          _TagBadge(label: 'Featured', color: AppColors.accent),
                         if (product.isTrending)
-                          const _TagBadge(
+                          _TagBadge(
                             label: 'Trending',
                             color: AppColors.warning,
                           ),
                         if (product.isLuxury)
-                          const _TagBadge(
-                            label: 'Luxury',
-                            color: AppColors.primary,
-                          ),
+                          _TagBadge(label: 'Luxury', color: AppColors.primary),
                       ],
                     ),
                   ),
@@ -732,7 +732,7 @@ class _ProductsList extends StatelessWidget {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(
+                              : Icon(
                                   Icons.delete_outline,
                                   color: AppColors.error,
                                 ),
@@ -765,6 +765,7 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -786,7 +787,7 @@ class _ProductCard extends StatelessWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -794,7 +795,7 @@ class _ProductCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${product.brand} | ${product.category} | ${product.dialColor} dial',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontWeight: FontWeight.w700,
                   ),
@@ -804,7 +805,7 @@ class _ProductCard extends StatelessWidget {
                   '${product.strapMaterial} | ${product.waterResistant ? 'Water resistant' : 'Not water resistant'} | ${product.warranty}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -818,7 +819,7 @@ class _ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       'Rs ${product.discountedPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textDark,
                         fontWeight: FontWeight.w900,
                       ),
@@ -826,22 +827,16 @@ class _ProductCard extends StatelessWidget {
                     if (product.hasDiscount)
                       Text(
                         '${product.discount.toStringAsFixed(0)}% off',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.success,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                     _StockBadge(stock: product.stockQuantity),
                     if (product.isFeatured)
-                      const _TagBadge(
-                        label: 'Featured',
-                        color: AppColors.accent,
-                      ),
+                      _TagBadge(label: 'Featured', color: AppColors.accent),
                     if (product.isTrending)
-                      const _TagBadge(
-                        label: 'Trending',
-                        color: AppColors.warning,
-                      ),
+                      _TagBadge(label: 'Trending', color: AppColors.warning),
                     _StatusBadge(isActive: product.isActive),
                   ],
                 ),
@@ -865,7 +860,7 @@ class _ProductCard extends StatelessWidget {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.delete_outline, color: AppColors.error),
+                    : Icon(Icons.delete_outline, color: AppColors.error),
               ),
             ],
           ),
@@ -883,6 +878,7 @@ class _ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -890,11 +886,11 @@ class _ProductImage extends StatelessWidget {
         height: size,
         color: AppColors.surface,
         child: imageUrl.trim().isEmpty
-            ? const Icon(Icons.watch_outlined, color: AppColors.textLight)
+            ? Icon(Icons.watch_outlined, color: AppColors.textLight)
             : Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(
+                errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.broken_image_outlined,
                   color: AppColors.textLight,
                 ),
@@ -911,6 +907,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final color = isActive ? AppColors.success : AppColors.textLight;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -937,6 +934,7 @@ class _StockBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final color = stock <= 0
         ? AppColors.error
         : stock <= 5
@@ -970,6 +968,7 @@ class _TagBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -996,6 +995,7 @@ class _InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1005,12 +1005,12 @@ class _InlineError extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error),
+          Icon(Icons.error_outline, color: AppColors.error),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.w700,
               ),
@@ -1249,6 +1249,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final provider = context.watch<AdminProductsProvider>();
     final title = _editingProduct == null ? 'Add Product' : 'Edit Product';
 
@@ -1271,7 +1272,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       Expanded(
                         child: Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textDark,
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
@@ -1374,7 +1375,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         child: ElevatedButton.icon(
                           onPressed: provider.isSaving ? null : _save,
                           icon: provider.isSaving
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator(
@@ -1445,6 +1446,7 @@ class _ProductFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Column(
       children: [
         TextFormField(
@@ -1681,7 +1683,7 @@ class _ProductFields extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: waterResistant,
           onChanged: onWaterResistantChanged,
-          title: const Text(
+          title: Text(
             'Water resistant',
             style: TextStyle(
               color: AppColors.textDark,
@@ -1694,7 +1696,7 @@ class _ProductFields extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: isFeatured,
           onChanged: onFeaturedChanged,
-          title: const Text(
+          title: Text(
             'Featured watch',
             style: TextStyle(
               color: AppColors.textDark,
@@ -1707,7 +1709,7 @@ class _ProductFields extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: isTrending,
           onChanged: onTrendingChanged,
-          title: const Text(
+          title: Text(
             'Trending tag',
             style: TextStyle(
               color: AppColors.textDark,
@@ -1720,7 +1722,7 @@ class _ProductFields extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: isActive,
           onChanged: onStatusChanged,
-          title: const Text(
+          title: Text(
             'Active product',
             style: TextStyle(
               color: AppColors.textDark,
@@ -1751,6 +1753,7 @@ class _ImagePickerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     Widget preview;
     if (pickedImageBytes.isNotEmpty) {
       preview = Image.memory(pickedImageBytes.first, fit: BoxFit.cover);
@@ -1758,14 +1761,14 @@ class _ImagePickerPanel extends StatelessWidget {
       preview = Image.network(
         existingImageUrls.first,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => const Icon(
+        errorBuilder: (context, error, stackTrace) => Icon(
           Icons.broken_image_outlined,
           color: AppColors.textLight,
           size: 42,
         ),
       );
     } else {
-      preview = const Icon(
+      preview = Icon(
         Icons.add_photo_alternate_outlined,
         color: AppColors.textLight,
         size: 46,
@@ -1802,11 +1805,10 @@ class _ImagePickerPanel extends StatelessWidget {
                     : Image.network(
                         existingImageUrls[index],
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                              Icons.broken_image_outlined,
-                              color: AppColors.textLight,
-                            ),
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.broken_image_outlined,
+                          color: AppColors.textLight,
+                        ),
                       );
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -1825,7 +1827,7 @@ class _ImagePickerPanel extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             imageError!,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.error,
               fontWeight: FontWeight.w700,
               fontSize: 12,

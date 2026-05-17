@@ -32,7 +32,7 @@ class UnsplashService {
     final random = Random();
 
     final url =
-"https://api.unsplash.com/search/photos?query=$query&per_page=20&page=${random.nextInt(5)+1}&client_id=$apiKey";
+        "https://api.unsplash.com/search/photos?query=$query&per_page=20&page=${random.nextInt(5) + 1}&client_id=$apiKey";
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {

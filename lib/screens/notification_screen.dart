@@ -4,19 +4,21 @@ import 'package:provider/provider.dart';
 import '../models/app_notification.dart';
 import '../providers/notification_provider.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
-        title: const Text(
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        title: Text(
           'Notifications',
           style: TextStyle(
             color: AppColors.textDark,
@@ -48,7 +50,7 @@ class NotificationScreen extends StatelessWidget {
                 provider.clearAll();
               }
             },
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(value: 'clear_read', child: Text('Clear Read')),
               PopupMenuItem(
                 value: 'clear_all',
@@ -59,12 +61,13 @@ class NotificationScreen extends StatelessWidget {
               ),
             ],
           ),
+          const ThemeToggleButton(),
         ],
       ),
       body: Consumer<NotificationProvider>(
         builder: (context, provider, child) {
           if (!provider.isLoaded) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );
           }
@@ -81,7 +84,9 @@ class NotificationScreen extends StatelessWidget {
               return Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: constraints.maxWidth >= 900 ? 860 : double.infinity,
+                    maxWidth: constraints.maxWidth >= 900
+                        ? 860
+                        : double.infinity,
                   ),
                   child: ListView(
                     padding: const EdgeInsets.all(16),
@@ -99,9 +104,8 @@ class NotificationScreen extends StatelessWidget {
                               icon: _iconForType(notification.type),
                               color: _colorForType(notification.type),
                               onTap: () => provider.markAsRead(notification.id),
-                              onDelete: () => provider.deleteNotification(
-                                notification.id,
-                              ),
+                              onDelete: () =>
+                                  provider.deleteNotification(notification.id),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -195,6 +199,7 @@ class _NotificationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -210,7 +215,7 @@ class _NotificationSummary extends StatelessWidget {
               color: AppColors.accent.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.notifications_active_outlined,
               color: AppColors.accent,
             ),
@@ -224,7 +229,7 @@ class _NotificationSummary extends StatelessWidget {
                   unreadCount == 0
                       ? 'All caught up'
                       : '$unreadCount unread ${unreadCount == 1 ? 'alert' : 'alerts'}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textInverse,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -266,6 +271,7 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Dismissible(
       key: ValueKey(notification.id),
       direction: DismissDirection.endToStart,
@@ -328,25 +334,19 @@ class _NotificationCard extends StatelessWidget {
                     notification.subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textLight,
-                      height: 1.4,
-                    ),
+                    style: TextStyle(color: AppColors.textLight, height: 1.4),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     time,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textLight,
-                    ),
+                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ],
               ),
             ),
             trailing: notification.isRead
                 ? null
-                : const Icon(Icons.circle, color: AppColors.error, size: 9),
+                : Icon(Icons.circle, color: AppColors.error, size: 9),
           ),
         ),
       ),
@@ -359,6 +359,7 @@ class _EmptyNotificationState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
@@ -372,14 +373,14 @@ class _EmptyNotificationState extends StatelessWidget {
                 color: AppColors.accent.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.notifications_none,
                 size: 42,
                 color: AppColors.accent,
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'No notifications',
               style: TextStyle(
                 fontSize: 20,
@@ -388,7 +389,7 @@ class _EmptyNotificationState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'New order updates and offers will appear here.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textLight, height: 1.5),
@@ -407,9 +408,10 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w800,
         color: AppColors.textDark,

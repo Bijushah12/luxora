@@ -31,6 +31,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Consumer<AdminOrdersProvider>(
       builder: (context, provider, child) {
         return StreamBuilder<List<AdminOrder>>(
@@ -136,6 +137,7 @@ class _OrderSummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     int countFor(String status) {
       return orders
           .where((order) => AdminOrderStatus.normalize(order.status) == status)
@@ -186,6 +188,7 @@ class _AdminSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 860) {
@@ -243,6 +246,7 @@ class _AdminSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -271,7 +275,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -281,7 +285,7 @@ class _AdminSummaryTile extends StatelessWidget {
                   item.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -309,6 +313,7 @@ class _OrderPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -335,7 +340,7 @@ class _OrderPanel extends StatelessWidget {
           '#${order.id.length > 10 ? order.id.substring(0, 10) : order.id}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.w900,
           ),
@@ -344,7 +349,7 @@ class _OrderPanel extends StatelessWidget {
           '${order.customerDisplayName} | Rs ${order.totalAmount.toStringAsFixed(2)} | ${_formatDate(order.createdAt)}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppColors.textLight),
+          style: TextStyle(color: AppColors.textLight),
         ),
         trailing: SizedBox(
           width: 176,
@@ -418,6 +423,7 @@ class _OrderTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final currentIndex = AdminOrderStatus.values.indexOf(
       AdminOrderStatus.normalize(status),
     );
@@ -513,6 +519,7 @@ class _OrderInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _DetailBox(
       title: 'Customer',
       icon: Icons.person_outline,
@@ -540,11 +547,12 @@ class _OrderItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return _DetailBox(
       title: 'Products',
       icon: Icons.watch_outlined,
       children: items.isEmpty
-          ? const [
+          ? [
               Text(
                 'No product list stored on this order.',
                 style: TextStyle(color: AppColors.textLight),
@@ -562,6 +570,7 @@ class _OrderItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -574,11 +583,11 @@ class _OrderItemTile extends StatelessWidget {
               height: 52,
               color: AppColors.surface,
               child: item.imageUrl.trim().isEmpty
-                  ? const Icon(Icons.watch_outlined, color: AppColors.textLight)
+                  ? Icon(Icons.watch_outlined, color: AppColors.textLight)
                   : Image.network(
                       item.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.watch_outlined,
                         color: AppColors.textLight,
                       ),
@@ -594,7 +603,7 @@ class _OrderItemTile extends StatelessWidget {
                   item.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
@@ -602,10 +611,7 @@ class _OrderItemTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   '${_itemMeta(item)} | Qty ${item.quantity} | Rs ${item.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, fontSize: 12),
                 ),
               ],
             ),
@@ -613,7 +619,7 @@ class _OrderItemTile extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Rs ${item.subtotal.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textDark,
               fontWeight: FontWeight.w900,
             ),
@@ -637,6 +643,7 @@ class _DetailBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -654,7 +661,7 @@ class _DetailBox extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w900,
                 ),
@@ -677,6 +684,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -686,7 +694,7 @@ class _DetailRow extends StatelessWidget {
             width: 74,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textLight,
                 fontWeight: FontWeight.w700,
               ),
@@ -695,7 +703,7 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.w700,
               ),
@@ -714,6 +722,7 @@ class _InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -723,12 +732,12 @@ class _InlineError extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error),
+          Icon(Icons.error_outline, color: AppColors.error),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.w700,
               ),

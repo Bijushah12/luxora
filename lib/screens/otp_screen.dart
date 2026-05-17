@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../widgets/theme_toggle_button.dart';
 import 'home_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -10,16 +11,21 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textDark),
+        iconTheme: IconThemeData(color: AppColors.textDark),
+        actions: const [ThemeToggleButton()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(25),
@@ -36,7 +42,7 @@ class _OtpScreenState extends State<OtpScreen> {
               child: Icon(Icons.lock_clock, size: 60, color: AppColors.accent),
             ),
             const SizedBox(height: 30),
-            const Text(
+            Text(
               "OTP Verification",
               style: TextStyle(
                 color: AppColors.textDark,
@@ -48,10 +54,7 @@ class _OtpScreenState extends State<OtpScreen> {
             Text(
               "Enter the 4-digit code sent to your phone",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textLight,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textLight, fontSize: 14),
             ),
             const SizedBox(height: 40),
             Row(
@@ -71,7 +74,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
                     maxLength: 1,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textDark,
@@ -101,9 +104,12 @@ class _OtpScreenState extends State<OtpScreen> {
             const SizedBox(height: 20),
             TextButton(
               onPressed: () {},
-              child: const Text(
+              child: Text(
                 "Resend OTP",
-                style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppColors.accent,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

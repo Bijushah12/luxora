@@ -115,6 +115,7 @@ class WatchFilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -130,7 +131,7 @@ class WatchFilterButton extends StatelessWidget {
             child: Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
@@ -208,6 +209,7 @@ class _WatchFilterSheetState extends State<_WatchFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.watch(context);
     final viewInsets = MediaQuery.of(context).viewInsets;
     final brands = WatchFilters.brandsFor(widget.watches);
     if (!brands.contains(_brand)) {
@@ -352,11 +354,11 @@ class _WatchFilterSheetState extends State<_WatchFilterSheet> {
       fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
     );
   }
